@@ -1,0 +1,5 @@
+.DS_Store
+/.idea
+/api/src/.preload.php
+/data
+.env.local

@@ -1,0 +1,64 @@
+version: "4"
+
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./docker/api/php/config/docker-xdebug.ini:/usr/local/etc/php/conf.d/docker-xdebug.ini
+    environment:
+      XDEBUG_SESSION: 1
+      XDEBUG_MODE: debug, develop
+      PHP_IDE_CONFIG: "serverName=Docker"
+
+  nginx:
+    build:
+      dockerfile: Dockerfile
+    volumes:
+      - ./docker/certs/local:/etc/nginx/certs
+    ports:
+      - 80:80
+      - 443:443
+      - 8443:8443
+    environment:
+      NGINX_HOST: ${NGINX_HOST_LOCAL}
+      NGINX_PORT: ${NGINX_PORT_LOCAL}
+      NGINX_CERT_CRT: ${NGINX_CERT_CRT_LOCAL}
+      NGINX_CERT_KEY: ${NGINX_CERT_KEY_LOCAL}
+
+  frontend:
+    build:
+      dockerfile: ../docker/frontend/Dockerfile
+    restart: unless-stopped
+    command: npm start
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./frontend:${FRONTEND_DIRECTORY}
+    environment:
+      NODE_ENV: dev
+      CHOKIDAR_USEPOLLING: true
+      WDS_SOCKET_PORT: 0
+
+  mysql:
+    image: mysql:8.3
+    container_name: ${PROJECT_NAME}-mysql
+    restart: unless-stopped
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 13306:3306
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    hostname: mysql.docker
+    networks:
+      chess-empire:
+        ipv4_address: ${MYSQL_IPV4}
+
+volumes:
+  frontend:
+  mysql:

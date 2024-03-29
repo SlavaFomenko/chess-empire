@@ -1,0 +1,49 @@
+version: "4"
+
+services:
+  api:
+    container_name: ${PROJECT_NAME}-api
+    build:
+      context: ./docker/api/
+    volumes:
+      - ./api:${API_DIRECTORY}
+    networks:
+      chess-empire:
+        ipv4_address: ${API_IPV4}
+
+  nginx:
+    container_name: ${PROJECT_NAME}-nginx
+    build:
+      context: ./docker/nginx
+    volumes:
+      - ./api:${API_DIRECTORY}
+      - ./frontend:${FRONTEND_DIRECTORY}
+    depends_on:
+      - api
+    environment:
+      API_DIRECTORY: ${API_DIRECTORY}
+      FRONTEND_DIRECTORY: ${FRONTEND_DIRECTORY}
+    networks:
+      chess-empire:
+        ipv4_address: ${NGINX_IPV4}
+
+  frontend:
+    container_name: ${PROJECT_NAME}-frontend
+    build:
+      context: ./frontend
+    networks:
+      chess-empire:
+        ipv4_address: ${FRONTEND_IPV4}
+
+volumes:
+  api:
+  nginx:
+  data:
+
+networks:
+  chess-empire:
+    driver: "bridge"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16
