@@ -1,3 +1,6 @@
 <?php
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-phpinfo();
+$core = new ChessFramework\Core();
+
+echo $core->handle();

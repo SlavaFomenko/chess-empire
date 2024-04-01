@@ -1,0 +1,12 @@
+{
+    "name": "vendor/api",
+    "description": "api for chess-empire",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/",
+            "ChessFramework\\": "src/Core/"
+        }
+    },
+    "require": {}
+}
