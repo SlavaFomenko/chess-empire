@@ -15,6 +15,7 @@ services:
   nginx:
     build:
       dockerfile: Dockerfile
+    restart: unless-stopped
     volumes:
       - ./docker/certs/local:/etc/nginx/certs
     ports:
