@@ -1,10 +1,10 @@
 <?php
 
-namespace ChessFramework\Http;
+namespace Handy\Http;
 
-use ChessFramework\Context;
-use ChessFramework\Http\Exception\InvalidRequestPathException;
-use ChessFramework\Http\Exception\UnsupportedRequestException;
+use Handy\Context;
+use Handy\Http\Exception\InvalidRequestPathException;
+use Handy\Http\Exception\UnsupportedRequestException;
 
 class RequestParser
 {

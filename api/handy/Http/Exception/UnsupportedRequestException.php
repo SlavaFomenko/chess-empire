@@ -1,6 +1,6 @@
 <?php
 
-namespace ChessFramework\Http\Exception;
+namespace Handy\Http\Exception;
 
 use Exception;
 

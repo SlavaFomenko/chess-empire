@@ -1,10 +1,10 @@
 <?php
 
-namespace ChessFramework\Handling;
+namespace Handy\Handling;
 
-use ChessFramework\Context;
-use ChessFramework\Http\Exception\UnsupportedRequestException;
-use ChessFramework\Http\RequestParser;
+use Handy\Context;
+use Handy\Http\Exception\UnsupportedRequestException;
+use Handy\Http\RequestParser;
 
 class RequestParserHandler extends AbstractHandler
 {

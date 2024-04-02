@@ -1,6 +1,6 @@
 <?php
 
-namespace ChessFramework\Config;
+namespace Handy\Config;
 
 class Config
 {
