@@ -1,10 +1,10 @@
 <?php
 
-namespace ChessFramework;
+namespace Handy;
 
-use ChessFramework\Config\Config;
-use ChessFramework\Http\Request;
-use ChessFramework\Http\Response;
+use Handy\Config\Config;
+use Handy\Http\Request;
+use Handy\Http\Response;
 
 class Context
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace ChessFramework\Handling;
+namespace Handy\Handling;
 
-use ChessFramework\Context;
+use Handy\Context;
 
 abstract class AbstractHandler implements Handler
 {

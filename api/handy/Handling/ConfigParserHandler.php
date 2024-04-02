@@ -1,10 +1,10 @@
 <?php
 
-namespace ChessFramework\Handling;
+namespace Handy\Handling;
 
-use ChessFramework\Config\ConfigParser;
-use ChessFramework\Context;
-use ChessFramework\Handling\AbstractHandler;
+use Handy\Config\ConfigParser;
+use Handy\Context;
+use Handy\Handling\AbstractHandler;
 
 class ConfigParserHandler extends AbstractHandler
 {

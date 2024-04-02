@@ -1,9 +1,9 @@
 <?php
 
-namespace ChessFramework;
+namespace Handy;
 
-use ChessFramework\Handling\ConfigParserHandler;
-use ChessFramework\Handling\RequestParserHandler;
+use Handy\Handling\ConfigParserHandler;
+use Handy\Handling\RequestParserHandler;
 use Exception;
 
 class Core

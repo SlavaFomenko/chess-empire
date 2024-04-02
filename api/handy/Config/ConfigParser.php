@@ -1,12 +1,12 @@
 <?php
 
-namespace ChessFramework\Config;
+namespace Handy\Config;
 
-use ChessFramework\Context;
+use Handy\Context;
 
 class ConfigParser
 {
-    private const DEFAULT_CONFIG_PATH = "src/Core/Config/";
+    private const DEFAULT_CONFIG_PATH = "handy/Config/";
     private const USER_CONFIG_PATH = "config/";
 
     public static function parseConfig(Context $ctx): void

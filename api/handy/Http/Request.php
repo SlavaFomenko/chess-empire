@@ -1,6 +1,6 @@
 <?php
 
-namespace ChessFramework\Http;
+namespace Handy\Http;
 
 class Request
 {
