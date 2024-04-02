@@ -30,6 +30,7 @@ class Core
             new RequestParserHandler()
         ];
 
+
         foreach ($this->handlers as $index => $handler) {
             if ($index < count($this->handlers) - 1)
                 $handler->setNext($this->handlers[$index + 1]);

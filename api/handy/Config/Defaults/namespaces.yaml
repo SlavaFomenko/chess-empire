@@ -1,0 +1,4 @@
+namespaces:
+  App\Controller:
+    path: "src/Controller/"
+    type: "controller"

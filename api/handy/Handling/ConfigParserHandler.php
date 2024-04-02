@@ -10,6 +10,8 @@ class ConfigParserHandler extends AbstractHandler
 {
     public function handle(Context $ctx): void
     {
+//        ConfigParser::parseUserConfig($ctx);
+
         ConfigParser::parseConfig($ctx);
         parent::handle($ctx);
     }
