@@ -4,7 +4,6 @@ namespace Handy\Handling;
 
 use Handy\Config\ConfigParser;
 use Handy\Context;
-use Handy\Handling\AbstractHandler;
 
 class ConfigParserHandler extends AbstractHandler
 {
