@@ -177,25 +177,12 @@ class Query
 
     /**
      * @param string $name
-     * @param array|string $values
+     * @param array|string|null $values
      * @return void
      */
-    public function addParam(string $name, array|string $values): void
+    public function addParam(string $name, array|string|null $values): void
     {
-        if (!is_array($values)) {
-            $this->params[$name] = $values;
-            return;
-        }
-
-        $escapedValues = [];
-        foreach ($values as $value) {
-            if (is_string($value)) {
-                $escapedValues[] = "'" . addslashes($value) . "'";
-            } else {
-                $escapedValues[] = $value;
-            }
-        }
-        $this->params[$name] = '(' . implode(', ', $escapedValues) . ')';
+        $this->params[$name] = $values;
     }
 
     /**
@@ -212,12 +199,16 @@ class Query
                 if (!empty($this->columns)) {
                     $query .= " (" . implode(", ", $this->columns) . ")";
                 }
-                $query .= " VALUES (" . implode(", ", $this->values) . ")";
+                $query .= " VALUES ";
+                foreach ($this->getValues() as $key => $value) {
+                    $query .= "(" . implode(", ", $value) . "), ";
+                }
+                $query = rtrim($query, ", ");
                 break;
             case self::TYPE_UPDATE:
                 $query = "UPDATE " . $this->table . " SET ";
-                foreach ($this->columns as $value) {
-                    $query .= "$value = :$value, ";
+                foreach ($this->columns as $key => $value) {
+                    $query .= "$value = " . $this->values[0][$key] . ", ";
                 }
                 $query = rtrim($query, ", ");
                 break;
@@ -235,4 +226,22 @@ class Query
 
         return $query;
     }
+
+    /**
+     * @return array
+     */
+    public function execute(): array
+    {
+        $pdo = new \PDO($_ENV["DB_URL"], $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
+        $sth = $pdo->prepare($this->getSql());
+
+        foreach ($this->getParams() as $key => $value) {
+            $sth->bindValue($key, $value);
+        }
+
+        $sth->execute();
+
+        return $sth->fetchAll();
+    }
+
 }
