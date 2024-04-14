@@ -5,6 +5,7 @@ namespace Handy;
 use Handy\Handling\ConfigParserHandler;
 use Handy\Handling\RequestParserHandler;
 use Exception;
+use Handy\Handling\RouterHandler;
 
 class Core
 {
@@ -27,7 +28,8 @@ class Core
 
         $this->handlers = [
             new ConfigParserHandler(),
-            new RequestParserHandler()
+            new RequestParserHandler(),
+            new RouterHandler()
         ];
 
         foreach ($this->handlers as $index => $handler) {
@@ -40,6 +42,7 @@ class Core
     {
         try{
             $this->handlers[0]->handle($this->ctx);
+//            var_dump($this->ctx->response);
             return $this->ctx->response ?? "Null Response";
         } catch (Exception $e){
             return $e;
