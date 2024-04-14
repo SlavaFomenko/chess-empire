@@ -4,11 +4,12 @@ namespace Handy\Routing;
 
 use Handy\Context;
 use Handy\Routing\Exception\UnsupportedParamTypeException;
+use ReflectionException;
 use ReflectionMethod;
 
 class Route
 {
-    public const SUPPORTED_PARAM_TYPES = ["string", "int", "float"];
+    public const SUPPORTED_PARAM_TYPES = ["int", "float", "string"];
     public const PARAM_TYPES_REGEXPS = [
         "string" => "[^\/]+",
         "int" => "\d+",
@@ -67,6 +68,20 @@ class Route
     {
         $this->path = $path;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPriorityPath(): string
+    {
+        $path = $this->path;
+
+        foreach ($this->getParams() as $param) {
+            $path = str_replace($param[0], array_search($param[1], self::SUPPORTED_PARAM_TYPES) , $path);
+        }
+
+        return $path;
     }
 
     /**
@@ -159,6 +174,12 @@ class Route
         return $this;
     }
 
+    /**
+     * @param array $param
+     * @param $value
+     * @return mixed
+     * @throws UnsupportedParamTypeException
+     */
     public function parseParam(array $param, $value): mixed
     {
         return match ($param[1]) {
@@ -169,6 +190,11 @@ class Route
         };
     }
 
+    /**
+     * @param string $url
+     * @return array
+     * @throws UnsupportedParamTypeException
+     */
     public function prepareParams(string $url): array
     {
         $result = [];
@@ -182,6 +208,12 @@ class Route
         return $result;
     }
 
+    /**
+     * @param Context $ctx
+     * @return void
+     * @throws UnsupportedParamTypeException
+     * @throws ReflectionException
+     */
     public function execute(Context $ctx): void
     {
         $controller = $this->getController();
