@@ -1,4 +1,8 @@
-controllers: []
+controllers:
+  NotFound:
+    controller: Handy\Controller\NotFoundController
+    method: index
+
 
 supported_content_types: ["application/json"]
 

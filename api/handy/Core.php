@@ -2,9 +2,9 @@
 
 namespace Handy;
 
+use Exception;
 use Handy\Handling\ConfigParserHandler;
 use Handy\Handling\RequestParserHandler;
-use Exception;
 use Handy\Handling\RouterHandler;
 
 class Core
@@ -38,13 +38,15 @@ class Core
         }
     }
 
+    /**
+     * @return string
+     */
     public function handle(): string
     {
-        try{
+        try {
             $this->handlers[0]->handle($this->ctx);
-//            var_dump($this->ctx->response);
             return $this->ctx->response ?? "Null Response";
-        } catch (Exception $e){
+        } catch (Exception $e) {
             return $e;
         }
     }

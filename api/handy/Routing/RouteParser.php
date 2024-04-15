@@ -4,6 +4,7 @@ namespace Handy\Routing;
 
 use Handy\Controller\BaseController;
 use Handy\Routing\Attribute\Route as RouteAttribute;
+use Handy\Routing\Attribute\RouteFamily;
 use Handy\Routing\Exception\ControllerDirectoryNotFoundException;
 use Handy\Routing\Exception\DuplicateParamNameException;
 use Handy\Routing\Exception\DuplicateRouteNameException;
@@ -15,6 +16,37 @@ use ReflectionMethod;
 
 class RouteParser
 {
+
+    /**
+     * @param $namespaces
+     * @return array
+     * @throws ControllerDirectoryNotFoundException
+     * @throws DuplicateParamNameException
+     * @throws DuplicateRouteNameException
+     * @throws InvalidMethodArgumentsException
+     * @throws ReflectionException
+     * @throws UnsupportedParamTypeException
+     */
+    public static function getRoutes($namespaces): array
+    {
+        $routes = [];
+
+        foreach ($namespaces as $namespace => $data) {
+            $namespaceRoutes = RouteParser::getNamespaceRoutes($namespace, $data["path"]);
+
+            $duplicates = array_intersect_key($namespaceRoutes, $routes);
+
+            if (!empty($duplicates)) {
+                throw new DuplicateRouteNameException("Duplicate definitions for route \"" . array_keys($duplicates)[0] . "\" found in " . array_values($duplicates)[0]->getController());
+            }
+
+            $routes = array_merge($routes, $namespaceRoutes);
+        }
+
+        uasort($routes, fn($r1, $r2) => strcmp($r1->getPriorityPath(), $r2->getPriorityPath()));
+
+        return $routes;
+    }
 
     /**
      * @param string $namespace
@@ -43,13 +75,11 @@ class RouteParser
             $routes = array_merge($routes, $controllerRoutes);
         }
 
-        usort($routes, fn($r1, $r2) => strcmp($r1->getPriorityPath(), $r2->getPriorityPath()));
-
         return $routes;
     }
 
     /**
-     * @param string $controller
+     * @param ReflectionClass $controller
      * @param ReflectionMethod $method
      * @return array
      * @throws DuplicateParamNameException
@@ -57,18 +87,26 @@ class RouteParser
      * @throws InvalidMethodArgumentsException
      * @throws UnsupportedParamTypeException
      */
-    public static function getMethodRoutes(string $controller, ReflectionMethod $method): array
+    public static function getMethodRoutes(ReflectionClass $controller, ReflectionMethod $method): array
     {
         $methodRoutes = [];
+
+        $routeFamilyPath = "";
+        $routeFamilyName = "";
+
+        $routeFamily = array_filter($controller->getAttributes(), fn($a) => $a->getName() === RouteFamily::class);
+        if (isset($routeFamily[0])) {
+            $routeFamilyInstance = $routeFamily[0]->newInstance();
+            $routeFamilyPath = "/" . ltrim(rtrim($routeFamilyInstance->getPath(), "/"), "/");
+            $routeFamilyName = $routeFamilyInstance->getName() . "-";
+        }
 
         $attributes = array_filter($method->getAttributes(), fn($a) => $a->getName() === RouteAttribute::class);
         foreach ($attributes as $attribute) {
             $routeData = $attribute->newInstance();
 
-            $path = $routeData->getPath();
-            if (!str_ends_with($path, "/")) {
-                $path .= "/";
-            }
+            $routePath = "/" . ltrim($routeData->getPath(), "/");
+            $path = rtrim(($routeData->isInFamily() ? $routeFamilyPath : "") . $routePath, "/") . "/";
 
             $paramRegex = '/{([^}]+)}/';
             preg_match_all($paramRegex, $path, $matches);
@@ -107,13 +145,13 @@ class RouteParser
                 ->setPathRegex($pathRegex)
                 ->setParams($params)
                 ->setMethods($routeData->getMethods())
-                ->setController($controller)
+                ->setController($controller->getName())
                 ->setMethod($method->getName());
 
             if (isset($methodRoutes[$routeData->getName()])) {
                 throw new DuplicateRouteNameException("Duplicate definitions for route \"" . $routeData->getName() . "\" found in " . $controller);
             }
-            $methodRoutes[$routeData->getName()] = $route;
+            $methodRoutes[($routeData->isInFamily() ? $routeFamilyName : "") . $routeData->getName()] = $route;
         }
 
         return $methodRoutes;
@@ -131,13 +169,13 @@ class RouteParser
     public static function getControllerRoutes(string $controller): array
     {
         $controllerRoutes = [];
-
         $reflectionClass = new ReflectionClass($controller);
+
         $methods = $reflectionClass->getMethods();
         foreach ($methods as $method) {
-            $methodRoutes = self::getMethodRoutes($controller, $method);
-            $duplicates = array_intersect_key($controllerRoutes, $methodRoutes);
+            $methodRoutes = self::getMethodRoutes($reflectionClass, $method);
 
+            $duplicates = array_intersect_key($controllerRoutes, $methodRoutes);
             if (!empty($duplicates)) {
                 throw new DuplicateRouteNameException("Duplicate definitions for route \"" . array_keys($duplicates)[0] . "\" found in " . $controller);
             }

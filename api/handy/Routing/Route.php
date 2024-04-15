@@ -9,11 +9,16 @@ use ReflectionMethod;
 
 class Route
 {
-    public const SUPPORTED_PARAM_TYPES = ["int", "float", "string"];
-    public const PARAM_TYPES_REGEXPS = [
+
+    public const SUPPORTED_PARAM_TYPES = [
+        "int",
+        "float",
+        "string"
+    ];
+    public const PARAM_TYPES_REGEXPS   = [
         "string" => "[^\/]+",
-        "int" => "\d+",
-        "float" => "\d+(?:\,\d+)?"
+        "int"    => "\d+",
+        "float"  => "\d+(?:\,\d+)?"
     ];
 
     /**
@@ -78,7 +83,7 @@ class Route
         $path = $this->path;
 
         foreach ($this->getParams() as $param) {
-            $path = str_replace($param[0], array_search($param[1], self::SUPPORTED_PARAM_TYPES) , $path);
+            $path = str_replace($param[0], array_search($param[1], self::SUPPORTED_PARAM_TYPES), $path);
         }
 
         return $path;
@@ -201,8 +206,8 @@ class Route
 
         preg_match_all($this->getPathRegex(), $url, $matches);
 
-        foreach ($this->getParams() as $index=>$param) {
-            $result[$param[0]] = $this->parseParam($param, $matches[$index+1][0]);
+        foreach ($this->getParams() as $index => $param) {
+            $result[$param[0]] = $this->parseParam($param, $matches[$index + 1][0]);
         }
 
         return $result;

@@ -25,15 +25,22 @@ class Route
     private array $methods;
 
     /**
+     * @var bool
+     */
+    private bool $inFamily;
+
+    /**
      * @param string $name
      * @param string $path
      * @param array $methods
+     * @param bool $inFamily
      */
-    public function __construct(string $name, string $path, array $methods = Request::METHODS)
+    public function __construct(string $name, string $path, array $methods = Request::METHODS, bool $inFamily = true)
     {
         $this->name = $name;
         $this->path = $path;
         $this->methods = $methods;
+        $this->inFamily = $inFamily;
     }
 
     /**
@@ -60,5 +67,12 @@ class Route
         return $this->methods;
     }
 
+    /**
+     * @return bool
+     */
+    public function isInFamily(): bool
+    {
+        return $this->inFamily;
+    }
 
 }
