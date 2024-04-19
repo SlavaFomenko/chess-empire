@@ -8,6 +8,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
+        git \
         libyaml-dev \
         libssh-dev \
         libcurl4-openssl-dev \
