@@ -5,8 +5,7 @@ namespace Handy;
 use Exception;
 use Handy\Handling\ConfigParserHandler;
 use Handy\Handling\RequestParserHandler;
-use Handy\ORM\Query;
-use Handy\ORM\QueryBuilder;
+use Handy\Handling\RouterHandler;
 
 
 class Core
@@ -30,7 +29,8 @@ class Core
 
         $this->handlers = [
             new ConfigParserHandler(),
-            new RequestParserHandler()
+            new RequestParserHandler(),
+            new RouterHandler()
         ];
 
         foreach ($this->handlers as $index => $handler) {
@@ -39,6 +39,9 @@ class Core
         }
     }
 
+    /**
+     * @return string
+     */
     public function handle(): string
     {
         try {
