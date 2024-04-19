@@ -9,6 +9,12 @@ use Handy\Http\Exception\UnsupportedRequestException;
 class RequestParser
 {
 
+    /**
+     * @param Context $ctx
+     * @return void
+     * @throws InvalidRequestPathException
+     * @throws UnsupportedRequestException
+     */
     public static function parseRequest(Context $ctx): void
     {
         $request = new Request();
@@ -23,11 +29,13 @@ class RequestParser
 
         $path = strstr($_SERVER["REQUEST_URI"] . "?", "?", true);
         $globalPrefix = $ctx->config->globalPathPrefix;
-        if(!str_starts_with($path, $globalPrefix)){
+        if (!str_starts_with($path, $globalPrefix)) {
             throw new InvalidRequestPathException("Path \"" . $path . "\" does not start with global prefix \"" . $globalPrefix . "\"");
         }
         $path = substr($path, strlen($globalPrefix));
-        $path = $path === "" ? "/" : $path;
+        if (!str_ends_with($path, "/")) {
+            $path .= "/";
+        }
 
         $content = null;
 
