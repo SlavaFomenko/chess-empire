@@ -2,6 +2,8 @@
 
 namespace Handy\ORM;
 
+use Exception;
+
 class QueryBuilder
 {
 
@@ -45,7 +47,7 @@ class QueryBuilder
     /**
      * @param array $columns
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      */
     public function select(array $columns = ["*"]): self
     {
@@ -67,7 +69,7 @@ class QueryBuilder
     /**
      * @param $table
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      */
     public function insertInto($table): self
     {
@@ -79,7 +81,7 @@ class QueryBuilder
     /**
      * @param $table
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      */
     public function update($table): self
     {
@@ -91,7 +93,7 @@ class QueryBuilder
     /**
      * @param $table
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteFrom($table): self
     {
@@ -140,6 +142,48 @@ class QueryBuilder
             $this->query->addParam($key, $value);
         }
 
+        return $this;
+    }
+
+    /**
+     * @param string $column
+     * @return $this
+     */
+    public function groupBy(string $column): self
+    {
+        $this->query->addGroupBy($column);
+        return $this;
+    }
+
+    /**
+     * @param array $orderBy
+     * @return $this
+     */
+    public function orderBy(array $orderBy): self
+    {
+        foreach ($orderBy as [$column, $direction]) {
+            $this->query->addOrderBy($column, $direction);
+        }
+        return $this;
+    }
+
+    /**
+     * @param int $offset
+     * @return $this
+     */
+    public function offset(int $offset): self
+    {
+        $this->query->setOffset($offset);
+        return $this;
+    }
+
+    /**
+     * @param int $limit
+     * @return $this
+     */
+    public function limit(int $limit): self
+    {
+        $this->query->setLimit($limit);
         return $this;
     }
 

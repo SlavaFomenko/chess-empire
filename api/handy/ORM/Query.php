@@ -2,6 +2,8 @@
 
 namespace Handy\ORM;
 
+use Couchbase\InsertOptions;
+
 class Query
 {
 
@@ -45,6 +47,25 @@ class Query
      * @var array
      */
     private array $params;
+    /**
+     * @var array
+     */
+    private array $groupBy;
+
+    /**
+     * @var array
+     */
+    private array $orderBy;
+
+    /**
+     * @var int|null
+     */
+    private ?int $offset = null;
+
+    /**
+     * @var int|null
+     */
+    private ?int $limit = null;
 
     /**
      *
@@ -54,6 +75,74 @@ class Query
         $this->conditions = [];
         $this->values = [];
         $this->params = [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getGroupBy(): array
+    {
+        return $this->groupBy;
+    }
+
+    /**
+     * @param string $column
+     */
+    public function addGroupBy(string $column): void
+    {
+        $this->groupBy[] = $column;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOrderBy(): array
+    {
+        return $this->orderBy;
+    }
+
+    /**
+     * @param string $column
+     * @param string $direction
+     */
+    public function addOrderBy(string $column, string $direction = 'ASC'): void
+    {
+        $this->orderBy[] = [
+            $column,
+            $direction
+        ];
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getOffset(): ?int
+    {
+        return $this->offset;
+    }
+
+    /**
+     * @param int $offset
+     */
+    public function setOffset(int $offset): void
+    {
+        $this->offset = $offset;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getLimit(): ?int
+    {
+        return $this->limit;
+    }
+
+    /**
+     * @param int $limit
+     */
+    public function setLimit(int $limit): void
+    {
+        $this->limit = $limit;
     }
 
     /**
@@ -220,8 +309,32 @@ class Query
                 break;
         }
 
-        if (!empty($this->conditions)) {
+        if (!empty($this->conditions) && $this->type !== self::TYPE_INSERT) {
             $query .= " WHERE " . implode(" ", $this->conditions);
+        }
+
+        if ($this->type !== self::TYPE_SELECT) {
+            return $query;
+        }
+
+        if (!empty($this->groupBy)) {
+            $query .= " GROUP BY " . implode(", ", $this->groupBy);
+        }
+
+        if (!empty($this->orderBy)) {
+            $query .= " ORDER BY ";
+            foreach ($this->orderBy as $orderBy) {
+                $query .= implode(" ", $orderBy) . ', ';
+            }
+            $query = trim($query, ', ');
+        }
+
+        if (!is_null($this->limit)) {
+            $query .= " LIMIT " . $this->limit;
+        }
+
+        if (!is_null($this->offset)) {
+            $query .= " OFFSET " . $this->offset;
         }
 
         return $query;
