@@ -2,7 +2,7 @@
 
 namespace Handy\ORM;
 
-use Couchbase\InsertOptions;
+use Handy\ORM\Exception\InvalidQueryTypeException;
 
 class Query
 {
@@ -155,12 +155,12 @@ class Query
 
     /**
      * @param string $type
-     * @throws \Exception
+     * @throws InvalidQueryTypeException
      */
     public function setType(string $type): void
     {
         if (!in_array($type, self::TYPES)) {
-            throw new \Exception("Invalid query type: " . $type);
+            throw new InvalidQueryTypeException("Invalid query type: " . $type);
         }
 
         $this->type = $type;
@@ -272,89 +272,6 @@ class Query
     public function addParam(string $name, array|string|null $values): void
     {
         $this->params[$name] = $values;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSQL(): string
-    {
-        switch ($this->type) {
-            case self::TYPE_SELECT:
-                $query = "SELECT " . implode(", ", $this->columns) . " FROM " . $this->table;
-                break;
-            case self::TYPE_INSERT:
-                $query = "INSERT INTO " . $this->table;
-                if (!empty($this->columns)) {
-                    $query .= " (" . implode(", ", $this->columns) . ")";
-                }
-                $query .= " VALUES ";
-                foreach ($this->getValues() as $key => $value) {
-                    $query .= "(" . implode(", ", $value) . "), ";
-                }
-                $query = rtrim($query, ", ");
-                break;
-            case self::TYPE_UPDATE:
-                $query = "UPDATE " . $this->table . " SET ";
-                foreach ($this->columns as $key => $value) {
-                    $query .= "$value = " . $this->values[0][$key] . ", ";
-                }
-                $query = rtrim($query, ", ");
-                break;
-            case self::TYPE_DELETE:
-                $query = "DELETE FROM " . $this->table;
-                break;
-            default:
-                $query = "";
-                break;
-        }
-
-        if (!empty($this->conditions) && $this->type !== self::TYPE_INSERT) {
-            $query .= " WHERE " . implode(" ", $this->conditions);
-        }
-
-        if ($this->type !== self::TYPE_SELECT) {
-            return $query;
-        }
-
-        if (!empty($this->groupBy)) {
-            $query .= " GROUP BY " . implode(", ", $this->groupBy);
-        }
-
-        if (!empty($this->orderBy)) {
-            $query .= " ORDER BY ";
-            foreach ($this->orderBy as $orderBy) {
-                $query .= implode(" ", $orderBy) . ', ';
-            }
-            $query = trim($query, ', ');
-        }
-
-        if (!is_null($this->limit)) {
-            $query .= " LIMIT " . $this->limit;
-        }
-
-        if (!is_null($this->offset)) {
-            $query .= " OFFSET " . $this->offset;
-        }
-
-        return $query;
-    }
-
-    /**
-     * @return array
-     */
-    public function execute(): array
-    {
-        $pdo = new \PDO($_ENV["DB_URL"], $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
-        $sth = $pdo->prepare($this->getSql());
-
-        foreach ($this->getParams() as $key => $value) {
-            $sth->bindValue($key, $value);
-        }
-
-        $sth->execute();
-
-        return $sth->fetchAll();
     }
 
 }

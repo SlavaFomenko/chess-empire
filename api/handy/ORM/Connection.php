@@ -14,12 +14,12 @@ use PDO;
 class Connection
 {
 
-    // TODO place here a valid strategy class
     public const QUERY_STRATEGIES = [
-        "mysql8" => "MYSQL_STRATEGY_CLASS"
+        "mysql8" => MySQL8QueryStrategy::class
     ];
 
     private ?PDO $pdo;
+    private QueryStrategy $queryStrategy;
 
     public function __construct()
     {
@@ -42,6 +42,11 @@ class Connection
             throw new UnsupportedDbmsException("Unsupported DBMS: " . $_ENV["DB_MS"]);
         }
 
+        $queryStrategyClass = self::QUERY_STRATEGIES[$_ENV["DB_MS"]];
+        if (!class_exists($queryStrategyClass)) {
+            throw new ClassNotFoundException(self::QUERY_STRATEGIES[$_ENV["DB_MS"]] . " class not found");
+        }
+
         $options = [
             PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_EMULATE_PREPARES => false,
@@ -52,6 +57,8 @@ class Connection
         } catch (Exception $e) {
             throw new DatabaseConnectionFailedException($e->getMessage());
         }
+
+        $this->queryStrategy = new $queryStrategyClass;
     }
 
     public function isConnected(): bool
@@ -61,7 +68,16 @@ class Connection
 
     public function execute(Query $query): array
     {
-        return [];
+        $sql = $this->queryStrategy->getSQL($query);
+
+        $sth = $this->pdo->prepare($sql);
+        foreach ($query->getParams() as $key => $value) {
+            $sth->bindValue($key, $value);
+        }
+
+        $sth->execute();
+
+        return $sth->fetchAll();
     }
 
 }
