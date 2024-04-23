@@ -71,7 +71,7 @@ class QueryBuilder
      * @return $this
      * @throws Exception
      */
-    public function insertInto($table): self
+    public function insert($table): self
     {
         $this->query->setType('INSERT');
         $this->query->setTable($table);
@@ -95,7 +95,7 @@ class QueryBuilder
      * @return $this
      * @throws Exception
      */
-    public function deleteFrom($table): self
+    public function delete($table): self
     {
         $this->query->setType('DELETE');
         $this->query->setTable($table);
