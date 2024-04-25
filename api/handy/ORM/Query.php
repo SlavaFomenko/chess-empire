@@ -7,21 +7,31 @@ use Handy\ORM\Exception\InvalidQueryTypeException;
 class Query
 {
 
-    public const TYPE_SELECT = 'SELECT';
-    public const TYPE_INSERT = 'INSERT';
-    public const TYPE_UPDATE = 'UPDATE';
-    public const TYPE_DELETE = 'DELETE';
-    public const TYPES       = [
+    public const TYPE_SELECT       = 'SELECT';
+    public const TYPE_INSERT       = 'INSERT';
+    public const TYPE_UPDATE       = 'UPDATE';
+    public const TYPE_DELETE       = 'DELETE';
+    public const TYPE_CREATE_TABLE = 'CREATE TABLE';
+    public const TYPES             = [
         self::TYPE_SELECT,
         self::TYPE_INSERT,
         self::TYPE_UPDATE,
-        self::TYPE_DELETE
+        self::TYPE_DELETE,
+        self::TYPE_CREATE_TABLE,
     ];
+
+    public const OPERATOR_AND = "AND";
+    public const OPERATOR_OR  = "OR";
 
     /**
      * @var string
      */
     private string $type;
+
+    /**
+     * @var array
+     */
+    private array $columnDefinitions;
 
     /**
      * @var string
@@ -75,6 +85,26 @@ class Query
         $this->conditions = [];
         $this->values = [];
         $this->params = [];
+        $this->groupBy = [];
+        $this->orderBy = [];
+        $this->columnDefinitions = [];
+    }
+
+    /**
+     * @param array $column
+     * @return void
+     */
+    public function addColumnDefinition(array $column): void
+    {
+        $this->columnDefinitions[] = $column;
+    }
+
+    /**
+     * @return array
+     */
+    public function getColumnDefinitions(): array
+    {
+        return $this->columnDefinitions;
     }
 
     /**
@@ -215,12 +245,12 @@ class Query
     }
 
     /**
-     * @param $condition
+     * @param string ...$conditions
      * @return void
      */
-    public function addCondition($condition): void
+    public function addCondition(string ...$conditions): void
     {
-        $this->conditions[] = $condition;
+        $this->conditions = array_merge($this->conditions, $conditions);
     }
 
     /**
