@@ -3,6 +3,7 @@
 namespace Handy\Routing;
 
 use Handy\Context;
+use Handy\Http\Request;
 use Handy\Routing\Exception\UnsupportedParamTypeException;
 use ReflectionException;
 use ReflectionMethod;
@@ -20,6 +21,12 @@ class Route
         "int"    => "\d+",
         "float"  => "\d+(?:\,\d+)?"
     ];
+
+    /**
+     * Route path
+     * @var string
+     */
+    public string $name;
 
     /**
      * Route path
@@ -56,6 +63,30 @@ class Route
      * @var string
      */
     public string $method;
+
+    public function __construct()
+    {
+        $this->params = [];
+        $this->methods = Request::METHODS;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     * @return Route
+     */
+    public function setName(string $name): Route
+    {
+        $this->name = $name;
+        return $this;
+    }
 
     /**
      * @return string

@@ -5,7 +5,7 @@ namespace Handy\Routing\Attribute;
 use Attribute;
 use Handy\Http\Request;
 
-#[Attribute]
+#[Attribute(Attribute::IS_REPEATABLE | Attribute::TARGET_METHOD)]
 class Route
 {
 
