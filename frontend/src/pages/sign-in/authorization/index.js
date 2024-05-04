@@ -1,0 +1,1 @@
+export {AuthorizationPage} from './ui/authorization'
