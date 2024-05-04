@@ -6,6 +6,7 @@ use Exception;
 use Handy\Handling\ConfigParserHandler;
 use Handy\Handling\RequestParserHandler;
 use Handy\Handling\RouterHandler;
+use Handy\Handling\SecurityHandler;
 
 
 class Core
@@ -30,6 +31,7 @@ class Core
         $this->handlers = [
             new ConfigParserHandler(),
             new RequestParserHandler(),
+            new SecurityHandler(),
             new RouterHandler()
         ];
 
