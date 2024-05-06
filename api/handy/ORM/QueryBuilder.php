@@ -59,7 +59,7 @@ class QueryBuilder
 
     /**
      * @param string $name
-     * @param ColumnTypes $type
+     * @param ColumnType $type
      * @param array $size
      * @param bool $pk
      * @param bool $nullable
@@ -67,7 +67,7 @@ class QueryBuilder
      * @param bool $unique
      * @return $this
      */
-    public function addColumn(string $name, ColumnTypes $type, array $size = [], bool $pk = false, bool $nullable = true, bool $increment = false, bool $unique = false): self
+    public function addColumn(string $name, ColumnType $type, array $size = [], bool $pk = false, bool $nullable = true, bool $increment = false, bool $unique = false): self
     {
         $column = compact('name', 'type', 'size', 'pk', 'nullable', 'increment', 'unique');
         $this->query->addColumnDefinition($column);

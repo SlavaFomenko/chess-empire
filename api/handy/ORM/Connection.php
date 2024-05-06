@@ -6,6 +6,7 @@ use Exception;
 use Handy\Exception\ClassNotFoundException;
 use Handy\ORM\Exception\DatabaseConnectionFailedException;
 use Handy\ORM\Exception\InvalidDatabaseConfigException;
+use Handy\ORM\Exception\InvalidEntityClassException;
 use Handy\ORM\Exception\UnsupportedDbmsException;
 use Handy\ORM\QueryStrategy\MySQL8QueryStrategy;
 use Handy\ORM\QueryStrategy\QueryStrategy;
@@ -66,8 +67,12 @@ class Connection
         return $this->pdo !== null;
     }
 
-    public function execute(Query $query): array
+    public function execute(Query $query, ?string $entityClass = null): array
     {
+        if ($entityClass !== null && !is_subclass_of($entityClass, BaseEntity::class)) {
+            throw new InvalidEntityClassException($entityClass . " is not inherited from " . BaseEntity::class);
+        }
+
         $sql = $this->queryStrategy->getSQL($query);
 
         $sth = $this->pdo->prepare($sql);
@@ -77,7 +82,20 @@ class Connection
 
         $sth->execute();
 
-        return $sth->fetchAll();
+        $result = $sth->fetchAll();
+
+        if ($entityClass !== null) {
+            $result = array_map(
+                function ($data) use ($entityClass) {
+                    $entity = new $entityClass();
+                    $entity->fromQueryResult($data);
+                    return $entity;
+                },
+                $result
+            );
+        }
+
+        return $result;
     }
 
 }

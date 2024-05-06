@@ -36,7 +36,9 @@ class MySQL8QueryStrategy implements QueryStrategy
         $columns = array_map(function ($column) {
             $columnDefinition = "{$column['name']} {$column['type']->value}";
 
-            if (!empty($column['size'])) {
+            if (!empty($column['size']) && $column['type']->hasLength()) {
+                $columnDefinition .= "(" . $column['size'][0] . ")";
+            } else if (!empty($column['size']) && $column['type']->hasPrecisionAndScale()) {
                 $columnDefinition .= "(" . implode(", ", $column['size']) . ")";
             }
 
