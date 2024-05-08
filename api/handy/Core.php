@@ -4,18 +4,13 @@ namespace Handy;
 
 use Exception;
 use Handy\Handling\ConfigParserHandler;
+use Handy\Handling\OrmHandler;
 use Handy\Handling\RequestParserHandler;
 use Handy\Handling\RouterHandler;
 
 
 class Core
 {
-
-    /**
-     * Context instance
-     * @var Context
-     */
-    public Context $ctx;
 
     /**
      * Handlers
@@ -25,11 +20,10 @@ class Core
 
     public function __construct()
     {
-        $this->ctx = new Context();
-
         $this->handlers = [
             new ConfigParserHandler(),
             new RequestParserHandler(),
+            new OrmHandler(),
             new RouterHandler()
         ];
 
@@ -45,8 +39,8 @@ class Core
     public function handle(): string
     {
         try {
-            $this->handlers[0]->handle($this->ctx);
-            return $this->ctx->response ?? "Null Response";
+            $this->handlers[0]->handle();
+            return Context::$response ?? "Null Response";
         } catch (Exception $e) {
             return $e;
         }

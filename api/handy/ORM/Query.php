@@ -7,6 +7,7 @@ use Handy\ORM\Exception\InvalidQueryTypeException;
 class Query
 {
 
+    public const TYPE_EMPTY        = 'EMPTY';
     public const TYPE_SELECT       = 'SELECT';
     public const TYPE_INSERT       = 'INSERT';
     public const TYPE_UPDATE       = 'UPDATE';
@@ -26,7 +27,7 @@ class Query
     /**
      * @var string
      */
-    private string $type;
+    private string $type = self::TYPE_EMPTY;
 
     /**
      * @var array

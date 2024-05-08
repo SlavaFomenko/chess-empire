@@ -6,6 +6,7 @@ use Handy\Exception\DirectoryNotFoundException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use ReflectionProperty;
 
 class Resolver
 {
@@ -37,20 +38,32 @@ class Resolver
      */
     public static function getMethodsInClass(string $class, array $requiredAttributes = []): array
     {
-        $controllerRoutes = [];
         $reflectionClass = new ReflectionClass($class);
 
-        return array_filter($reflectionClass->getMethods(), fn($rm) => self::checkMethodForAttributes($rm, $requiredAttributes));
+        return array_filter($reflectionClass->getMethods(), fn($rm) => self::checkForAttributes($rm, $requiredAttributes));
     }
 
     /**
-     * @param ReflectionMethod $reflectionMethod
+     * @param string $class
+     * @param array $requiredAttributes
+     * @return array
+     * @throws ReflectionException
+     */
+    public static function getPropsInClass(string $class, array $requiredAttributes = []): array
+    {
+        $reflectionClass = new ReflectionClass($class);
+
+        return array_filter($reflectionClass->getProperties(), fn($rp) => self::checkForAttributes($rp, $requiredAttributes));
+    }
+
+    /**
+     * @param ReflectionMethod|ReflectionProperty $reflection
      * @param array $requiredAttributes
      * @return bool
      */
-    public static function checkMethodForAttributes(ReflectionMethod $reflectionMethod, array $requiredAttributes): bool
+    public static function checkForAttributes(ReflectionMethod|ReflectionProperty $reflection, array $requiredAttributes): bool
     {
-        $attributeNames = array_map(fn($ra) => $ra->getName(), $reflectionMethod->getAttributes());
+        $attributeNames = array_map(fn($ra) => $ra->getName(), $reflection->getAttributes());
         $filteredAttributes = array_filter($requiredAttributes, fn($a) => in_array($a, $attributeNames));
 
         return count($requiredAttributes) === count($filteredAttributes);

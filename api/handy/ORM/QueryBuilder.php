@@ -148,7 +148,10 @@ class QueryBuilder
      */
     public function andWhere($condition): self
     {
-        $this->query->addCondition(Query::OPERATOR_AND, $condition);
+        if (!empty($this->query->getConditions())) {
+            $this->query->addCondition(Query::OPERATOR_AND);
+        }
+        $this->query->addCondition($condition);
         return $this;
     }
 
@@ -158,7 +161,10 @@ class QueryBuilder
      */
     public function orWhere($condition): self
     {
-        $this->query->addCondition(Query::OPERATOR_OR, $condition);
+        if (!empty($this->query->getConditions())) {
+            $this->query->addCondition(Query::OPERATOR_OR);
+        }
+        $this->query->addCondition($condition);
         return $this;
     }
 

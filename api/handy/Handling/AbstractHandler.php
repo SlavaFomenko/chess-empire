@@ -2,8 +2,6 @@
 
 namespace Handy\Handling;
 
-use Handy\Context;
-
 abstract class AbstractHandler implements Handler
 {
 
@@ -24,9 +22,9 @@ abstract class AbstractHandler implements Handler
         return $this;
     }
 
-    public function handle(Context $ctx): void
+    public function handle(): void
     {
-        $this->next?->handle($ctx);
+        $this->next?->handle();
     }
 
 }

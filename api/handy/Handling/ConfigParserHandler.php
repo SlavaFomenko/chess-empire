@@ -3,14 +3,14 @@
 namespace Handy\Handling;
 
 use Handy\Config\ConfigParser;
-use Handy\Context;
 
 class ConfigParserHandler extends AbstractHandler
 {
-    public function handle(Context $ctx): void
+
+    public function handle(): void
     {
-        ConfigParser::parseConfig($ctx);
-        parent::handle($ctx);
+        ConfigParser::parseConfig();
+        parent::handle();
     }
 
 }

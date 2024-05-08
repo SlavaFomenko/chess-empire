@@ -4,6 +4,7 @@ namespace Handy\ORM;
 
 use Exception;
 use Handy\Exception\ClassNotFoundException;
+use Handy\ORM\Exception\ConnectionNotInitializedException;
 use Handy\ORM\Exception\DatabaseConnectionFailedException;
 use Handy\ORM\Exception\InvalidDatabaseConfigException;
 use Handy\ORM\Exception\InvalidEntityClassException;
@@ -69,6 +70,10 @@ class Connection
 
     public function execute(Query $query, ?string $entityClass = null): array
     {
+        if (!$this->isConnected()) {
+            throw new ConnectionNotInitializedException("Database connection is not initialized");
+        }
+
         if ($entityClass !== null && !is_subclass_of($entityClass, BaseEntity::class)) {
             throw new InvalidEntityClassException($entityClass . " is not inherited from " . BaseEntity::class);
         }

@@ -12,27 +12,27 @@ class NewsController extends BaseController
 {
 
     #[Route(name: "main", path: "")]
-    public function index()
+    public function index(): Response
     {
-        $this->ctx->response = new Response("News index");
+        return new Response("News index");
     }
 
     #[Route(name: "by_id", path: "/{id}")]
-    public function byId(int $id)
+    public function byId(int $id): Response
     {
-        $this->ctx->response = new Response("News with id " . $id);
+        return new Response("News with id " . $id);
     }
 
     #[Route(name: "by_author", path: "/{author}")]
-    public function byAuthor(string $author)
+    public function byAuthor(string $author): Response
     {
-        $this->ctx->response = new Response("News by " . $author);
+        return new Response("News by " . $author);
     }
 
     #[Route(name: "comment_by_news_id", path: "news/{newsId}/{commentId}", inFamily: false)]
-    public function commentById(string $commentId, int $newsId)
+    public function commentById(string $commentId, int $newsId): Response
     {
-        $this->ctx->response = new Response("Comment " . $commentId . " for news " . $newsId);
+        return new Response("Comment " . $commentId . " for news " . $newsId);
     }
 
 }

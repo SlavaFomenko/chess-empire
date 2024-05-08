@@ -2,13 +2,14 @@
 
 namespace Handy\Controller;
 
-use Handy\Http\Request;
 use Handy\Http\Response;
 
 class ExceptionController extends BaseController
 {
-    public function index(string $id): void
+
+    public function index(string $id): Response
     {
-        $this->ctx->response = new Response("Exception!!!" . $this->request->getContent());
+        return new Response("Exception!!!" . $this->request->getContent());
     }
+
 }

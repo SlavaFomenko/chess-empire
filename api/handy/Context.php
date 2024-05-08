@@ -5,6 +5,8 @@ namespace Handy;
 use Handy\Config\Config;
 use Handy\Http\Request;
 use Handy\Http\Response;
+use Handy\ORM\Connection;
+use Handy\ORM\EntityManager;
 
 class Context
 {
@@ -12,25 +14,28 @@ class Context
     /**
      * @var ?Config
      */
-    public ?Config $config;
+    public static ?Config $config = null;
 
     /**
      * Current request
      * @var ?Request
      */
-    public ?Request $request;
+    public static ?Request $request = null;
 
     /**
      * Current response
      * @var ?Response
      */
-    public ?Response $response;
+    public static ?Response $response = null;
 
+    /**
+     * @var Connection|null
+     */
+    public static ?Connection $connection = null;
 
-    public function __construct()
-    {
-        $this->config = null;
-        $this->request = null;
-        $this->response = null;
-    }
+    /**
+     * @var EntityManager|null
+     */
+    public static ?EntityManager $entityManager = null;
+
 }

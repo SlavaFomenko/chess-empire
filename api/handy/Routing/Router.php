@@ -5,11 +5,13 @@ namespace Handy\Routing;
 use Handy\Context;
 use Handy\Controller\BaseController;
 use Handy\Exception\DirectoryNotFoundException;
+use Handy\Http\Response;
 use Handy\Routing\Attribute\Route as RouteAttribute;
 use Handy\Routing\Attribute\RouteFamily;
 use Handy\Routing\Exception\DuplicateParamNameException;
 use Handy\Routing\Exception\DuplicateRouteNameException;
 use Handy\Routing\Exception\InvalidMethodArgumentsException;
+use Handy\Routing\Exception\InvalidResponseReturnedException;
 use Handy\Routing\Exception\UnsupportedParamTypeException;
 use Handy\Utils\Resolver;
 use ReflectionException;
@@ -19,32 +21,40 @@ class Router
 {
 
     /**
-     * @param Context $ctx
      * @throws DuplicateParamNameException
      * @throws DuplicateRouteNameException
      * @throws InvalidMethodArgumentsException
      * @throws UnsupportedParamTypeException
-     * @throws ReflectionException|DirectoryNotFoundException
+     * @throws ReflectionException|DirectoryNotFoundException|InvalidResponseReturnedException
      */
-    public static function handle(Context $ctx): void
+    public static function handle(): void
     {
-        $namespaces = array_filter($ctx->config->namespaces, function ($item) {
+        $namespaces = array_filter(Context::$config->namespaces, function ($item) {
             return $item["type"] == "controller";
         });
 
         $routes = self::parseRoutes($namespaces);
 
+        $notFoundConfig = Context::$config->controllers["NotFound"];
+        $notFoundRoute = new Route();
+        $notFoundRoute->setName("handy-not-found")
+            ->setController($notFoundConfig["controller"])
+            ->setMethod($notFoundConfig["method"])
+            ->setPath("")
+            ->setPathRegex("/.*/");
+
+        $routes["handy-not-found"] = $notFoundRoute;
+
         foreach ($routes as $route) {
-            if (preg_match($route->getPathRegex(), $ctx->request->getPath()) === 1 && in_array($ctx->request->getMethod(), $route->getMethods())) {
-                $route->execute($ctx);
+            if (preg_match($route->getPathRegex(), Context::$request->getPath()) === 1 && in_array(Context::$request->getMethod(), $route->getMethods())) {
+                $response = $route->execute();
+                if (!is_a($response, Response::class, true)) {
+                    throw new InvalidResponseReturnedException("Invalid response type returned: " . $response::class);
+                }
+                Context::$response = $response;
                 return;
             }
         }
-
-        $notFoundController = $ctx->config->controllers["NotFound"];
-        $method = $notFoundController["method"];
-        $notFoundControllerInstance = new $notFoundController["controller"]($ctx);
-        $notFoundControllerInstance->$method();
     }
 
     /**
