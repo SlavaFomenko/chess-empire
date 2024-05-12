@@ -10,12 +10,11 @@ class RequestParser
 {
 
     /**
-     * @param Context $ctx
      * @return void
      * @throws InvalidRequestPathException
      * @throws UnsupportedRequestException
      */
-    public static function parseRequest(Context $ctx): void
+    public static function parseRequest(): void
     {
         $request = new Request();
 
@@ -28,7 +27,7 @@ class RequestParser
         $protocol = empty($_SERVER['HTTPS']) ? "http" : "https";
 
         $path = strstr($_SERVER["REQUEST_URI"] . "?", "?", true);
-        $globalPrefix = $ctx->config->globalPathPrefix;
+        $globalPrefix = Context::$config->globalPathPrefix;
         if (!str_starts_with($path, $globalPrefix)) {
             throw new InvalidRequestPathException("Path \"" . $path . "\" does not start with global prefix \"" . $globalPrefix . "\"");
         }
@@ -50,7 +49,7 @@ class RequestParser
             ->setQuery($_GET)
             ->setContent($content);
 
-        $ctx->request = $request;
+        Context::$request = $request;
     }
 
 }

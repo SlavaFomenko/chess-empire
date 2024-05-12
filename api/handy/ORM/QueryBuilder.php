@@ -3,6 +3,7 @@
 namespace Handy\ORM;
 
 use Exception;
+use Handy\ORM\Exception\InvalidQueryTypeException;
 
 class QueryBuilder
 {
@@ -42,6 +43,35 @@ class QueryBuilder
     public function getQuery(): Query
     {
         return $this->query;
+    }
+
+    /**
+     * @param string $tableName
+     * @return $this
+     * @throws InvalidQueryTypeException
+     */
+    public function createTable(string $tableName): self
+    {
+        $this->query->setType('CREATE TABLE');
+        $this->query->setTable($tableName);
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param ColumnType $type
+     * @param array $size
+     * @param bool $pk
+     * @param bool $nullable
+     * @param bool $increment
+     * @param bool $unique
+     * @return $this
+     */
+    public function addColumn(string $name, ColumnType $type, array $size = [], bool $pk = false, bool $nullable = true, bool $increment = false, bool $unique = false): self
+    {
+        $column = compact('name', 'type', 'size', 'pk', 'nullable', 'increment', 'unique');
+        $this->query->addColumnDefinition($column);
+        return $this;
     }
 
     /**
@@ -118,7 +148,10 @@ class QueryBuilder
      */
     public function andWhere($condition): self
     {
-        $this->query->addCondition("AND $condition");
+        if (!empty($this->query->getConditions())) {
+            $this->query->addCondition(Query::OPERATOR_AND);
+        }
+        $this->query->addCondition($condition);
         return $this;
     }
 
@@ -128,7 +161,10 @@ class QueryBuilder
      */
     public function orWhere($condition): self
     {
-        $this->query->addCondition("OR $condition");
+        if (!empty($this->query->getConditions())) {
+            $this->query->addCondition(Query::OPERATOR_OR);
+        }
+        $this->query->addCondition($condition);
         return $this;
     }
 

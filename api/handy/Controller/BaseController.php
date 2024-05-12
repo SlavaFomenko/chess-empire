@@ -2,33 +2,32 @@
 
 namespace Handy\Controller;
 
-use Handy\Controller\Exception\EmptyRequestException;
 use Handy\Context;
+use Handy\Controller\Exception\EmptyRequestException;
 use Handy\Http\Request;
+use Handy\ORM\EntityManager;
 
 class BaseController
 {
-
-    /**
-     * @var Context
-     */
-    protected Context $ctx;
 
     /**
      * @var Request
      */
     protected Request $request;
 
-    public function __construct(Context $ctx)
-    {
-        $this->ctx = $ctx;
+    /**
+     * @var EntityManager|null
+     */
+    protected ?EntityManager $em;
 
-        if($ctx->request === null){
+    public function __construct()
+    {
+        if (Context::$request === null) {
             throw new EmptyRequestException("Controller called with an empty request object");
         }
 
-        $this->request = $ctx->request;
+        $this->request = Context::$request;
+        $this->em = Context::$entityManager;
     }
-
 
 }

@@ -2,26 +2,37 @@
 
 namespace Handy\ORM;
 
-use Couchbase\InsertOptions;
+use Handy\ORM\Exception\InvalidQueryTypeException;
 
 class Query
 {
 
-    public const TYPE_SELECT = 'SELECT';
-    public const TYPE_INSERT = 'INSERT';
-    public const TYPE_UPDATE = 'UPDATE';
-    public const TYPE_DELETE = 'DELETE';
-    public const TYPES       = [
+    public const TYPE_EMPTY        = 'EMPTY';
+    public const TYPE_SELECT       = 'SELECT';
+    public const TYPE_INSERT       = 'INSERT';
+    public const TYPE_UPDATE       = 'UPDATE';
+    public const TYPE_DELETE       = 'DELETE';
+    public const TYPE_CREATE_TABLE = 'CREATE TABLE';
+    public const TYPES             = [
         self::TYPE_SELECT,
         self::TYPE_INSERT,
         self::TYPE_UPDATE,
-        self::TYPE_DELETE
+        self::TYPE_DELETE,
+        self::TYPE_CREATE_TABLE,
     ];
+
+    public const OPERATOR_AND = "AND";
+    public const OPERATOR_OR  = "OR";
 
     /**
      * @var string
      */
-    private string $type;
+    private string $type = self::TYPE_EMPTY;
+
+    /**
+     * @var array
+     */
+    private array $columnDefinitions;
 
     /**
      * @var string
@@ -75,6 +86,26 @@ class Query
         $this->conditions = [];
         $this->values = [];
         $this->params = [];
+        $this->groupBy = [];
+        $this->orderBy = [];
+        $this->columnDefinitions = [];
+    }
+
+    /**
+     * @param array $column
+     * @return void
+     */
+    public function addColumnDefinition(array $column): void
+    {
+        $this->columnDefinitions[] = $column;
+    }
+
+    /**
+     * @return array
+     */
+    public function getColumnDefinitions(): array
+    {
+        return $this->columnDefinitions;
     }
 
     /**
@@ -155,12 +186,12 @@ class Query
 
     /**
      * @param string $type
-     * @throws \Exception
+     * @throws InvalidQueryTypeException
      */
     public function setType(string $type): void
     {
         if (!in_array($type, self::TYPES)) {
-            throw new \Exception("Invalid query type: " . $type);
+            throw new InvalidQueryTypeException("Invalid query type: " . $type);
         }
 
         $this->type = $type;
@@ -215,12 +246,12 @@ class Query
     }
 
     /**
-     * @param $condition
+     * @param string ...$conditions
      * @return void
      */
-    public function addCondition($condition): void
+    public function addCondition(string ...$conditions): void
     {
-        $this->conditions[] = $condition;
+        $this->conditions = array_merge($this->conditions, $conditions);
     }
 
     /**
@@ -272,89 +303,6 @@ class Query
     public function addParam(string $name, array|string|null $values): void
     {
         $this->params[$name] = $values;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSQL(): string
-    {
-        switch ($this->type) {
-            case self::TYPE_SELECT:
-                $query = "SELECT " . implode(", ", $this->columns) . " FROM " . $this->table;
-                break;
-            case self::TYPE_INSERT:
-                $query = "INSERT INTO " . $this->table;
-                if (!empty($this->columns)) {
-                    $query .= " (" . implode(", ", $this->columns) . ")";
-                }
-                $query .= " VALUES ";
-                foreach ($this->getValues() as $key => $value) {
-                    $query .= "(" . implode(", ", $value) . "), ";
-                }
-                $query = rtrim($query, ", ");
-                break;
-            case self::TYPE_UPDATE:
-                $query = "UPDATE " . $this->table . " SET ";
-                foreach ($this->columns as $key => $value) {
-                    $query .= "$value = " . $this->values[0][$key] . ", ";
-                }
-                $query = rtrim($query, ", ");
-                break;
-            case self::TYPE_DELETE:
-                $query = "DELETE FROM " . $this->table;
-                break;
-            default:
-                $query = "";
-                break;
-        }
-
-        if (!empty($this->conditions) && $this->type !== self::TYPE_INSERT) {
-            $query .= " WHERE " . implode(" ", $this->conditions);
-        }
-
-        if ($this->type !== self::TYPE_SELECT) {
-            return $query;
-        }
-
-        if (!empty($this->groupBy)) {
-            $query .= " GROUP BY " . implode(", ", $this->groupBy);
-        }
-
-        if (!empty($this->orderBy)) {
-            $query .= " ORDER BY ";
-            foreach ($this->orderBy as $orderBy) {
-                $query .= implode(" ", $orderBy) . ', ';
-            }
-            $query = trim($query, ', ');
-        }
-
-        if (!is_null($this->limit)) {
-            $query .= " LIMIT " . $this->limit;
-        }
-
-        if (!is_null($this->offset)) {
-            $query .= " OFFSET " . $this->offset;
-        }
-
-        return $query;
-    }
-
-    /**
-     * @return array
-     */
-    public function execute(): array
-    {
-        $pdo = new \PDO($_ENV["DB_URL"], $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
-        $sth = $pdo->prepare($this->getSql());
-
-        foreach ($this->getParams() as $key => $value) {
-            $sth->bindValue($key, $value);
-        }
-
-        $sth->execute();
-
-        return $sth->fetchAll();
     }
 
 }

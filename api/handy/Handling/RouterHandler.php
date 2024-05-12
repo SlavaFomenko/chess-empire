@@ -2,16 +2,15 @@
 
 namespace Handy\Handling;
 
-use Handy\Context;
-use Handy\Http\RequestParser;
 use Handy\Routing\Router;
 
 class RouterHandler extends AbstractHandler
 {
-    public function handle(Context $ctx): void
+
+    public function handle(): void
     {
-        Router::handle($ctx);
-        parent::handle($ctx);
+        Router::handle();
+        parent::handle();
     }
 
 }

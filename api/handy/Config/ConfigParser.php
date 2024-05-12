@@ -3,17 +3,20 @@
 namespace Handy\Config;
 
 use Error;
+use Exception;
 use Handy\Config\Exception\InvalidConfigException;
 use Handy\Config\Exception\InvalidConfigSyntaxException;
 use Handy\Context;
-use Exception;
 
 class ConfigParser
 {
 
     private const DEFAULT_CONFIG_PATH = "handy/Config/Defaults/";
     private const USER_CONFIG_PATH    = "config/";
-    private const CONFIG_FILES = ['namespaces.yaml', 'config.yaml'];
+    private const CONFIG_FILES        = [
+        'namespaces.yaml',
+        'config.yaml'
+    ];
 
     public static function getFullDirPath($directory): string
     {
@@ -35,7 +38,7 @@ class ConfigParser
 
             $parsedYaml = @yaml_parse_file($filePath) ?? [];
 
-            if($parsedYaml === false){
+            if ($parsedYaml === false) {
                 throw new InvalidConfigSyntaxException('Invalid syntax in ' . $filePath);
             }
 
@@ -45,7 +48,7 @@ class ConfigParser
         return $config;
     }
 
-    public static function parseConfig(Context $ctx): void
+    public static function parseConfig(): void
     {
         $configArray = self::parseFromDir(self::DEFAULT_CONFIG_PATH);
 
@@ -60,11 +63,11 @@ class ConfigParser
             $config->controllers = $configArray["controllers"];
             $config->supportedContentTypes = $configArray["supported_content_types"];
             $config->globalPathPrefix = $configArray["global_path_prefix"];
-        } catch(Exception|Error $e){
+        } catch (Exception|Error $e) {
             throw new InvalidConfigException($e->getMessage());
         }
 
-        $ctx->config = $config;
+        Context::$config = $config;
     }
 
 }

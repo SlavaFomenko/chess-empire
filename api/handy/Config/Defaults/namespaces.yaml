@@ -2,3 +2,7 @@ namespaces:
   App\Controller:
     path: "src/Controller/"
     type: "controller"
+
+  App\Entity:
+    path: "src/Entity/"
+    type: "entity"

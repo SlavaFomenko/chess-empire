@@ -113,6 +113,10 @@ class Route
     {
         $path = $this->path;
 
+        if ($this->name == "handy-not-found") {
+            return "/";
+        }
+
         foreach ($this->getParams() as $param) {
             $path = str_replace($param[0], array_search($param[1], self::SUPPORTED_PARAM_TYPES), $path);
         }
@@ -245,18 +249,17 @@ class Route
     }
 
     /**
-     * @param Context $ctx
-     * @return void
+     * @return mixed
      * @throws UnsupportedParamTypeException
      * @throws ReflectionException
      */
-    public function execute(Context $ctx): void
+    public function execute(): mixed
     {
         $controller = $this->getController();
         $method = $this->getMethod();
-        $controllerInstance = new $controller($ctx);
+        $controllerInstance = new $controller();
         $reflectionMethod = new ReflectionMethod($controller, $method);
-        $reflectionMethod->invokeArgs($controllerInstance, $this->prepareParams($ctx->request->getPath()));
+        return $reflectionMethod->invokeArgs($controllerInstance, $this->prepareParams(Context::$request->getPath()));
     }
 
 }

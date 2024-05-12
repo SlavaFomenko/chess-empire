@@ -2,16 +2,15 @@
 
 namespace Handy\Handling;
 
-use Handy\Context;
-use Handy\Http\Exception\UnsupportedRequestException;
 use Handy\Http\RequestParser;
 
 class RequestParserHandler extends AbstractHandler
 {
-    public function handle(Context $ctx): void
+
+    public function handle(): void
     {
-        RequestParser::parseRequest($ctx);
-        parent::handle($ctx);
+        RequestParser::parseRequest();
+        parent::handle();
     }
 
 }

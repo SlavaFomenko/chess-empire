@@ -2,7 +2,6 @@
 
 namespace Handy\Handling;
 
-use Handy\Context;
 use Exception;
 
 interface Handler
@@ -17,10 +16,9 @@ interface Handler
 
     /**
      * Handles request step
-     * @throws Exception
-     * @param Context $ctx
      * @return void
+     * @throws Exception
      */
-    public function handle(Context $ctx): void;
+    public function handle(): void;
 
 }

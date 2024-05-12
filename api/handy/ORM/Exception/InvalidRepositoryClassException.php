@@ -4,7 +4,7 @@ namespace Handy\ORM\Exception;
 
 use Exception;
 
-class InvalidQueryException extends Exception
+class InvalidRepositoryClassException extends Exception
 {
 
 }
