@@ -63,7 +63,8 @@ class ConfigParser
             $config->controllers = $configArray["controllers"];
             $config->supportedContentTypes = $configArray["supported_content_types"];
             $config->globalPathPrefix = $configArray["global_path_prefix"];
-        } catch (Exception|Error $e) {
+            $config->securityProvider=$configArray["security_provider"];
+        } catch(Exception|Error $e){
             throw new InvalidConfigException($e->getMessage());
         }
 

@@ -7,3 +7,5 @@ controllers:
 supported_content_types: ["application/json"]
 
 global_path_prefix: ""
+
+security_provider: Handy\Security\EmptySecurityProvider

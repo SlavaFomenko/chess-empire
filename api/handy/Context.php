@@ -7,6 +7,7 @@ use Handy\Http\Request;
 use Handy\Http\Response;
 use Handy\ORM\Connection;
 use Handy\ORM\EntityManager;
+use Handy\Security\Security;
 
 class Context
 {
@@ -29,13 +30,18 @@ class Context
     public static ?Response $response = null;
 
     /**
-     * @var Connection|null
+     * @var ?Connection
      */
     public static ?Connection $connection = null;
 
     /**
-     * @var EntityManager|null
+     * @var ?EntityManager
      */
     public static ?EntityManager $entityManager = null;
+
+    /**
+     * @var ?Security
+     */
+    public static ?Security $security;
 
 }
