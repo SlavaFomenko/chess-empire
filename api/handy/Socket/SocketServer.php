@@ -6,7 +6,7 @@ use Handy\Socket\Exception\SocketServerLaunchException;
 use Handy\Socket\Exception\UnsupportedUserClassException;
 use Socket;
 
-class SocketServer
+class SocketServer implements IEventFlow
 {
 
     /**
@@ -32,6 +32,10 @@ class SocketServer
     /**
      * @var array
      */
+    public array $heldMessages;
+    /**
+     * @var array
+     */
     public array $sockets;
     /**
      * @var array
@@ -40,7 +44,11 @@ class SocketServer
     /**
      * @var array
      */
-    public array $heldMessages;
+    public array $rooms;
+    /**
+     * @var array
+     */
+    public array $events;
 
     /**
      * @param string $ip
@@ -59,6 +67,8 @@ class SocketServer
         $this->userClass = $userClass;
         $this->sockets = [];
         $this->users = [];
+        $this->rooms = [];
+        $this->events = [];
         $this->heldMessages = [];
         $this->maxBufferSize = $maxBufferSize;
         $this->ip = $ip;
@@ -74,7 +84,7 @@ class SocketServer
     /**
      * @return mixed
      */
-    public function run()
+    public function run(): mixed
     {
         while (true) {
             if (empty($this->sockets)) {
@@ -171,6 +181,60 @@ class SocketServer
     }
 
     /**
+     * @inheritDoc
+     */
+    public function on(string $event, object $callback): void
+    {
+        if (!isset($this->events[$event])) {
+            $this->events[$event] = [];
+        }
+        $this->events[$event][] = $callback;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeListener(string $event, object $callback): void
+    {
+        if (!isset($this->events[$event])) {
+            return;
+        }
+        $this->events[$event] = array_filter($this->events[$event], fn($cb) => $cb !== $callback);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeAllListeners(string $event): void
+    {
+        unset($this->events[$event]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function notifyListeners(string $event, mixed $data, ?SocketUser $user = null): void
+    {
+        if (isset($this->events[$event])) {
+            foreach ($this->events[$event] as $listener) {
+                $listener($data, $user);
+            }
+        }
+        if ($user->room !== null) {
+            $this->getRoomById($user->room)?->notifyListeners($event, $data, $user);
+        }
+        $user->notifyListeners($event, $data, $user);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearEvents(): void
+    {
+        $this->events = [];
+    }
+
+    /**
      * @param SocketUser $user
      * @param string $message
      * @return void
@@ -208,7 +272,7 @@ class SocketServer
      * @param string $message
      * @return void
      */
-    protected function send(SocketUser $user, string $message): void
+    public function send(SocketUser $user, string $message): void
     {
         if ($user->handshake !== null) {
             $message = $this->frame($message, $user);
@@ -229,7 +293,7 @@ class SocketServer
      */
     protected function connect(Socket $socket): void
     {
-        $user = new $this->userClass($socket, uniqid('u'));
+        $user = new $this->userClass($this, $socket, uniqid('u'));
         $this->users[$user->id] = $user;
         $this->sockets[$user->id] = $socket;
         $this->connecting($user);
@@ -249,11 +313,12 @@ class SocketServer
             return;
         }
 
-        unset($this->users[$user->id]);
-
-        if (array_key_exists($user->id, $this->sockets)) {
-            unset($this->sockets[$user->id]);
+        if ($user->room !== null) {
+            @$this->rooms[$user->room]?->kick($user);
         }
+
+        unset($this->users[$user->id]);
+        unset($this->sockets[$user->id]);
 
         if (!is_null($socketError)) {
             socket_clear_error($socket);
@@ -334,9 +399,27 @@ class SocketServer
      * @param Socket $socket
      * @return SocketUser|null
      */
-    protected function getUserBySocket(Socket $socket): ?SocketUser
+    public function getUserBySocket(Socket $socket): ?SocketUser
     {
         return array_values(array_filter($this->users, fn($u) => $u->socket == $socket) + [null])[0];
+    }
+
+    /**
+     * @param string $id
+     * @return SocketUser|null
+     */
+    public function getUserById(string $id): ?SocketUser
+    {
+        return @$this->users[$id] ?? null;
+    }
+
+    /**
+     * @param string $id
+     * @return SocketUser|null
+     */
+    public function getRoomById(string $id): ?SocketRoom
+    {
+        return @$this->rooms[$id] ?? null;
     }
 
     /**
@@ -425,6 +508,10 @@ class SocketServer
 
             if (($message = $this->deFrame($frame, $user)) !== FALSE) {
                 if ((preg_match('//u', $message)) || ($headers['opCode'] == 2)) {
+                    $eventData = json_decode($message, true);
+                    if ($eventData !== null && isset($eventData["event"])) {
+                        $this->notifyListeners($eventData["event"], @$eventData["data"] ?? null, $user);
+                    }
                     $this->process($user, $message);
                 } else {
                     echo "ERROR: The message is not encoded with UTF-8" . PHP_EOL;
@@ -455,22 +542,23 @@ class SocketServer
 
     /**
      * @param string $message
-     * @param $user
+     * @param SocketUser $user
      * @return false|string
      */
-    protected function deFrame(string $message, $user): false|string
+    protected function deFrame(string $message, SocketUser $user): false|string
     {
         $headers = $this->extractHeaders($message);
         $pong = false;
         switch ($headers['opCode']) {
+            case 9:
+                $pong = true;
             case 0:
             case 1:
             case 2:
             case 10:
                 break;
-            case 9:
-                $pong = true;
-                break;
+            case 8:
+                $this->disconnect($this->sockets[$user->id]);
             default:
                 return false;
         }

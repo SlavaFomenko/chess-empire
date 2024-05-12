@@ -2,9 +2,7 @@
 
 namespace Handy\Socket;
 
-use Socket;
-
-class SocketUser implements IEventFlow
+class SocketRoom implements IEventFlow
 {
 
     /**
@@ -12,49 +10,13 @@ class SocketUser implements IEventFlow
      */
     public SocketServer $server;
     /**
-     * @var Socket
-     */
-    public Socket $socket;
-    /**
      * @var string
      */
     public string $id;
     /**
-     * @var string|null
-     */
-    public ?string $room;
-    /**
      * @var array
      */
-    public array $headers;
-    /**
-     * @var string|null
-     */
-    public ?string $handshake;
-    /**
-     * @var bool
-     */
-    public bool $handlingPartialPacket;
-    /**
-     * @var string
-     */
-    public string $partialBuffer;
-    /**
-     * @var bool
-     */
-    public bool $sendingContinuous;
-    /**
-     * @var string
-     */
-    public string $partialMessage;
-    /**
-     * @var bool
-     */
-    public bool $hasSentClose;
-    /**
-     * @var mixed
-     */
-    public mixed $requestedResource;
+    public array $users;
     /**
      * @var array
      */
@@ -62,23 +24,37 @@ class SocketUser implements IEventFlow
 
     /**
      * @param SocketServer $server
-     * @param Socket $socket
      * @param string $id
      */
-    public function __construct(SocketServer $server, Socket $socket, string $id)
+    public function __construct(SocketServer $server, string $id)
     {
         $this->server = $server;
-        $this->socket = $socket;
         $this->id = $id;
-        $this->room = null;
-        $this->headers = [];
-        $this->handshake = null;
-        $this->handlingPartialPacket = false;
-        $this->partialBuffer = "";
-        $this->sendingContinuous = false;
-        $this->partialMessage = "";
-        $this->hasSentClose = false;
+        $this->users = [];
         $this->events = [];
+    }
+
+    /**
+     * @param SocketUser $user
+     * @return void
+     */
+    public function join(SocketUser $user): void
+    {
+        if ($user->room !== null) {
+            $this->server->getRoomById($user->room)?->kick($user);
+        }
+        $user->room = $this->id;
+        $this->users[] = $user->id;
+    }
+
+    /**
+     * @param SocketUser $user
+     * @return void
+     */
+    public function kick(SocketUser $user): void
+    {
+        $user->room = null;
+        $this->users = array_diff($this->users, [$user->id]);
     }
 
     /**
@@ -132,19 +108,6 @@ class SocketUser implements IEventFlow
     public function clearEvents(): void
     {
         $this->events = [];
-    }
-
-    /**
-     * @param string $event
-     * @param mixed $data
-     * @return void
-     */
-    public function emit(string $event, mixed $data): void
-    {
-        $this->server->send($this, json_encode([
-            "event" => $event,
-            "data"  => $data
-        ]));
     }
 
 }
