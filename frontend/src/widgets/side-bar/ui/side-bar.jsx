@@ -1,7 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../styles/side-bar.module.scss";
-
 export function SideBar () {
   const navigate = useNavigate();
   const location = useLocation();
@@ -11,6 +10,8 @@ export function SideBar () {
       navigate(page);
     }
   };
+
+
 
   return (
     <div className={styles.side_bar}>

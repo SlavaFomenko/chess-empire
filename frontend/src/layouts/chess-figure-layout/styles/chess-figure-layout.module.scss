@@ -1,0 +1,19 @@
+.wrapper{
+  width: 100%;
+  height: 100%;
+
+  border: 1px solid blue;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  img{
+    width: 90%;
+    height: 90%;
+  }
+}
+  .isSelected{
+    background-color: lightgreen;
+  }
+  .isHighlighted{
+    background-color: lightcoral;
+  }
