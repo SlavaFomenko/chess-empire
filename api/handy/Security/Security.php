@@ -17,9 +17,9 @@ class Security
     }
 
     /**
-     * @return object
+     * @return ?object
      */
-    public function getData(): object
+    public function getData(): ?object
     {
         return $this->data;
     }

@@ -42,7 +42,7 @@ class Core
     {
         try {
             $this->handlers[0]->handle();
-            return Context::$response ?? "Null Response";
+            return Context::$response;
         } catch (Exception $e) {
             return $e;
         }

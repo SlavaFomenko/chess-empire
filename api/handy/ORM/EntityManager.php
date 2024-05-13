@@ -20,7 +20,7 @@ class EntityManager
         "after"  => self::STATE_NOT_PERSISTED
     ];
 
-    public array $states;
+    private array $states;
 
     public function __construct()
     {
@@ -100,7 +100,7 @@ class EntityManager
         $this->clearStates();
     }
 
-    public function getQueryForStateSet(array $stateSet): ?Query
+    private function getQueryForStateSet(array $stateSet): ?Query
     {
         $states = array_values($stateSet)[0];
         if ($states["before"] == self::STATE_NOT_EXISTS && $this->isValidState($states["after"])) {
@@ -117,7 +117,7 @@ class EntityManager
         return null;
     }
 
-    public function getDeleteQuery(array $stateSet): Query
+    private function getDeleteQuery(array $stateSet): Query
     {
         $entityData = $this->parseRecordId(array_keys($stateSet)[0]);
         $states = array_values($stateSet)[0];
@@ -130,7 +130,7 @@ class EntityManager
         return $qb->getQuery();
     }
 
-    public function getInsertQuery(array $stateSet): Query
+    private function getInsertQuery(array $stateSet): Query
     {
         $entityData = $this->parseRecordId(array_keys($stateSet)[0]);
         $states = array_values($stateSet)[0];
@@ -142,7 +142,7 @@ class EntityManager
         return $qb->getQuery();
     }
 
-    public function getUpdateQuery(array $stateSet): Query
+    private function getUpdateQuery(array $stateSet): Query
     {
         $entityData = $this->parseRecordId(array_keys($stateSet)[0]);
         $states = array_values($stateSet)[0];
@@ -158,7 +158,7 @@ class EntityManager
         return $qb->getQuery();
     }
 
-    public function isValidState(array $state): bool
+    private function isValidState(array $state): bool
     {
         return !in_array($state, [
             self::STATE_NOT_EXISTS,
@@ -166,12 +166,12 @@ class EntityManager
         ]);
     }
 
-    public function getRecordId(BaseEntity $entity): string
+    private function getRecordId(BaseEntity $entity): string
     {
         return $entity::class . "@" . ($entity->getIdColumn()["value"] ?? uniqid("NEW_ENTITY_"));
     }
 
-    public function parseRecordId(string $id): array
+    private function parseRecordId(string $id): array
     {
         $parts = explode("@", $id, 2);
         $entityClass = $parts[0];

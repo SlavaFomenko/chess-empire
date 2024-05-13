@@ -8,9 +8,10 @@ use Handy\ORM\Attribute\Entity;
 use Handy\ORM\Attribute\Id;
 use Handy\ORM\BaseEntity;
 use Handy\ORM\ColumnType;
+use Handy\Utils\JsonSerializable;
 
 #[Entity(repository: UserRepository::class, table: "user")]
-class User extends BaseEntity
+class User extends BaseEntity implements JsonSerializable
 {
 
     #[Id]
@@ -60,5 +61,13 @@ class User extends BaseEntity
         return $this;
     }
 
+
+    public function jsonSerialize(): array
+    {
+        return [
+            "id" => $this->getId(),
+            "email" => $this->getId()
+        ];
+    }
 
 }
