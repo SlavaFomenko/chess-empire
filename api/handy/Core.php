@@ -7,6 +7,7 @@ use Handy\Handling\ConfigParserHandler;
 use Handy\Handling\OrmHandler;
 use Handy\Handling\RequestParserHandler;
 use Handy\Handling\RouterHandler;
+use Handy\Handling\SecurityHandler;
 
 
 class Core
@@ -24,6 +25,7 @@ class Core
             new ConfigParserHandler(),
             new RequestParserHandler(),
             new OrmHandler(),
+            new SecurityHandler(),
             new RouterHandler()
         ];
 

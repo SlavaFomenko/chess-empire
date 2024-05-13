@@ -2,4 +2,4 @@
 /.idea
 /api/src/.preload.php
 /data
-.env.local
+api/.env.local

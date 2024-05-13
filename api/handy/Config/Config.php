@@ -29,4 +29,8 @@ class Config
      */
     public string $globalPathPrefix;
 
+    /**
+     * @var string
+     */
+    public string $securityProvider;
 }
