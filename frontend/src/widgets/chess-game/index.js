@@ -1,0 +1,1 @@
+export { ChessGame } from "./ui/chess-game";

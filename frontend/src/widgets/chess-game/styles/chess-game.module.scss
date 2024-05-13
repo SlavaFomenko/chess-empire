@@ -1,0 +1,17 @@
+.wrapper{
+  width: 800px;
+  height: 800px;
+  display: flex;
+  justify-content: center;
+  .buttons{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap:20px;
+    button {
+      padding: 20px;
+      text-wrap: none;
+    }
+  }
+}
