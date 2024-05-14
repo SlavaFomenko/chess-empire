@@ -7,9 +7,9 @@ use Handy\Utils\JsonSerializable;
 class JsonResponse extends Response
 {
 
-    public function __construct($data)
+    public function __construct($data = null, int $code = 200)
     {
-        parent::__construct($data);
+        parent::__construct($data, $code);
         header('Content-Type: application/json');
     }
 
