@@ -18,7 +18,7 @@ class JsonResponse extends Response
         $data = [];
         if (is_array($this->data)) {
             $data = $this->serializeRecursive($this->data);
-        } else if (is_a($data, JsonSerializable::class)) {
+        } else if (is_a($this->data, JsonSerializable::class)) {
             $data = $this->data->jsonSerialize();
         }
         return json_encode($data);
