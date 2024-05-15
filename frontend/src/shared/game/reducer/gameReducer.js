@@ -19,7 +19,8 @@ export const gameSlice = createSlice({
     check: false,
     gameHistory: [],
     currentStep: 0,
-    moveAllowed: true
+    moveAllowed: true,
+    colorSelectedPiece:null
   },
   reducers: {
     selectPiece: (state, action) => {
@@ -30,27 +31,19 @@ export const gameSlice = createSlice({
       }
       const { row, col } = action.payload;
       const piece = state.initialBoard[row][col];
+      state.colorSelectedPiece = piece.toUpperCase() === piece? 'white' : 'black';
       const possibleMoves = [];
       const validateFn = validate[piece.toUpperCase()];
 
+
       if (piece !== "" && (state.currentPlayer === "white" && piece.toUpperCase() === piece)) {
-        if (state.check) {
-          for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-              if (validate[piece](row, col, i, j, state.initialBoard) && canCaptureKing(row, col, i, j, state.initialBoard, state.currentPlayer)) {
+        for (let i = 0; i < 8; i++) {
+          for (let j = 0; j < 8; j++) {
+            if (validateFn(row, col, i, j, state.initialBoard) && canCaptureKing(row, col, i, j, state.initialBoard, state.currentPlayer)) {
+              if (state.initialBoard[i][j] === "" ||
+                (state.currentPlayer === "white" &&
+                  state.initialBoard[i][j].toLowerCase() === state.initialBoard[i][j])) {
                 possibleMoves.push({ row: i, col: j });
-              }
-            }
-          }
-        } else {
-          for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-              if (validateFn(row, col, i, j, state.initialBoard)) {
-                if (state.initialBoard[i][j] === "" ||
-                  (state.currentPlayer === "white" &&
-                    state.initialBoard[i][j].toLowerCase() === state.initialBoard[i][j])) {
-                  possibleMoves.push({ row: i, col: j });
-                }
               }
             }
           }
@@ -59,23 +52,13 @@ export const gameSlice = createSlice({
       if (piece !== "" && (state.currentPlayer === "black" && piece.toLowerCase() === piece)) {
         const reversedBoard = state.initialBoard.map(row => [...row]).reverse();
         const validateFn = validate[piece.toUpperCase()];
-        if (state.check) {
-          for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-              if (validateFn(7 - row, col, 7 - i, j, reversedBoard) && canCaptureKing(7 - row, col, 7 - i, j, reversedBoard, state.currentPlayer)) {
+        for (let i = 0; i < 8; i++) {
+          for (let j = 0; j < 8; j++) {
+            if (validateFn(7 - row, col, 7 - i, j, reversedBoard) && canCaptureKing(7 - row, col, 7 - i, j, reversedBoard, state.currentPlayer)) {
+              if (state.initialBoard[i][j] === "" ||
+                (state.currentPlayer === "black" &&
+                  state.initialBoard[i][j].toUpperCase() === state.initialBoard[i][j])) {
                 possibleMoves.push({ row: i, col: j });
-              }
-            }
-          }
-        } else {
-          for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-              if (validateFn(7 - row, col, 7 - i, j, reversedBoard)) {
-                if (state.initialBoard[i][j] === "" ||
-                  (state.currentPlayer === "black" &&
-                    state.initialBoard[i][j].toUpperCase() === state.initialBoard[i][j])) {
-                  possibleMoves.push({ row: i, col: j });
-                }
               }
             }
           }
@@ -168,6 +151,11 @@ export const gameSlice = createSlice({
       };
     },
     undoTurn: (state) => {
+
+      if(state.gameHistory.length <= 0){
+        return {...state}
+      }
+
       const board = [
         ["r", "n", "b", "q", "k", "b", "n", "r"],
         ["p", "p", "p", "p", "p", "p", "p", "p"],
@@ -207,8 +195,11 @@ function canCaptureKing (row, col, newRow, newCol, board, currentPlayer) {
 
   if (newBoard[newRow][newCol] === "" ||
     (currentPlayer === "white" &&
-      newBoard[newRow][newCol] === newBoard[newRow][newCol].toLowerCase()) || (currentPlayer === "black" &&
-      newBoard[newRow][newCol] === newBoard[newRow][newCol].toUpperCase())) {
+      newBoard[newRow][newCol] === newBoard[newRow][newCol].toLowerCase()) ||
+    (currentPlayer === "black" &&
+      newBoard[newRow][newCol] === newBoard[newRow][newCol].toUpperCase())
+  )
+  {
     newBoard[newRow][newCol] = piece;
     newBoard[row][col] = "";
   } else {
@@ -329,13 +320,15 @@ const isCheck = (player, board) => {
         if (board[i][j] !== "" && board[i][j].toUpperCase() !== board[i][j]) {
           const validateFn = validate[board[i][j].toUpperCase()];
           const reversedBoard = board.map(row => [...row]).reverse();
-          return validateFn(7 - i, j, 7 - kingRow, kingCol, reversedBoard);
+          if (validateFn(7 - i, j, 7 - kingRow, kingCol, reversedBoard)) {
+            return true;
+          }
         }
       } else {
         if (board[i][j] !== "" && board[i][j].toLowerCase() !== board[i][j]) {
-          if (board[i][j] === "P") {
-            const validateFn = validate[board[i][j].toUpperCase()];
-            if (validateFn(7 - i, j, 7 - kingRow, kingCol, [...board].reverse())) {
+          if(board[i][j] === "P"){
+            const  validateFn = validate[board[i][j].toUpperCase()];
+            if (validateFn(7-i, j, 7-kingRow, kingCol, [...board].reverse())) {
               return true;
             }
           }

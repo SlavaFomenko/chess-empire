@@ -2,35 +2,93 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Handy\Controller\BaseController;
+use Handy\Http\JsonResponse;
+use Handy\Http\Request;
 use Handy\Http\Response;
 use Handy\Routing\Attribute\Route;
 
 class UserController extends BaseController
 {
 
-    #[Route(name: "user_main", path: "/user")]
-    public function index(): Response
+    #[Route(name: "user_create", path: "/users", methods: [Request::METHOD_POST])]
+    public function register(): Response
     {
-        return new Response("User index");
+        $body = $this->request->getContent();
+
+        if (!isset($body["username"],
+            $body["first_name"],
+            $body["last_name"],
+            $body["email"],
+            $body["password"])) {
+            return new JsonResponse(["message" => "Missing fields in request body"], 400);
+        }
+
+        $username = trim($body["username"]);
+        $email = trim($body["email"]);
+        $password = trim($body["password"]);
+        $firstName = trim($body["first_name"]);
+        $lastName = trim($body["last_name"]);
+
+        if (!$this->validateEmail($email) ||
+            !$this->validateName($firstName) ||
+            !$this->validateName($lastName) ||
+            !$this->validatePassword($password) ||
+            !$this->validateUsername($username)) {
+            return new JsonResponse(["message" => "Invalid data"], 400);
+        }
+
+        $hashedPassword = hash_hmac('sha256', $password, $_ENV["PASSWORD_HASH_KEY"]);
+
+        $repo = $this->em->getRepository(User::class);
+        if (!empty($repo->findBy(["username" => $username]))) {
+            return new JsonResponse([
+                "message" => "The user with this username already exists"
+            ], 400);
+        }
+        if (!empty($repo->findBy(["email" => $email]))) {
+            return new JsonResponse([
+                "message" => "The user with this email already exists"
+            ], 400);
+        }
+
+        $user = new User();
+
+        $user->setEmail($email)
+            ->setFirstName($firstName)
+            ->setUserName($username)
+            ->setLastName($lastName)
+            ->setPassword($hashedPassword)
+            ->setRating(0)
+            ->setRole(User::ROLE_USER);
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $user = $repo->findOneBy(["email" => $email]);
+
+        return new JsonResponse($user, 201);
     }
 
-    #[Route(name: "user_by_id", path: "/user/{id}")]
-    public function byId(int $id): Response
+    function validateEmail($email): bool
     {
-        return new Response("User with id " . $id);
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 
-    #[Route(name: "user_by_name", path: "/user/{name}")]
-    public function byName(string $name): Response
+    function validatePassword($password): bool
     {
-        return new Response("User with name " . $name);
+        return preg_match('/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/', $password) === 1;
     }
 
-    #[Route(name: "comment_by_user_id", path: "/user/{userId}/{commentId}")]
-    public function commentById(string $commentId, int $userId): Response
+    function validateUsername($username): bool
     {
-        return new Response("Comment " . $commentId . " for user " . $userId);
+        return preg_match('/^[a-zA-Z0-9]+$/', $username) === 1;
+    }
+
+    function validateName($name): bool
+    {
+        return preg_match('/^[a-zA-Z]+$/', $name) === 1;
     }
 
 }

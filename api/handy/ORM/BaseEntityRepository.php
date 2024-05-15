@@ -43,15 +43,19 @@ class BaseEntityRepository
         return $this->findBy([], $limit, $offset);
     }
 
-    public function findBy(array $criteria, ?int $limit = null, ?int $offset = null): array
+    public function findBy(array $criteria, bool $or = false, ?int $limit = null, ?int $offset = null): array
     {
         $qb = new QueryBuilder();
         $qb->select()
             ->from($this->entityTable);
 
         foreach ($criteria as $key => $value) {
-            $qb->andWhere($key . " = :" . $key)
-                ->setParam([$key => $value]);
+            if($or){
+                $qb->orWhere($key . " = :" . $key);
+            } else {
+                $qb->andWhere($key . " = :" . $key);
+            }
+            $qb->setParam([$key => $value]);
         }
 
         $limit !== null && $qb->limit($limit);
@@ -68,27 +72,9 @@ class BaseEntityRepository
         return $entities;
     }
 
-    public function findOneBy(array $criteria): mixed
+    public function findOneBy(array $criteria, bool $or = false): mixed
     {
-        $qb = new QueryBuilder();
-        $qb->select()
-            ->from($this->entityTable)
-            ->limit(1);
-
-        foreach ($criteria as $key => $value) {
-            $qb->andWhere($key . " = :" . $key)
-                ->setParam([$key => $value]);
-        }
-
-        $q = $qb->getQuery();
-
-        $entity = Context::$connection->execute($q, $this->entityClass)[0] ?? null;
-
-        if ($entity !== null) {
-            $this->entityManager->track($entity);
-        }
-
-        return $entity;
+        return @$this->findBy($criteria, $or,1)[0] ?? null;
     }
 
 }

@@ -1,1 +1,3 @@
 global_path_prefix: "/api"
+
+security_provider: Handy\Security\JWTSecurityProvider

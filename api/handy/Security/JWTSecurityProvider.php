@@ -30,11 +30,18 @@ class JWTSecurityProvider implements ISecurityProvider
         Context::$security->setData((object)(self::parseToken($token)));
     }
 
+
     /**
-     * @inheritDoc
+     * @param array $data
+     * @param int $exp
+     * @return string
      */
-    public static function generateToken(array $data): string
+    public static function generateToken(array $data, int $exp): string
     {
+        $now = time();
+        $data['iat'] = $now;
+        $data['exp'] = $now + $exp;
+
         return Token::customPayload($data, $_ENV["JWT_KEY"]);
     }
 
