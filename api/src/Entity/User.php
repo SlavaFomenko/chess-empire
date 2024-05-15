@@ -14,6 +14,8 @@ use Handy\Utils\JsonSerializable;
 class User extends BaseEntity implements JsonSerializable
 {
 
+    public const ROLE_USER = "ROLE_USER";
+
     #[Id]
     #[Column(type: ColumnType::INT, column: "id")]
     private ?int $id = null;

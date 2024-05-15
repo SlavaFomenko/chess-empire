@@ -20,10 +20,13 @@ class EmptySecurityProvider implements ISecurityProvider
         Context::$security = new Security();
     }
 
+
     /**
-     * @inheritDoc
+     * @param array $data
+     * @param int $exp
+     * @return string
      */
-    public static function generateToken(array $data): string
+    public static function generateToken(array $data, int $exp): string
     {
         return "";
     }

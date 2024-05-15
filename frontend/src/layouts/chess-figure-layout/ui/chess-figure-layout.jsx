@@ -10,11 +10,17 @@ export const ChessFigureLayout = ({ figureProps: { coordinate, color }, children
   const possibleMoves = useSelector((state) => state.game.possibleMoves);
   const isSelected = selectedPiece && selectedPiece.row === coordinate.row && selectedPiece.col === coordinate.col;
   const isHighlighted = possibleMoves.some(move => move.row === coordinate.row && move.col === coordinate.col);
+  const colorSelectedPiece = useSelector(state => state.game.colorSelectedPiece)
 
   const handleSquareClick = () => {
     if (isSelected) {
       dispatch(selectPiece(null));
     } else if (selectedPiece) {
+
+      if(colorSelectedPiece === color){
+        dispatch(selectPiece(coordinate));
+      }
+
       const newCoordinate = {
         newRow: coordinate.row,
         newCol: coordinate.col,
