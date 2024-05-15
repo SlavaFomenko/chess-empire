@@ -1,0 +1,17 @@
+.wrapper{
+  position: fixed;
+  width: auto;
+  height: auto;
+
+  display: flex;
+  flex-direction: column;
+
+  gap:20px;
+  top:20px;
+  left:50%;
+  transform: translateX(-50%);
+
+  border: 1px solid gray;
+  border-radius: 20px;
+  padding: 20px;
+}

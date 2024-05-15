@@ -3,4 +3,11 @@
   width: 100%;
 
   display: flex;
+
+  flex-direction: column;
+  gap:20px;
+  button{
+    width:min-content;
+    padding: 20px;
+  }
 }

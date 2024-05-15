@@ -1,16 +1,23 @@
 import styles from "./styles/index.module.scss";
 import { withProviders } from "./providers";
 import { Routing } from "../pages";
-import { Provider } from "react-redux";
-import { store } from "./providers/with-store";
+import { useSelector } from "react-redux";
+import { NotificationLayout } from "../layouts/notification-layout";
 
 function App () {
+
+  const { isVisible, content } = useSelector(store => store.notification);
+
   return (
-    <Provider store={store}>
-      <div className={styles.App}>
-        <Routing />
-      </div>
-    </Provider>);
+    <div className={styles.App}>
+      {isVisible && (
+        <NotificationLayout>
+          {content}
+        </NotificationLayout>
+      )}
+      <Routing />
+    </div>
+  );
 }
 
 export default withProviders(App);

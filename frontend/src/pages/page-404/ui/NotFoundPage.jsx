@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutPage } from "../../../layouts/layout-page";
+import { LayoutPage } from "../../../layouts/page-layout";
 
 export function NotFoundPage () {
   return (
