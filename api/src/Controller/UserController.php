@@ -73,7 +73,7 @@ class UserController extends BaseController
 
     function validateEmail($email): bool
     {
-        return filter_var($email, FILTER_VALIDATE_EMAIL) === 1;
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 
     function validatePassword($password): bool

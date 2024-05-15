@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use Handy\Context;
 use Handy\Controller\BaseController;
 use Handy\Http\JsonResponse;
 use Handy\Http\Request;
@@ -43,6 +44,7 @@ class AuthorizationController extends BaseController
             "role"     => $user->getRole()
         ], 172800);
 
+        var_dump(Context::$security);
         return new JsonResponse(["token" => $token], 200);
     }
 
