@@ -44,7 +44,6 @@ class AuthorizationController extends BaseController
             "role"     => $user->getRole()
         ], 172800);
 
-        var_dump(Context::$security);
         return new JsonResponse(["token" => $token], 200);
     }
 
