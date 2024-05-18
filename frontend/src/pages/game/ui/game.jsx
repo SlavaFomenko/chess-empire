@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "../styles/game.module.scss";
-import { LayoutPage } from "../../../layouts/layout-page";
+import { LayoutPage } from "../../../layouts/page-layout";
 import { ChessGame } from "../../../widgets/chess-game";
 
 export const GamePage = () => {

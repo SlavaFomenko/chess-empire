@@ -1,7 +1,25 @@
 import React from "react";
+import { LayoutPage } from "../../../../layouts/page-layout";
+import { Registration } from "../../../../features/registration";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../../../shared/notification";
 
-export function RegestrationPage (props) {
+export function RegistrationPage (props) {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const notification = (data) => {
+    const message = data.response?.data?.message ? data.response.data.message : "Please, try again later";
+    dispatch(showNotification(message));
+  };
+
   return (
-    <div>RegestrationPage</div>
+    <LayoutPage>
+      <div>
+        <h1>Sign Up</h1>
+        <Registration notification={notification} navigate={navigate} />
+      </div>
+    </LayoutPage>
   );
 }

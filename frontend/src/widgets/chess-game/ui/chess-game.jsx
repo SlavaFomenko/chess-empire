@@ -1,7 +1,7 @@
 import React from "react";
 import styles from '../styles/chess-game.module.scss'
 import { ChessBoard } from "../../../features/chess-board";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { applyTurn, undoTurn } from "../../../layouts/chess-figure-layout/model/chess-figure-layout";
 
 

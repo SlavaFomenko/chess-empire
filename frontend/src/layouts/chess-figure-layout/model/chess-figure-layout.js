@@ -11,14 +11,6 @@ export const movePiece = (newCoordinates) => {
     payload: newCoordinates,
   };
 };
-
-
-export const reverseBoard = () => {
-  return {
-    type: "game/reverseBoard"
-  };
-};
-
 export const applyTurn = (turns) => {
   return {
     type: "game/applyTurn",

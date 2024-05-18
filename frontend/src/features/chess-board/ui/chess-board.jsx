@@ -1,7 +1,6 @@
 import React from "react";
 import styles from "../styles/chess-board.module.scss";
-import { Rook } from "../../../entities/chess-figures/rook/ui/rook";
-import { Bishop, EmptyField, King, Knight, Pawn, Queen } from "../../../entities/chess-figures";
+import { Rook, Bishop, EmptyField, King, Knight, Pawn, Queen } from "../../../entities/chess-figures";
 import { useSelector } from "react-redux";
 import { COORDS } from "../../../shared/game";
 

@@ -4,6 +4,7 @@ namespace Handy;
 
 use Exception;
 use Handy\Handling\ConfigParserHandler;
+use Handy\Handling\CorsHandler;
 use Handy\Handling\OrmHandler;
 use Handy\Handling\RequestParserHandler;
 use Handy\Handling\RouterHandler;
@@ -24,6 +25,7 @@ class Core
         $this->handlers = [
             new ConfigParserHandler(),
             new RequestParserHandler(),
+            new CorsHandler(),
             new OrmHandler(),
             new SecurityHandler(),
             new RouterHandler()
