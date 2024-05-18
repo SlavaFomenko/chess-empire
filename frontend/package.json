@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.3",
-    "antd": "^5.16.5",
     "axios": "^1.6.8",
     "classnames": "^2.5.1",
     "compose-function": "^3.0.3",

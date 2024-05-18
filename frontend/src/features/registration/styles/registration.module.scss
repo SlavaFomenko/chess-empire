@@ -1,0 +1,16 @@
+.registration{
+  padding: 20px;
+  background: lightgray;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.error{
+  color: red;
+  font-weight: bold;
+  font-size:0.7rem;
+}

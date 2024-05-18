@@ -1,2 +1,3 @@
-export const BASE_URL = 'http://localhost:3000';
-export const LOGIN_URL = BASE_URL + '/login';
+export const BASE_URL = 'https://chess-empire.ua/api';
+export const LOGIN_URL = BASE_URL + '/login-check';
+export const REGISTRATION_URL = BASE_URL + '/users';
