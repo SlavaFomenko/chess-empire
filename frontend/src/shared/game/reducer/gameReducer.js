@@ -20,7 +20,15 @@ export const gameSlice = createSlice({
     gameHistory: [],
     currentStep: 0,
     moveAllowed: true,
-    colorSelectedPiece:null
+    colorSelectedPiece: null,
+    hasMoved: {
+      whiteKing: false,
+      whiteRookLeft: false,
+      whiteRookRight: false,
+      blackKing: false,
+      blackRookLeft: false,
+      blackRookRight: false
+    }
   },
   reducers: {
     selectPiece: (state, action) => {
@@ -31,10 +39,9 @@ export const gameSlice = createSlice({
       }
       const { row, col } = action.payload;
       const piece = state.initialBoard[row][col];
-      state.colorSelectedPiece = piece.toUpperCase() === piece? 'white' : 'black';
+      state.colorSelectedPiece = piece.toUpperCase() === piece ? "white" : "black";
       const possibleMoves = [];
       const validateFn = validate[piece.toUpperCase()];
-
 
       if (piece !== "" && (state.currentPlayer === "white" && piece.toUpperCase() === piece)) {
         for (let i = 0; i < 8; i++) {
@@ -48,7 +55,17 @@ export const gameSlice = createSlice({
             }
           }
         }
+
+        if (piece === "K" && !state.hasMoved.whiteKing) {
+          if (!state.hasMoved.whiteRookLeft && canCastle(state.initialBoard, row, col, 0, state.currentPlayer)) {
+            possibleMoves.push({ row: row, col: col - 2 });
+          }
+          if (!state.hasMoved.whiteRookRight && canCastle(state.initialBoard, row, col, 7, state.currentPlayer)) {
+            possibleMoves.push({ row: row, col: col + 2 });
+          }
+        }
       }
+
       if (piece !== "" && (state.currentPlayer === "black" && piece.toLowerCase() === piece)) {
         const reversedBoard = state.initialBoard.map(row => [...row]).reverse();
         const validateFn = validate[piece.toUpperCase()];
@@ -63,7 +80,17 @@ export const gameSlice = createSlice({
             }
           }
         }
+
+        if (piece === "k" && !state.hasMoved.blackKing) {
+          if (!state.hasMoved.blackRookLeft && canCastle(state.initialBoard, row, col, 0, state.currentPlayer)) {
+            possibleMoves.push({ row: row, col: col - 2 });
+          }
+          if (!state.hasMoved.blackRookRight && canCastle(state.initialBoard, row, col, 7, state.currentPlayer)) {
+            possibleMoves.push({ row: row, col: col + 2 });
+          }
+        }
       }
+
       if (possibleMoves.length > 0) {
         state.selectedPiece = { row, col };
         state.possibleMoves = possibleMoves;
@@ -73,6 +100,61 @@ export const gameSlice = createSlice({
       const { row, col } = state.selectedPiece;
       const { newRow, newCol } = action.payload;
       const piece = state.initialBoard[row][col];
+      let newState = { ...state };
+
+      if (piece.toUpperCase() === "K" && Math.abs(newCol - col) === 2) {
+        const kingRow = row;
+        const kingCol = col;
+        const rookCol = newCol > col ? 7 : 0;
+        const newRookCol = newCol > col ? newCol - 1 : newCol + 1;
+
+        if (canCastle(state.initialBoard, kingRow, kingCol, rookCol, state.currentPlayer)) {
+          const newBoard = state.initialBoard.map(row => [...row]);
+          newBoard[kingRow][kingCol] = "";
+          newBoard[kingRow][newCol] = piece;
+          newBoard[kingRow][rookCol] = "";
+          newBoard[kingRow][newRookCol] = state.currentPlayer === "white" ? "R" : "r";
+
+          const newGameHistory = [...state.gameHistory, {
+            fromRow: row,
+            fromCol: col,
+            toRow: newRow,
+            toCol: newCol,
+            castling: true,
+            rookFromCol: rookCol,
+            rookToCol: newRookCol
+          }];
+          const check = isCheck(state.currentPlayer === "white" ? "black" : "white", newBoard);
+
+          if (state.currentPlayer === "white") {
+            newState.hasMoved = {
+              ...newState.hasMoved,
+              whiteKing: true,
+              whiteRookLeft: rookCol === 0 ? true : newState.hasMoved.whiteRookLeft,
+              whiteRookRight: rookCol === 7 ? true : newState.hasMoved.whiteRookRight
+            };
+          } else {
+            newState.hasMoved = {
+              ...newState.hasMoved,
+              blackKing: true,
+              blackRookLeft: rookCol === 0 ? true : newState.hasMoved.blackRookLeft,
+              blackRookRight: rookCol === 7 ? true : newState.hasMoved.blackRookRight
+            };
+          }
+
+          newState = {
+            ...newState,
+            initialBoard: newBoard,
+            selectedPiece: null,
+            possibleMoves: [],
+            currentPlayer: state.currentPlayer === "white" ? "black" : "white",
+            gameHistory: newGameHistory,
+            currentStep: state.currentStep + 1,
+            check
+          };
+          return newState;
+        }
+      }
       if (piece && state.currentPlayer === "white" && piece.toUpperCase() === piece) {
         if (validate[`${piece}`](row, col, newRow, newCol, state.initialBoard)) {
           if (state.initialBoard[newRow][newCol] === "" || state.initialBoard[newRow][newCol].toLowerCase() === state.initialBoard[newRow][newCol]) {
@@ -86,12 +168,19 @@ export const gameSlice = createSlice({
 
             const newGameHistory = [...state.gameHistory, { fromRow: row, fromCol: col, toRow: newRow, toCol: newCol }];
 
+            if (piece.toUpperCase() === "K") {
+              state.hasMoved.whiteKing = true;
+            } else if (piece.toUpperCase() === "R") {
+              if (col === 0) state.hasMoved.whiteRookLeft = true;
+              if (col === 7) state.hasMoved.whiteRookRight = true;
+            }
+
             return {
               ...state,
               initialBoard: newBoard,
               selectedPiece: null,
               possibleMoves: [],
-              currentPlayer: "black",
+              currentPlayer: state.currentPlayer === "white" ? "black" : "white",
               gameHistory: newGameHistory,
               currentStep: state.currentStep + 1,
               check
@@ -102,22 +191,29 @@ export const gameSlice = createSlice({
         const reversedBoard = state.initialBoard.map(row => [...row]).reverse();
         if (validate[`${piece.toUpperCase()}`](7 - row, col, 7 - newRow, newCol, reversedBoard)) {
           if (state.initialBoard[newRow][newCol] === "" || state.initialBoard[newRow][newCol].toUpperCase() === state.initialBoard[newRow][newCol]) {
-            const newBoard = reversedBoard.map(row => [...row]).reverse();
+            const newBoard = state.initialBoard.map(row => [...row]);
             newBoard[newRow][newCol] = piece;
             newBoard[row][col] = "";
-
             if (state.check && !state.possibleMoves.some(move => move.row === newRow && move.col === newCol)) {
               return state;
             }
-
             const check = isCheck(state.currentPlayer === "white" ? "black" : "white", newBoard);
+
             const newGameHistory = [...state.gameHistory, { fromRow: row, fromCol: col, toRow: newRow, toCol: newCol }];
+
+            if (piece.toLowerCase() === "k") {
+              state.hasMoved.blackKing = true;
+            } else if (piece.toLowerCase() === "r") {
+              if (col === 0) state.hasMoved.blackRookLeft = true;
+              if (col === 7) state.hasMoved.blackRookRight = true;
+            }
+
             return {
               ...state,
               initialBoard: newBoard,
               selectedPiece: null,
               possibleMoves: [],
-              currentPlayer: "white",
+              currentPlayer: state.currentPlayer === "white" ? "black" : "white",
               gameHistory: newGameHistory,
               currentStep: state.currentStep + 1,
               check
@@ -128,35 +224,52 @@ export const gameSlice = createSlice({
       return state;
     },
     applyTurn: (state) => {
-      if (state.currentStep >= state.gameHistory.length) {
+
+      if (state.gameHistory.length === state.currentStep) {
         return state;
       }
 
-      const { fromRow, fromCol, toRow, toCol } = state.gameHistory[state.currentStep];
-      const piece = state.initialBoard[fromRow][fromCol];
-      const newBoard = state.initialBoard.map(row => [...row]);
-      newBoard[toRow][toCol] = piece;
-      newBoard[fromRow][fromCol] = "";
-
-      const check = isCheck(state.currentPlayer === "white" ? "black" : "white", newBoard);
-
-      return {
-        ...state,
-        initialBoard: newBoard,
-        selectedPiece: null,
-        currentPlayer: state.currentPlayer === "white" ? "white" : "black",
-        currentStep: state.currentStep + 1,
-        check,
-        moveAllowed: state.currentStep + 1 === state.gameHistory.length
-      };
-    },
-    undoTurn: (state) => {
-
-      if(state.gameHistory.length <= 0){
-        return {...state}
+      const { fromRow, fromCol, toRow, toCol, castling, rookFromCol, rookToCol } = state.gameHistory[state.currentStep];
+      if (castling) {
+        const newBoard = state.initialBoard.map(row => [...row]);
+        const piece = newBoard[fromRow][fromCol];
+        newBoard[fromRow][fromCol] = "";
+        newBoard[toRow][toCol] = piece;
+        newBoard[fromRow][rookFromCol] = "";
+        newBoard[fromRow][rookToCol] = state.currentPlayer === "white" ? "R" : "r";
+        state.initialBoard = newBoard;
+      } else {
+        const piece = state.initialBoard[fromRow][fromCol];
+        state.initialBoard[toRow][toCol] = piece;
+        state.initialBoard[fromRow][fromCol] = "";
       }
 
-      const board = [
+      if (state.currentPlayer === "white") {
+        if (state.initialBoard[toRow][toCol] === "K") {
+          state.hasMoved.whiteKing = true;
+        }
+        if (state.initialBoard[toRow][toCol] === "R") {
+          if (fromCol === 0) state.hasMoved.whiteRookLeft = true;
+          if (fromCol === 7) state.hasMoved.whiteRookRight = true;
+        }
+      } else {
+        if (state.initialBoard[toRow][toCol] === "k") {
+          state.hasMoved.blackKing = true;
+        }
+        if (state.initialBoard[toRow][toCol] === "r") {
+          if (fromCol === 0) state.hasMoved.blackRookLeft = true;
+          if (fromCol === 7) state.hasMoved.blackRookRight = true;
+        }
+      }
+
+      state.currentPlayer = state.currentPlayer === "white" ? "black" : "white";
+      state.currentStep++;
+      state.moveAllowed = state.gameHistory.length === state.currentStep;
+    },
+    undoTurn: (state) => {
+      if (state.currentStep === 0) return state;
+      state.currentStep -= 1;
+      const initialBoard = [
         ["r", "n", "b", "q", "k", "b", "n", "r"],
         ["p", "p", "p", "p", "p", "p", "p", "p"],
         ["", "", "", "", "", "", "", ""],
@@ -166,28 +279,93 @@ export const gameSlice = createSlice({
         ["P", "P", "P", "P", "P", "P", "P", "P"],
         ["R", "N", "B", "Q", "K", "B", "N", "R"]
       ];
+      state.initialBoard = initialBoard;
 
-      const index = state.gameHistory.findIndex((move, index) => index + 1 === state.currentStep);
-      const historyToUndo = index !== -1 ? state.gameHistory.slice(0, index) : [];
+      state.hasMoved = {
+        whiteKing: false,
+        whiteRookLeft: false,
+        whiteRookRight: false,
+        blackKing: false,
+        blackRookLeft: false,
+        blackRookRight: false
+      };
 
-      for (let i = 0; i < historyToUndo.length; i++) {
-        const move = historyToUndo[i];
-        const { fromRow, fromCol, toRow, toCol } = move;
+      for (let i = 0; i < state.currentStep; i++) {
+        const move = state.gameHistory[i];
+        if (move.castling) {
+          const kingRow = move.fromRow;
+          const kingCol = move.fromCol;
+          const newKingCol = move.toCol;
+          const rookCol = move.rookFromCol;
+          const newRookCol = move.rookToCol;
+          const kingPiece = state.initialBoard[kingRow][kingCol];
+          const rookPiece = state.initialBoard[kingRow][rookCol];
 
-        board[toRow][toCol] = board[fromRow][fromCol];
-        board[fromRow][fromCol] = "";
+          state.initialBoard[kingRow][kingCol] = "";
+          state.initialBoard[kingRow][newKingCol] = kingPiece;
+          state.initialBoard[kingRow][rookCol] = "";
+          state.initialBoard[kingRow][newRookCol] = rookPiece;
+
+          if (kingPiece === "K") {
+            state.hasMoved.whiteKing = true;
+            if (rookCol === 0) state.hasMoved.whiteRookLeft = true;
+            if (rookCol === 7) state.hasMoved.whiteRookRight = true;
+          } else {
+            state.hasMoved.blackKing = true;
+            if (rookCol === 0) state.hasMoved.blackRookLeft = true;
+            if (rookCol === 7) state.hasMoved.blackRookRight = true;
+          }
+        } else {
+          const piece = state.initialBoard[move.fromRow][move.fromCol];
+          state.initialBoard[move.toRow][move.toCol] = piece;
+          state.initialBoard[move.fromRow][move.fromCol] = "";
+
+          if (piece.toUpperCase() === "K") {
+            if (piece === "K") {
+              state.hasMoved.whiteKing = true;
+            } else {
+              state.hasMoved.blackKing = true;
+            }
+          } else if (piece.toUpperCase() === "R") {
+            if (piece === "R") {
+              if (move.fromCol === 0) state.hasMoved.whiteRookLeft = true;
+              if (move.fromCol === 7) state.hasMoved.whiteRookRight = true;
+            } else {
+              if (move.fromCol === 0) state.hasMoved.blackRookLeft = true;
+              if (move.fromCol === 7) state.hasMoved.blackRookRight = true;
+            }
+          }
+        }
       }
 
-      return {
-        ...state,
-        initialBoard: board,
-        currentStep: state.currentStep > 0 ? state.currentStep - 1 : 0,
-        selectedPiece: null,
-        moveAllowed: false
-      };
+      state.currentPlayer = state.currentPlayer === "white" ? "black" : "white";
+      state.selectedPiece = null;
+      state.possibleMoves = [];
+      state.moveAllowed = false;
     }
   }
+
 });
+
+const canCastle = (board, kingRow, kingCol, rookCol, player) => {
+  if (isCheck(player, board)) return false;
+
+  const direction = rookCol > kingCol ? 1 : -1;
+  for (let col = kingCol + direction; col !== rookCol; col += direction) {
+    if (board[kingRow][col] !== "") return false;
+    const newBoard = board.map(row => [...row]);
+    newBoard[kingRow][col] = player === "white" ? "K" : "k";
+    newBoard[kingRow][kingCol] = "";
+    if (isCheck(player, newBoard)) {
+
+      return false;
+    }
+
+    console.log("hello");
+  }
+
+  return true;
+};
 
 function canCaptureKing (row, col, newRow, newCol, board, currentPlayer) {
   const piece = board[row][col];
@@ -198,8 +376,7 @@ function canCaptureKing (row, col, newRow, newCol, board, currentPlayer) {
       newBoard[newRow][newCol] === newBoard[newRow][newCol].toLowerCase()) ||
     (currentPlayer === "black" &&
       newBoard[newRow][newCol] === newBoard[newRow][newCol].toUpperCase())
-  )
-  {
+  ) {
     newBoard[newRow][newCol] = piece;
     newBoard[row][col] = "";
   } else {
@@ -274,7 +451,7 @@ const validate = {
       let i = row + directionX;
       let j = col + directionY;
       while (i !== newRow && j !== newCol) {
-        if (board[i][j] !== "") return false;
+        if (i < 0 || i >= 8 || j < 0 || j >= 8 || board[i][j] !== "") return false;
         i += directionX;
         j += directionY;
       }
@@ -282,13 +459,13 @@ const validate = {
     } else if (newRow === row) {
       const direction = newCol > col ? 1 : -1;
       for (let i = col + direction; i !== newCol; i += direction) {
-        if (board[row][i] !== "") return false;
+        if (i < 0 || i >= 8 || board[row][i] !== "") return false;
       }
       return true;
     } else if (newCol === col) {
       const direction = newRow > row ? 1 : -1;
       for (let i = row + direction; i !== newRow; i += direction) {
-        if (board[i][col] !== "") return false;
+        if (i < 0 || i >= 8 || board[i][col] !== "") return false;
       }
       return true;
     }
@@ -326,9 +503,9 @@ const isCheck = (player, board) => {
         }
       } else {
         if (board[i][j] !== "" && board[i][j].toLowerCase() !== board[i][j]) {
-          if(board[i][j] === "P"){
-            const  validateFn = validate[board[i][j].toUpperCase()];
-            if (validateFn(7-i, j, 7-kingRow, kingCol, [...board].reverse())) {
+          if (board[i][j] === "P") {
+            const validateFn = validate[board[i][j].toUpperCase()];
+            if (validateFn(7 - i, j, 7 - kingRow, kingCol, [...board].reverse())) {
               return true;
             }
           }
@@ -341,5 +518,6 @@ const isCheck = (player, board) => {
       }
     }
   }
+
   return false;
 };
