@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loginUser } from "../../../features/login/model/login";
 
 export const notificationSlice = createSlice({
   name: "notification",

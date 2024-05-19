@@ -8,14 +8,14 @@ import { applyTurn, undoTurn } from "../../../layouts/chess-figure-layout/model/
 
 export function ChessGame () {
 
-  const dispach = useDispatch();
+  const dispatch = useDispatch();
 
   return (
     <div className={styles.wrapper}>
       <ChessBoard/>
       <div className={styles.buttons}>
-      <button onClick={()=>dispach((undoTurn()))}>undoTurn</button>
-      <button onClick={()=>dispach((applyTurn()))}>applyTurn</button>
+      <button onClick={()=>dispatch((undoTurn()))}>undoTurn</button>
+      <button onClick={()=>dispatch((applyTurn()))}>applyTurn</button>
       </div>
     </div>
   );

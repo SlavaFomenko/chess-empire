@@ -3,16 +3,16 @@
 namespace Handy\Socket;
 
 use Handy\Socket\Exception\SocketServerLaunchException;
-use Handy\Socket\Exception\UnsupportedUserClassException;
+use Handy\Socket\Exception\UnsupportedClientClassException;
 use Socket;
 
 class SocketServer implements IEventFlow
 {
 
     /**
-     * @var string|SocketUser
+     * @var string
      */
-    public string $userClass;
+    public string $clientClass;
     /**
      * @var string
      */
@@ -40,7 +40,7 @@ class SocketServer implements IEventFlow
     /**
      * @var array
      */
-    public array $users;
+    public array $clients;
     /**
      * @var array
      */
@@ -54,19 +54,19 @@ class SocketServer implements IEventFlow
      * @param string $ip
      * @param int $port
      * @param int $maxBufferSize
-     * @param string $userClass
+     * @param string $clientClass
      * @throws SocketServerLaunchException
-     * @throws UnsupportedUserClassException
+     * @throws UnsupportedClientClassException
      */
-    public function __construct(string $ip, int $port, int $maxBufferSize = 2048, string $userClass = SocketUser::class)
+    public function __construct(string $ip, int $port, int $maxBufferSize = 2048, string $clientClass = SocketClient::class)
     {
-        if (!($userClass == SocketUser::class || is_subclass_of($userClass, SocketUser::class))) {
-            throw new UnsupportedUserClassException("Class $userClass is not inherited from " . SocketUser::class);
+        if (!($clientClass == SocketClient::class || is_subclass_of($clientClass, SocketClient::class))) {
+            throw new UnsupportedClientClassException("Class $clientClass is not inherited from " . SocketClient::class);
         }
 
-        $this->userClass = $userClass;
+        $this->clientClass = $clientClass;
         $this->sockets = [];
-        $this->users = [];
+        $this->clients = [];
         $this->rooms = [];
         $this->events = [];
         $this->heldMessages = [];
@@ -78,7 +78,6 @@ class SocketServer implements IEventFlow
         socket_bind($this->master, $this->ip, $this->port) or throw new SocketServerLaunchException("Failed to start listening.");
         socket_listen($this->master, 256) or throw new SocketServerLaunchException("Failed to start listening.");
         $this->sockets['m'] = $this->master;
-        echo "Socket server started\nListening on $this->ip:$this->port" . PHP_EOL;
     }
 
     /**
@@ -86,6 +85,7 @@ class SocketServer implements IEventFlow
      */
     public function run(): mixed
     {
+        echo "Socket server started\nListening on $this->ip:$this->port" . PHP_EOL;
         while (true) {
             if (empty($this->sockets)) {
                 $this->sockets['m'] = $this->master;
@@ -102,7 +102,7 @@ class SocketServer implements IEventFlow
                         echo "Failed to accept new connection" . PHP_EOL;
                     } else {
                         $this->connect($client);
-                        echo "Client " . $this->getUserBySocket($client)->id . " connected" . PHP_EOL;
+                        echo "Client " . $this->getClientBySocket($client)->id . " connected" . PHP_EOL;
                     }
                     continue;
                 }
@@ -136,15 +136,15 @@ class SocketServer implements IEventFlow
                     continue;
                 }
 
-                $user = $this->getUserBySocket($socket);
-                if ($user->handshake === null) {
+                $client = $this->getClientBySocket($socket);
+                if ($client->handshake === null) {
                     $tmp = str_replace("\r", '', $buffer);
                     if (!str_contains($tmp, "\n\n")) {
                         continue;
                     }
-                    $this->doHandshake($user, $buffer);
+                    $this->doHandshake($client, $buffer);
                 } else {
-                    $this->splitPacket($numBytes, $buffer, $user);
+                    $this->splitPacket($numBytes, $buffer, $client);
                 }
             }
         }
@@ -163,18 +163,18 @@ class SocketServer implements IEventFlow
     protected function _tick(): void
     {
         foreach ($this->heldMessages as $key => $message) {
-            $userFound = false;
-            foreach ($this->users as $currentUser) {
-                if ($message['user']->socket != $currentUser->socket) {
+            $clientFound = false;
+            foreach ($this->clients as $currentClient) {
+                if ($message['client']->socket != $currentClient->socket) {
                     continue;
                 }
-                $userFound = true;
-                if ($currentUser->handshake !== null) {
+                $clientFound = true;
+                if ($currentClient->handshake !== null) {
                     unset($this->heldMessages[$key]);
-                    $this->send($currentUser, $message['message']);
+                    $this->send($currentClient, $message['message']);
                 }
             }
-            if (!$userFound) {
+            if (!$clientFound) {
                 unset($this->heldMessages[$key]);
             }
         }
@@ -213,17 +213,17 @@ class SocketServer implements IEventFlow
     /**
      * @inheritDoc
      */
-    public function notifyListeners(string $event, mixed $data, ?SocketUser $user = null): void
+    public function notifyListeners(string $event, mixed $data, ?SocketClient $client = null): void
     {
         if (isset($this->events[$event])) {
             foreach ($this->events[$event] as $listener) {
-                $listener($data, $user);
+                $listener($data, $client);
             }
         }
-        if ($user->room !== null) {
-            $this->getRoomById($user->room)?->notifyListeners($event, $data, $user);
+        if ($client->room !== null) {
+            $this->getRoomById($client->room)?->notifyListeners($event, $data, $client);
         }
-        $user->notifyListeners($event, $data, $user);
+        $client->notifyListeners($event, $data, $client);
     }
 
     /**
@@ -235,53 +235,53 @@ class SocketServer implements IEventFlow
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @param string $message
      * @return void
      */
-    protected function process(SocketUser $user, string $message)
+    protected function process(SocketClient $client, string $message)
     {
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @return void
      */
-    protected function connected(SocketUser $user)
+    protected function connected(SocketClient $client)
     {
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @return void
      */
-    protected function closed(SocketUser $user)
+    protected function closed(SocketClient $client)
     {
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @return void
      */
-    protected function connecting(SocketUser $user)
+    protected function connecting(SocketClient $client)
     {
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @param string $message
      * @return void
      */
-    public function send(SocketUser $user, string $message): void
+    public function send(SocketClient $client, string $message): void
     {
-        if ($user->handshake !== null) {
-            $message = $this->frame($message, $user);
-            $this->write($user, $message);
+        if ($client->handshake !== null) {
+            $message = $this->frame($message, $client);
+            $this->write($client, $message);
             return;
         }
 
         $holdingMessage = [
-            'user'    => $user,
+            'client'    => $client,
             'message' => $message
         ];
         $this->heldMessages[] = $holdingMessage;
@@ -293,10 +293,10 @@ class SocketServer implements IEventFlow
      */
     protected function connect(Socket $socket): void
     {
-        $user = new $this->userClass($this, $socket, uniqid('u'));
-        $this->users[$user->id] = $user;
-        $this->sockets[$user->id] = $socket;
-        $this->connecting($user);
+        $client = new $this->clientClass($this, $socket, uniqid('u'));
+        $this->clients[$client->id] = $client;
+        $this->sockets[$client->id] = $socket;
+        $this->connecting($client);
     }
 
     /**
@@ -307,39 +307,39 @@ class SocketServer implements IEventFlow
      */
     protected function disconnect(Socket $socket, bool $triggerClosed = true, ?int $socketError = null): void
     {
-        $user = $this->getUserBySocket($socket);
+        $client = $this->getClientBySocket($socket);
 
-        if ($user === null) {
+        if ($client === null) {
             return;
         }
 
-        if ($user->room !== null) {
-            @$this->rooms[$user->room]?->kick($user);
+        if ($client->room !== null) {
+            @$this->rooms[$client->room]?->kick($client);
         }
 
-        unset($this->users[$user->id]);
-        unset($this->sockets[$user->id]);
+        unset($this->clients[$client->id]);
+        unset($this->sockets[$client->id]);
 
         if (!is_null($socketError)) {
             socket_clear_error($socket);
         }
 
         if ($triggerClosed) {
-            echo "Client $user->id disconnected" . PHP_EOL;
-            $this->closed($user);
-            socket_close($user->socket);
+            echo "Client $client->id disconnected" . PHP_EOL;
+            $this->closed($client);
+            socket_close($client->socket);
         } else {
-            $message = $this->frame('', $user, MessageType::Close);
-            $this->write($user, $message);
+            $message = $this->frame('', $client, MessageType::Close);
+            $this->write($client, $message);
         }
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @param string $buffer
      * @return void
      */
-    protected function doHandshake(SocketUser $user, string $buffer): void
+    protected function doHandshake(SocketClient $client, string $buffer): void
     {
         $magicGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         $headers = [];
@@ -356,7 +356,7 @@ class SocketServer implements IEventFlow
         }
 
         if (isset($headers['get'])) {
-            $user->requestedResource = $headers['get'];
+            $client->requestedResource = $headers['get'];
         } else {
             $handshakeResponse = "HTTP/1.1 405 Method Not Allowed\r\n\r\n";
         }
@@ -374,13 +374,13 @@ class SocketServer implements IEventFlow
         }
 
         if (isset($handshakeResponse)) {
-            $this->write($user, $handshakeResponse);
-            $this->disconnect($user->socket);
+            $this->write($client, $handshakeResponse);
+            $this->disconnect($client->socket);
             return;
         }
 
-        $user->headers = $headers;
-        $user->handshake = $buffer;
+        $client->headers = $headers;
+        $client->handshake = $buffer;
 
         $webSocketKeyHash = sha1($headers['sec-websocket-key'] . $magicGUID);
 
@@ -391,31 +391,31 @@ class SocketServer implements IEventFlow
         $handshakeToken = base64_encode($handshakeToken) . "\r\n";
 
         $handshakeResponse = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: $handshakeToken\r\n";
-        $this->write($user, $handshakeResponse);
-        $this->connected($user);
+        $this->write($client, $handshakeResponse);
+        $this->connected($client);
     }
 
     /**
      * @param Socket $socket
-     * @return SocketUser|null
+     * @return SocketClient|null
      */
-    public function getUserBySocket(Socket $socket): ?SocketUser
+    public function getClientBySocket(Socket $socket): ?SocketClient
     {
-        return array_values(array_filter($this->users, fn($u) => $u->socket == $socket) + [null])[0];
+        return array_values(array_filter($this->clients, fn($u) => $u->socket == $socket) + [null])[0];
     }
 
     /**
      * @param string $id
-     * @return SocketUser|null
+     * @return SocketClient|null
      */
-    public function getUserById(string $id): ?SocketUser
+    public function getClientById(string $id): ?SocketClient
     {
-        return @$this->users[$id] ?? null;
+        return @$this->clients[$id] ?? null;
     }
 
     /**
      * @param string $id
-     * @return SocketUser|null
+     * @return SocketClient|null
      */
     public function getRoomById(string $id): ?SocketRoom
     {
@@ -424,22 +424,22 @@ class SocketServer implements IEventFlow
 
     /**
      * @param string $message
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @param MessageType $messageType
      * @param $messageContinues
      * @return string
      */
-    protected function frame(string $message, SocketUser $user, MessageType $messageType = MessageType::Text, $messageContinues = false): string
+    protected function frame(string $message, SocketClient $client, MessageType $messageType = MessageType::Text, $messageContinues = false): string
     {
         switch ($messageType) {
             case MessageType::Continuous:
                 $b1 = 0;
                 break;
             case MessageType::Text:
-                $b1 = ($user->sendingContinuous) ? 0 : 1;
+                $b1 = ($client->sendingContinuous) ? 0 : 1;
                 break;
             case MessageType::Bin:
-                $b1 = ($user->sendingContinuous) ? 0 : 2;
+                $b1 = ($client->sendingContinuous) ? 0 : 2;
                 break;
             case MessageType::Close:
                 $b1 = 8;
@@ -452,7 +452,7 @@ class SocketServer implements IEventFlow
                 break;
         }
 
-        $user->sendingContinuous = $messageContinues;
+        $client->sendingContinuous = $messageContinues;
         if (!$messageContinues) {
             $b1 += 128;
         }
@@ -485,14 +485,14 @@ class SocketServer implements IEventFlow
     /**
      * @param int $length
      * @param string $packet
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @return void
      */
-    protected function splitPacket(int $length, string $packet, SocketUser $user): void
+    protected function splitPacket(int $length, string $packet, SocketClient $client): void
     {
-        if ($user->handlingPartialPacket) {
-            $packet = $user->partialBuffer . $packet;
-            $user->handlingPartialPacket = false;
+        if ($client->handlingPartialPacket) {
+            $packet = $client->partialBuffer . $packet;
+            $client->handlingPartialPacket = false;
             $length = strlen($packet);
         }
 
@@ -506,13 +506,13 @@ class SocketServer implements IEventFlow
 
             $frame = substr($packet, $framePos, $frameSize);
 
-            if (($message = $this->deFrame($frame, $user)) !== FALSE) {
+            if (($message = $this->deFrame($frame, $client)) !== FALSE) {
                 if ((preg_match('//u', $message)) || ($headers['opCode'] == 2)) {
                     $eventData = json_decode($message, true);
                     if ($eventData !== null && isset($eventData["event"])) {
-                        $this->notifyListeners($eventData["event"], @$eventData["data"] ?? null, $user);
+                        $this->notifyListeners($eventData["event"], @$eventData["data"] ?? null, $client);
                     }
-                    $this->process($user, $message);
+                    $this->process($client, $message);
                 } else {
                     echo "ERROR: The message is not encoded with UTF-8" . PHP_EOL;
                 }
@@ -542,10 +542,10 @@ class SocketServer implements IEventFlow
 
     /**
      * @param string $message
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @return false|string
      */
-    protected function deFrame(string $message, SocketUser $user): false|string
+    protected function deFrame(string $message, SocketClient $client): false|string
     {
         $headers = $this->extractHeaders($message);
         $pong = false;
@@ -558,7 +558,7 @@ class SocketServer implements IEventFlow
             case 10:
                 break;
             case 8:
-                $this->disconnect($this->sockets[$user->id]);
+                $this->disconnect($this->sockets[$client->id]);
             default:
                 return false;
         }
@@ -567,28 +567,28 @@ class SocketServer implements IEventFlow
             return false;
         }
 
-        $payload = $user->partialMessage . $this->extractPayload($message, $headers);
+        $payload = $client->partialMessage . $this->extractPayload($message, $headers);
 
         if ($pong) {
-            $reply = $this->frame($payload, $user, MessageType::Pong);
-            $this->write($user, $reply);
+            $reply = $this->frame($payload, $client, MessageType::Pong);
+            $this->write($client, $reply);
             return false;
         }
 
         $payload = $this->applyMask($payload, $headers);
 
         if ($headers['length'] > strlen($payload)) {
-            $user->handlingPartialPacket = true;
-            $user->partialBuffer = $message;
+            $client->handlingPartialPacket = true;
+            $client->partialBuffer = $message;
             return false;
         }
 
         if ($headers['fin']) {
-            $user->partialMessage = "";
+            $client->partialMessage = "";
             return $payload;
         }
 
-        $user->partialMessage = $payload;
+        $client->partialMessage = $payload;
         return false;
     }
 
@@ -673,13 +673,13 @@ class SocketServer implements IEventFlow
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @param string $message
      * @return void
      */
-    protected function write(SocketUser $user, string $message): void
+    protected function write(SocketClient $client, string $message): void
     {
-        @socket_write($user->socket, $message, strlen($message));
+        @socket_write($client->socket, $message, strlen($message));
     }
 
 }

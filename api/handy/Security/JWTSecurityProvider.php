@@ -4,6 +4,7 @@ namespace Handy\Security;
 
 use Handy\Context;
 use ReallySimpleJWT\Decode;
+use ReallySimpleJWT\Exception\JwtException;
 use ReallySimpleJWT\Jwt;
 use ReallySimpleJWT\Parse;
 use ReallySimpleJWT\Token;
@@ -26,6 +27,10 @@ class JWTSecurityProvider implements ISecurityProvider
         }
         $token = str_replace('Bearer ', '', $headers['Authorization']);
 
+        if(!self::validateToken($token)){
+            return;
+        }
+
         Context::$security->setToken($token);
         Context::$security->setData((object)(self::parseToken($token)));
     }
@@ -47,12 +52,18 @@ class JWTSecurityProvider implements ISecurityProvider
 
     /**
      * @inheritDoc
+     * @throws JwtException
      */
     public static function parseToken(string $token): array
     {
         $jwt = new Jwt($token);
         $parse = new Parse($jwt, new Decode());
         return $parse->parse()->getPayload();
+    }
+
+    public static function validateToken(string $token): bool
+    {
+        return Token::validate($token, $_ENV["JWT_KEY"]) && Token::validateExpiration($token);
     }
 
 }

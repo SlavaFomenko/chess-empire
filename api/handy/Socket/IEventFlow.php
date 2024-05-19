@@ -28,10 +28,10 @@ interface IEventFlow
     /**
      * @param string $event
      * @param mixed $data
-     * @param SocketUser|null $user
+     * @param SocketClient|null $client
      * @return void
      */
-    public function notifyListeners(string $event, mixed $data, ?SocketUser $user): void;
+    public function notifyListeners(string $event, mixed $data, ?SocketClient $client): void;
 
     /**
      * @return void

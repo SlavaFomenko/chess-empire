@@ -2,10 +2,6 @@ import React, { useState } from "react";
 import styles from "../styles/registration.module.scss";
 import { Field, Form, Formik } from "formik";
 import { registerUser } from "../model/registration";
-import { useDispatch } from "react-redux";
-import { login } from "../../../shared/user";
-import { useNavigate } from "react-router-dom";
-import { showNotification } from "../../../shared/notification";
 
 export function Registration ({notification, navigate}) {
   const [showPassword, setShowPassword] = useState(false);

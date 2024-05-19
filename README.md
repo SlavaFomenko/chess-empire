@@ -1,7 +1,7 @@
 ## How to run
 
 You can run `./local_reacreate_docker.sh` script to build and run the project.
-If you want console to close automatically afterbuilding process, remove or comment `read` statement in this script.
+If you want console to close automatically after building process, remove or comment `read` statement in this script.
 
 ## Project structure
 

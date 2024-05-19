@@ -1,11 +1,13 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../styles/side-bar.module.scss";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { s } from "../../../shared/socket/actions/socket";
 
 export function SideBar () {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const user = useSelector(state => state.user);
 
   const redirect = (page) => {
@@ -16,6 +18,7 @@ export function SideBar () {
 
   const logout = () => {
     localStorage.removeItem("token");
+    dispatch(s.disconnect());
     window.location.reload();
   };
 

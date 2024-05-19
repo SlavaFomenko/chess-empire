@@ -24,5 +24,11 @@ interface ISecurityProvider
      */
     public static function parseToken(string $token): array;
 
+    /**
+     * @param string $token
+     * @return bool
+     */
+    public static function validateToken(string $token): bool;
+
 }
 
