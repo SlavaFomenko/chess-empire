@@ -1,6 +1,8 @@
 import { socket } from "../socket";
 import { showNotification } from "../../notification";
 import { unauthorizedState } from "../states/unauthorizedState";
+import { history } from "../../routing";
+import { searchingGameState } from "../states/searchingGameState";
 
 export const socketMiddleware = (params) => (next) => (action) => {
   const { dispatch, getState } = params;
@@ -14,7 +16,7 @@ export const socketMiddleware = (params) => (next) => (action) => {
   switch (actionName) {
     case "connect":
       socket.initialize(process.env.REACT_APP_SOCKET_HOST).then(r => {
-        socket.setState(unauthorizedState, { dispatch });
+        socket.setState(unauthorizedState, { dispatch, history, getState });
         socket.emit("auth", localStorage.getItem("token"));
       }).catch(() => {
         dispatch(showNotification("Cannot establish connection with server"));
@@ -25,6 +27,13 @@ export const socketMiddleware = (params) => (next) => (action) => {
       break;
     case "on":
       socket.on(action.payload.event, action.payload.callback);
+      break;
+    case "searchGame":
+      socket.emit("play_random", action.payload);
+      socket.setState(searchingGameState, { dispatch, history, getState })
+      break;
+    case "turn":
+      socket.emit("turn", action.payload);
       break;
     default:
       break;

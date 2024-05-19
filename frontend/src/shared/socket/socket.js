@@ -70,6 +70,10 @@ class Socket {
 
   setState (state, props) {
     this.state = state({...props, socket: this})
+    props.dispatch({
+      type: "socket/setState",
+      payload: this.state.name
+    })
   }
 
   notifyListeners (event, data = null) {

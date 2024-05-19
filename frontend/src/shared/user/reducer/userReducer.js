@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { loginUser } from "../../../features/login/model/login";
+import { jwtDecode } from "jwt-decode";
 
 export const userSlice = createSlice({
   name: "user",
@@ -9,13 +10,15 @@ export const userSlice = createSlice({
   },
   reducers: {
     restoreToken: (state, action) => {
-      state.user = { ...state.user, token: action.payload };
+      const decoded = jwtDecode(action.payload);
+      state.user = { ...state.user, token: action.payload, id: decoded.id };
     }
   },
   extraReducers: (builder) => {
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.error = null;
-      state.user = { ...state.user, token: action.payload.token };
+      const decoded = jwtDecode(action.payload.token);
+      state.user = { ...state.user, token: action.payload.token, id: decoded.id };
       localStorage.setItem("token", action.payload.token);
     }).addCase(loginUser.rejected, (state, action) => {
       state.user = null;

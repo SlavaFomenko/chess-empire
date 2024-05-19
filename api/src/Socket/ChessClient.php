@@ -4,7 +4,6 @@ namespace App\Socket;
 
 use App\Entity\User;
 use App\Socket\States\ClientState;
-use Handy\Context;
 use Handy\Socket\SocketClient;
 use Handy\Socket\SocketServer;
 use Socket;

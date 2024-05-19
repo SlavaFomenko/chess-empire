@@ -10,18 +10,32 @@ use Handy\Context;
 use Handy\ORM\Connection;
 use Handy\ORM\EntityManager;
 use Handy\Security\JWTSecurityProvider;
-use Handy\Socket\SocketServer;
 use Handy\Socket\SocketClient;
+use Handy\Socket\SocketServer;
 
 class ChessServer extends SocketServer
 {
+
+    public array $users = [];
+    public array $randomSearch = [];
+
     public function __construct(string $ip, int $port, int $maxBufferSize = 2048, string $userClass = ChessClient::class)
     {
         parent::__construct($ip, $port, $maxBufferSize, $userClass);
         Context::$connection = new Connection();
         Context::$connection->connect();
         Context::$entityManager = new EntityManager();
+        $this->users = [];
+        $this->randomSearch = [];
         $this->initListeners();
+    }
+
+    public function tick(): void
+    {
+        /** @var GameRoom $room */
+        foreach (array_filter($this->rooms, fn($r) => is_a($r, GameRoom::class)) as $room) {
+            $room->refreshTimers();
+        }
     }
 
     public function connected(SocketClient $client): void
@@ -30,38 +44,70 @@ class ChessServer extends SocketServer
         $client->setState(UnauthorizedState::class);
     }
 
+    public function closed(SocketClient $client): void
+    {
+        $this->randomSearch = array_filter($this->randomSearch, fn($c)=>$c["client"] !== $client->id);
+
+        /** @var ChessClient $client */
+        $id = $client->user?->getId();
+
+        if ($id !== null && !isset($this->users[$id])) {
+            $this->users[$id] = array_diff($this->users[$id], [$client->id]);
+        }
+    }
+
     public function initListeners(): void
     {
-        $this->on("auth", function ($data, ChessClient $client){
-            if(!is_a($client->state, UnauthorizedState::class)){
-                $client->emit("auth_err", "Already authorized");
+        $this->on("play_random", function ($data, ChessClient $client) {
+            if (!isset($data["time"], $data["rated"], $data["color"])) {
+                trigger_error("Incomplete game settings received");
                 return;
             }
 
-            $tokenData = null;
-            try {
-                $tokenData = JWTSecurityProvider::parseToken($data);
-            } catch (Exception $e){
-                $client->emit("auth_err", "Invalid token");
+            $availablePlayers = array_filter($this->randomSearch, function ($settings) use ($data) {
+                $time = $settings["time"] === $data["time"];
+                $rated = $settings["rated"] === $data["rated"];
+                $color = $settings["color"] !== $data["color"] || str_contains($settings["color"] . $data["color"], "r");
+                return $time && $rated && $color;
+            });
+
+            if (empty($availablePlayers)) {
+                $this->randomSearch[] = array_merge($data, ["client" => $client->id]);
                 return;
             }
 
-            if(!JWTSecurityProvider::validateToken($data) || !isset($tokenData["id"])){
-                $client->emit("auth_err", "Invalid token");
-                return;
+            usort($availablePlayers, function ($a, $b) use ($client) {
+                $ua = $this->getClientById($a["client"])?->user;
+                $ub = $this->getClientById($b["client"])?->user;
+                return ($ua->getRating() - $client->user->getRating()) - ($ub->getRating() - $client->user->getRating());
+            });
+
+            $secondPlayer = $availablePlayers[0];
+
+            @$this->randomSearch = array_diff($this->randomSearch, [$secondPlayer]);
+
+            $roomId = uniqid('gr');
+            $room = new GameRoom($data["rated"], $data["time"], $this, $roomId);
+            $availableColors = array_diff(["black","white"], [$secondPlayer["color"],$data["color"]]);
+            shuffle($availableColors);
+            if ($data["color"] === "r") {
+                $data["color"] = $availableColors[0];
+                array_shift($availableColors);
+            }
+            if ($secondPlayer["color"] === "r") {
+                $secondPlayer["color"] = $availableColors[0];
             }
 
-            $repo = Context::$entityManager->getRepository(User::class);
-            $user = $repo->find($tokenData["id"]);
+            $room->join($client, $data["color"]);
+            $room->join($this->getClientById($secondPlayer["client"]), $secondPlayer["color"]);
+            $room->startGame();
 
-            if(!$user){
-                $client->emit("auth_err", "User not found");
-                return;
-            }
+            $this->rooms[$roomId] = $room;
+        });
 
-            $client->user = $user;
-            $client->setState(DefaultState::class);
-            $client->emit("auth_ok", $client->id);
+        $this->on("cancel_random", function ($data, ChessClient $client) {
+            $this->randomSearch = array_filter($this->randomSearch, fn($c)=>$c["client"] !== $client->id);
         });
     }
+
 }

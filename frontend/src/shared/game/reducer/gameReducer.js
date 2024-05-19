@@ -1,18 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { applyTurns, turnToCords } from "../lib";
+import { DEFAULT_BOARD } from "../config/config";
 
 export const gameSlice = createSlice({
   name: "game",
   initialState: {
-    initialBoard: [
-      ["r", "n", "b", "q", "k", "b", "n", "r"],
-      ["p", "p", "p", "p", "p", "p", "p", "p"],
-      ["", "", "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "", ""],
-      ["", "", "", "", "", "", "", ""],
-      ["P", "P", "P", "P", "P", "P", "P", "P"],
-      ["R", "N", "B", "Q", "K", "B", "N", "R"]
-    ],
+    id: null,
+    initialBoard: DEFAULT_BOARD,
     selectedPiece: null,
     currentPlayer: "white",
     possibleMoves: [],
@@ -20,11 +14,12 @@ export const gameSlice = createSlice({
     gameHistory: [],
     currentStep: 0,
     moveAllowed: true,
-    colorSelectedPiece:null
+    colorSelectedPiece: null,
+    myColor: null,
   },
   reducers: {
     selectPiece: (state, action) => {
-      if (action.payload === null || !state.moveAllowed) {
+      if (action.payload === null || !state.moveAllowed || state.myColor !== state.currentPlayer) {
         state.selectedPiece = null;
         state.possibleMoves = [];
         return;
@@ -84,7 +79,9 @@ export const gameSlice = createSlice({
             }
             const check = isCheck(state.currentPlayer === "white" ? "black" : "white", newBoard);
 
+            console.log(state.gameHistory)
             const newGameHistory = [...state.gameHistory, { fromRow: row, fromCol: col, toRow: newRow, toCol: newCol }];
+            console.log(newGameHistory)
 
             return {
               ...state,
@@ -127,45 +124,39 @@ export const gameSlice = createSlice({
       }
       return state;
     },
-    applyTurn: (state) => {
-      if (state.currentStep >= state.gameHistory.length) {
-        return state;
+    goToStep: (state, action) => {
+      const newStep = action.payload.step;
+
+      console.log(state)
+
+      if (state.gameHistory.length <= 0 || newStep > state.gameHistory.length || newStep < 0) {
+        return {...state};
       }
 
-      const { fromRow, fromCol, toRow, toCol } = state.gameHistory[state.currentStep];
-      const piece = state.initialBoard[fromRow][fromCol];
-      const newBoard = state.initialBoard.map(row => [...row]);
-      newBoard[toRow][toCol] = piece;
-      newBoard[fromRow][fromCol] = "";
+      const historyToApply = JSON.parse(JSON.stringify(state.gameHistory)).slice(0, Math.max(newStep, 0));
 
-      const check = isCheck(state.currentPlayer === "white" ? "black" : "white", newBoard);
+      const newBoard = applyTurns(historyToApply);
+      const newCurrentPlayer = newStep % 2 === 0 ? "white" : "black";
+
+      const check = isCheck(newCurrentPlayer, newBoard);
 
       return {
         ...state,
         initialBoard: newBoard,
         selectedPiece: null,
-        currentPlayer: state.currentPlayer === "white" ? "white" : "black",
-        currentStep: state.currentStep + 1,
+        currentPlayer: newCurrentPlayer,
+        currentStep: newStep,
+        possibleMoves: [],
         check,
-        moveAllowed: state.currentStep + 1 === state.gameHistory.length
+        moveAllowed: newStep === state.gameHistory.length
       };
     },
     undoTurn: (state) => {
-
       if(state.gameHistory.length <= 0){
         return {...state}
       }
 
-      const board = [
-        ["r", "n", "b", "q", "k", "b", "n", "r"],
-        ["p", "p", "p", "p", "p", "p", "p", "p"],
-        ["", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", ""],
-        ["P", "P", "P", "P", "P", "P", "P", "P"],
-        ["R", "N", "B", "Q", "K", "B", "N", "R"]
-      ];
+      const board = DEFAULT_BOARD.map(row => [...row]);
 
       const index = state.gameHistory.findIndex((move, index) => index + 1 === state.currentStep);
       const historyToUndo = index !== -1 ? state.gameHistory.slice(0, index) : [];
@@ -184,6 +175,21 @@ export const gameSlice = createSlice({
         currentStep: state.currentStep > 0 ? state.currentStep - 1 : 0,
         selectedPiece: null,
         moveAllowed: false
+      };
+    },
+    updateState: (state, action) => {
+      const {id, turn, history, b, w, myColor} = action.payload;
+      const gameHistory = history === "" ? [] : history.split(" ").map(turn => turnToCords(turn));
+      return {
+        ...state,
+        id: id,
+        currentPlayer: turn,
+        myColor: myColor ?? state.myColor,
+        gameHistory: gameHistory,
+        currentStep: gameHistory.length,
+        b: b,
+        w: w,
+        initialBoard: applyTurns(gameHistory)
       };
     }
   }
@@ -271,8 +277,8 @@ const validate = {
     if (Math.abs(newRow - row) === Math.abs(newCol - col)) {
       const directionX = newRow > row ? 1 : -1;
       const directionY = newCol > col ? 1 : -1;
-      let i = row + directionX;
-      let j = col + directionY;
+      let i = Math.max(row + directionX, 0);
+      let j = Math.max(col + directionY, 0);
       while (i !== newRow && j !== newCol) {
         if (board[i][j] !== "") return false;
         i += directionX;

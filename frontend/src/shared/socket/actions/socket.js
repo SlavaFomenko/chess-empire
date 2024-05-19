@@ -1,3 +1,5 @@
+import { cordsToTurn } from "../../game/lib";
+
 const connect = () => {
   return {
     type: "socket/connect"
@@ -17,8 +19,24 @@ const on = (data) => {
   };
 };
 
+const turn = (data) => {
+  return {
+    type: "socket/turn",
+    payload: cordsToTurn(data)
+  };
+};
+
+const searchGame = (data) => {
+  return {
+    type: "socket/searchGame",
+    payload: data
+  };
+};
+
 export const s = {
   connect: connect,
   disconnect: disconnect,
   on: on,
+  searchGame: searchGame,
+  turn: turn
 }

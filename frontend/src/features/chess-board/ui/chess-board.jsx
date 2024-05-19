@@ -6,6 +6,7 @@ import { COORDS } from "../../../shared/game";
 
 export function ChessBoard () {
   const board = useSelector(state => state.game.initialBoard);
+  const myColor = useSelector(state => state.game.myColor);
 
   const renderBoard = [];
 
@@ -63,7 +64,7 @@ export function ChessBoard () {
             break;
           default:
             renderBoard.push(
-              <EmptyField color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <EmptyField color={"empty"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
         }
       }
@@ -72,8 +73,7 @@ export function ChessBoard () {
 
   return (
     <div className={styles.chess_board}>
-      {/*{renderBoard.reverse()}*/}
-      {renderBoard}
+      {myColor === "white" ? renderBoard : renderBoard.reverse()}
     </div>
   );
 }

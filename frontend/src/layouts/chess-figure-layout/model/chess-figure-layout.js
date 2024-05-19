@@ -11,16 +11,10 @@ export const movePiece = (newCoordinates) => {
     payload: newCoordinates,
   };
 };
-export const applyTurn = (turns) => {
+export const goToStep = (step) => {
   return {
-    type: "game/applyTurn",
-    payload:turns
-  };
-};
-export const undoTurn = (turns) => {
-  return {
-    type: "game/undoTurn",
-    payload:turns
+    type: "game/goToStep",
+    payload: {step}
   };
 };
 

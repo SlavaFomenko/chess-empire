@@ -19,9 +19,7 @@ class ClientState
     public function notifyListeners(string $event, mixed $data, ?ChessClient $client): void
     {
         if (isset($this->events[$event])) {
-            foreach ($this->events[$event] as $listener) {
-                $listener($data, $client);
-            }
+            $this->events[$event]($data, $client);
         }
     }
 }
