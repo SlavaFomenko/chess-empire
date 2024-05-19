@@ -127,13 +127,11 @@ export const gameSlice = createSlice({
     goToStep: (state, action) => {
       const newStep = action.payload.step;
 
-      console.log(state)
-
       if (state.gameHistory.length <= 0 || newStep > state.gameHistory.length || newStep < 0) {
         return {...state};
       }
 
-      const historyToApply = JSON.parse(JSON.stringify(state.gameHistory)).slice(0, Math.max(newStep, 0));
+      const historyToApply = state.gameHistory.slice(0, Math.max(newStep, 0));
 
       const newBoard = applyTurns(historyToApply);
       const newCurrentPlayer = newStep % 2 === 0 ? "white" : "black";
@@ -179,17 +177,17 @@ export const gameSlice = createSlice({
     },
     updateState: (state, action) => {
       const {id, turn, history, b, w, myColor} = action.payload;
-      const gameHistory = history === "" ? [] : history.split(" ").map(turn => turnToCords(turn));
+      const newHistory = history === "" ? [] : history.split(" ").map(turn => turnToCords(turn));
       return {
         ...state,
         id: id,
         currentPlayer: turn,
         myColor: myColor ?? state.myColor,
-        gameHistory: gameHistory,
-        currentStep: gameHistory.length,
+        gameHistory: newHistory,
+        currentStep: newHistory.length,
         b: b,
         w: w,
-        initialBoard: applyTurns(gameHistory)
+        initialBoard: applyTurns([...newHistory])
       };
     }
   }
