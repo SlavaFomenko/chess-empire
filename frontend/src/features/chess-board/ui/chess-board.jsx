@@ -5,8 +5,10 @@ import { Bishop, EmptyField, King, Knight, Pawn, Queen } from "../../../entities
 import { useSelector } from "react-redux";
 import { COORDS } from "../../../shared/game";
 
+
 export function ChessBoard () {
   const board = useSelector(state => state.game.initialBoard);
+  // const isPending = useSelector(state => state.game.promotion.isPending);
 
   const renderBoard = [];
 
@@ -64,7 +66,7 @@ export function ChessBoard () {
             break;
           default:
             renderBoard.push(
-              <EmptyField color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <EmptyField color={""} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
         }
       }
@@ -75,6 +77,8 @@ export function ChessBoard () {
     <div className={styles.chess_board}>
       {/*{renderBoard.reverse()}*/}
       {renderBoard}
+
+
     </div>
   );
 }

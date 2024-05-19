@@ -28,6 +28,11 @@ export const gameSlice = createSlice({
       blackKing: false,
       blackRookLeft: false,
       blackRookRight: false
+    },
+    promotion: {
+      isPending: false,
+      position: null,
+      selectedPiece: null
     }
   },
   reducers: {
@@ -100,7 +105,14 @@ export const gameSlice = createSlice({
       const { row, col } = state.selectedPiece;
       const { newRow, newCol } = action.payload;
       const piece = state.initialBoard[row][col];
-      let newState = { ...state };
+      let newState = JSON.parse(JSON.stringify(state));
+
+      if (piece.toUpperCase() === "P" && (newRow === 0 || newRow === 7)) {
+        newState.promotion.isPending = true;
+        newState.promotion.position = action.payload
+        //debugger
+      }
+        // console.log(newState);
 
       if (piece.toUpperCase() === "K" && Math.abs(newCol - col) === 2) {
         const kingRow = row;
@@ -108,14 +120,14 @@ export const gameSlice = createSlice({
         const rookCol = newCol > col ? 7 : 0;
         const newRookCol = newCol > col ? newCol - 1 : newCol + 1;
 
-        if (canCastle(state.initialBoard, kingRow, kingCol, rookCol, state.currentPlayer)) {
-          const newBoard = state.initialBoard.map(row => [...row]);
+        if (canCastle(newState.initialBoard, kingRow, kingCol, rookCol, newState.currentPlayer)) {
+          const newBoard = newState.initialBoard.map(row => [...row]);
           newBoard[kingRow][kingCol] = "";
           newBoard[kingRow][newCol] = piece;
           newBoard[kingRow][rookCol] = "";
-          newBoard[kingRow][newRookCol] = state.currentPlayer === "white" ? "R" : "r";
+          newBoard[kingRow][newRookCol] = newState.currentPlayer === "white" ? "R" : "r";
 
-          const newGameHistory = [...state.gameHistory, {
+          const newGameHistory = [...newState.gameHistory, {
             fromRow: row,
             fromCol: col,
             toRow: newRow,
@@ -124,9 +136,9 @@ export const gameSlice = createSlice({
             rookFromCol: rookCol,
             rookToCol: newRookCol
           }];
-          const check = isCheck(state.currentPlayer === "white" ? "black" : "white", newBoard);
+          const check = isCheck(newState.currentPlayer === "white" ? "black" : "white", newBoard);
 
-          if (state.currentPlayer === "white") {
+          if (newState.currentPlayer === "white") {
             newState.hasMoved = {
               ...newState.hasMoved,
               whiteKing: true,
@@ -147,89 +159,110 @@ export const gameSlice = createSlice({
             initialBoard: newBoard,
             selectedPiece: null,
             possibleMoves: [],
-            currentPlayer: state.currentPlayer === "white" ? "black" : "white",
+            currentPlayer: newState.currentPlayer === "white" ? "black" : "white",
             gameHistory: newGameHistory,
-            currentStep: state.currentStep + 1,
+            currentStep: newState.currentStep + 1,
             check
           };
+          //debugger
           return newState;
         }
       }
-      if (piece && state.currentPlayer === "white" && piece.toUpperCase() === piece) {
-        if (validate[`${piece}`](row, col, newRow, newCol, state.initialBoard)) {
-          if (state.initialBoard[newRow][newCol] === "" || state.initialBoard[newRow][newCol].toLowerCase() === state.initialBoard[newRow][newCol]) {
-            const newBoard = state.initialBoard.map(row => [...row]);
+      if (piece && newState.currentPlayer === "white" && piece.toUpperCase() === piece) {
+        if (validate[`${piece}`](row, col, newRow, newCol, newState.initialBoard)) {
+          if (newState.initialBoard[newRow][newCol] === "" || newState.initialBoard[newRow][newCol].toLowerCase() === newState.initialBoard[newRow][newCol]) {
+            const newBoard = newState.initialBoard.map(row => [...row]);
             newBoard[newRow][newCol] = piece;
             newBoard[row][col] = "";
-            if (state.check && !state.possibleMoves.some(move => move.row === newRow && move.col === newCol)) {
-              return state;
+            if (newState.check && !newState.possibleMoves.some(move => move.row === newRow && move.col === newCol)) {
+              return newState;
             }
-            const check = isCheck(state.currentPlayer === "white" ? "black" : "white", newBoard);
+            const check = isCheck(newState.currentPlayer === "white" ? "black" : "white", newBoard);
 
-            const newGameHistory = [...state.gameHistory, { fromRow: row, fromCol: col, toRow: newRow, toCol: newCol }];
+            const newGameHistory = [...newState.gameHistory, { fromRow: row, fromCol: col, toRow: newRow, toCol: newCol }];
 
             if (piece.toUpperCase() === "K") {
-              state.hasMoved.whiteKing = true;
+              newState.hasMoved.whiteKing = true;
             } else if (piece.toUpperCase() === "R") {
-              if (col === 0) state.hasMoved.whiteRookLeft = true;
-              if (col === 7) state.hasMoved.whiteRookRight = true;
+              if (col === 0) newState.hasMoved.whiteRookLeft = true;
+              if (col === 7) newState.hasMoved.whiteRookRight = true;
             }
 
-            return {
-              ...state,
+            newState = {
+              ...newState,
               initialBoard: newBoard,
               selectedPiece: null,
               possibleMoves: [],
-              currentPlayer: state.currentPlayer === "white" ? "black" : "white",
+              currentPlayer: newState.currentPlayer === "white" ? "black" : "white",
               gameHistory: newGameHistory,
-              currentStep: state.currentStep + 1,
+              currentStep: newState.currentStep + 1,
               check
             };
+            //debugger
+            return newState
           }
         }
-      } else if (piece && state.currentPlayer === "black" && piece.toLowerCase() === piece) {
-        const reversedBoard = state.initialBoard.map(row => [...row]).reverse();
+      } else if (piece && newState.currentPlayer === "black" && piece.toLowerCase() === piece) {
+        const reversedBoard = newState.initialBoard.map(row => [...row]).reverse();
         if (validate[`${piece.toUpperCase()}`](7 - row, col, 7 - newRow, newCol, reversedBoard)) {
-          if (state.initialBoard[newRow][newCol] === "" || state.initialBoard[newRow][newCol].toUpperCase() === state.initialBoard[newRow][newCol]) {
-            const newBoard = state.initialBoard.map(row => [...row]);
+          if (newState.initialBoard[newRow][newCol] === "" || newState.initialBoard[newRow][newCol].toUpperCase() === newState.initialBoard[newRow][newCol]) {
+            const newBoard = newState.initialBoard.map(row => [...row]);
             newBoard[newRow][newCol] = piece;
             newBoard[row][col] = "";
-            if (state.check && !state.possibleMoves.some(move => move.row === newRow && move.col === newCol)) {
-              return state;
+            if (newState.check && !newState.possibleMoves.some(move => move.row === newRow && move.col === newCol)) {
+              return newState;
             }
-            const check = isCheck(state.currentPlayer === "white" ? "black" : "white", newBoard);
+            const check = isCheck(newState.currentPlayer === "white" ? "black" : "white", newBoard);
 
-            const newGameHistory = [...state.gameHistory, { fromRow: row, fromCol: col, toRow: newRow, toCol: newCol }];
+            const newGameHistory = [...newState.gameHistory, { fromRow: row, fromCol: col, toRow: newRow, toCol: newCol }];
 
             if (piece.toLowerCase() === "k") {
-              state.hasMoved.blackKing = true;
+              newState.hasMoved.blackKing = true;
             } else if (piece.toLowerCase() === "r") {
-              if (col === 0) state.hasMoved.blackRookLeft = true;
-              if (col === 7) state.hasMoved.blackRookRight = true;
+              if (col === 0) newState.hasMoved.blackRookLeft = true;
+              if (col === 7) newState.hasMoved.blackRookRight = true;
             }
 
-            return {
-              ...state,
+            newState =  {
+              ...newState,
               initialBoard: newBoard,
               selectedPiece: null,
               possibleMoves: [],
-              currentPlayer: state.currentPlayer === "white" ? "black" : "white",
+              currentPlayer: newState.currentPlayer === "white" ? "black" : "white",
               gameHistory: newGameHistory,
-              currentStep: state.currentStep + 1,
+              currentStep: newState.currentStep + 1,
               check
             };
+
+            return newState
           }
         }
       }
-      return state;
+      //debugger
+      return newState;
     },
+    selectPromotionPiece: (state, action) => {
+      const  selectedPiece  = action.payload;
+      const { newRow, newCol } = state.promotion.position;
+      state.promotion.selectedPiece = selectedPiece;
+      state.promotion.isPending = false;
+      state.initialBoard[newRow][newCol] = state.currentPlayer === 'white'? selectedPiece.toLowerCase() : selectedPiece ;
+      state.gameHistory[state.gameHistory.length - 1].newPiece = selectedPiece;
+    },
+
     applyTurn: (state) => {
 
       if (state.gameHistory.length === state.currentStep) {
         return state;
       }
 
-      const { fromRow, fromCol, toRow, toCol, castling, rookFromCol, rookToCol } = state.gameHistory[state.currentStep];
+      const { fromRow, fromCol, toRow, toCol, castling, rookFromCol, rookToCol,newPiece } = state.gameHistory[state.currentStep];
+
+      if(newPiece){
+        state.initialBoard[toRow][toCol] = "";
+        state.initialBoard[fromRow][fromCol] = newPiece;
+      }
+
       if (castling) {
         const newBoard = state.initialBoard.map(row => [...row]);
         const piece = newBoard[fromRow][fromCol];
@@ -268,6 +301,7 @@ export const gameSlice = createSlice({
     },
     undoTurn: (state) => {
       if (state.currentStep === 0) return state;
+
       state.currentStep -= 1;
       const initialBoard = [
         ["r", "n", "b", "q", "k", "b", "n", "r"],
@@ -279,8 +313,8 @@ export const gameSlice = createSlice({
         ["P", "P", "P", "P", "P", "P", "P", "P"],
         ["R", "N", "B", "Q", "K", "B", "N", "R"]
       ];
-      state.initialBoard = initialBoard;
 
+      state.initialBoard = initialBoard;
       state.hasMoved = {
         whiteKing: false,
         whiteRookLeft: false,
@@ -292,6 +326,7 @@ export const gameSlice = createSlice({
 
       for (let i = 0; i < state.currentStep; i++) {
         const move = state.gameHistory[i];
+
         if (move.castling) {
           const kingRow = move.fromRow;
           const kingCol = move.fromCol;
@@ -320,6 +355,10 @@ export const gameSlice = createSlice({
           state.initialBoard[move.toRow][move.toCol] = piece;
           state.initialBoard[move.fromRow][move.fromCol] = "";
 
+          if (move.newPiece) {
+            state.initialBoard[move.toRow][move.toCol] = move.newPiece.toUpperCase();
+          }
+
           if (piece.toUpperCase() === "K") {
             if (piece === "K") {
               state.hasMoved.whiteKing = true;
@@ -342,7 +381,11 @@ export const gameSlice = createSlice({
       state.selectedPiece = null;
       state.possibleMoves = [];
       state.moveAllowed = false;
-    }
+
+      return state;
+    },
+
+
   }
 
 });
@@ -357,13 +400,9 @@ const canCastle = (board, kingRow, kingCol, rookCol, player) => {
     newBoard[kingRow][col] = player === "white" ? "K" : "k";
     newBoard[kingRow][kingCol] = "";
     if (isCheck(player, newBoard)) {
-
       return false;
     }
-
-    console.log("hello");
   }
-
   return true;
 };
 
@@ -418,7 +457,9 @@ const validate = {
       const directionY = newCol > col ? 1 : -1;
       let i = row + directionX;
       let j = col + directionY;
+
       while (i !== newRow && j !== newCol) {
+        if (i < 0 || i >= board.length || j < 0 || j >= board[0].length) return false;
         if (board[i][j] !== "") return false;
         i += directionX;
         j += directionY;
@@ -427,6 +468,7 @@ const validate = {
     }
     return false;
   },
+
 
   "R": (row, col, newRow, newCol, board) => {
     if (newRow === row) {
