@@ -5,6 +5,7 @@ import { LoginPage } from "./sign-in/login";
 import { RegistrationPage } from "./sign-in/registration";
 import { HomePage } from "./home";
 import { NotFoundPage } from "./page-404";
+import { ProfilePage } from "./profile";
 
 export class Routing extends React.Component {
 
@@ -19,6 +20,7 @@ export class Routing extends React.Component {
         <Route path="/game" element={<GamePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegistrationPage />} />
+        <Route path={'/profile'} element={<ProfilePage/>}/>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     );
