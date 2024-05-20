@@ -33,11 +33,11 @@ export const gameSlice = createSlice({
     gameOver: {
       winner: null,
       reason: null,
-      w_rating:null,
-      b_rating:null
+      w_rating: null,
+      b_rating: null
     },
     black: null,
-    white: null,
+    white: null
   },
   reducers: {
     selectPiece: (state, action) => {
@@ -339,8 +339,6 @@ const canCastle = (board, kingRow, kingCol, rookCol, player) => {
   }
   return true;
 };
-
-
 
 function canCaptureKing (row, col, newRow, newCol, board, currentPlayer) {
   const piece = board[row][col];

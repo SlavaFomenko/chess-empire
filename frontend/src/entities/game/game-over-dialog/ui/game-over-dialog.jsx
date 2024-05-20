@@ -4,10 +4,14 @@ import styles from "../styles/game-over-dialog.module.scss";
 export function GameOverDialog ({gameState}) {
   const gameOverState = gameState.gameOver;
 
+  const endTitle = gameOverState.winner === "tie" ? "TIE" : `${gameOverState.winner} won`.toUpperCase();
+
   const reasonMessage = {
     disconnect: "The opponent left the game",
     timeout: "The opponent ran out of time",
     resign: "The opponent resigned",
+    mate: "Mate!",
+    tie: "There's nothing we can do"
   }
 
   const rating = {
@@ -18,7 +22,7 @@ export function GameOverDialog ({gameState}) {
   return (
     <div className={styles.container}>
       <div className={styles.gameOverDialog}>
-        <h1>{`${gameOverState.winner} won`.toUpperCase()}</h1>
+        <h1>{endTitle}</h1>
         <p>{reasonMessage[gameOverState.reason]}</p>
         <table>
           <tr>

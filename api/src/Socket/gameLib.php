@@ -163,8 +163,6 @@ function applyTurns($turns, $board = DEFAULT_BOARD, $currentPlayer = "white", $h
 
     $turn = array_shift($turns);
 
-    var_dump($turn, $hasMoved);
-
     $fromRow = $turn['fromRow'];
     $fromCol = $turn['fromCol'];
     $toRow = $turn['toRow'];
@@ -193,23 +191,23 @@ function applyTurns($turns, $board = DEFAULT_BOARD, $currentPlayer = "white", $h
         $board[$fromRow][$fromCol] = "";
     }
 
-    if ($currentPlayer === "white") {
-        if ($board[$fromRow][$fromCol] === "K") {
-            $hasMoved['whiteKing'] = true;
-        }
-        if ($board[$fromRow][$fromCol] === "R") {
-            if ($fromCol === 0) $hasMoved['whiteRookLeft'] = true;
-            if ($fromCol === 7) $hasMoved['whiteRookRight'] = true;
-        }
-    } else {
-        if ($board[$fromRow][$fromCol] === "k") {
-            $hasMoved['blackKing'] = true;
-        }
-        if ($board[$fromRow][$fromCol] === "r") {
-            if ($fromCol === 0) $hasMoved['blackRookLeft'] = true;
-            if ($fromCol === 7) $hasMoved['blackRookRight'] = true;
-        }
+
+    if ($board[$toRow][$toCol] === "K") {
+        $hasMoved['whiteKing'] = true;
     }
+    if ($board[$toRow][$toCol] === "R") {
+        if ($fromCol === 0) $hasMoved['whiteRookLeft'] = true;
+        if ($fromCol === 7) $hasMoved['whiteRookRight'] = true;
+    }
+
+    if ($board[$toRow][$toCol] === "k") {
+        $hasMoved['blackKing'] = true;
+    }
+    if ($board[$toRow][$toCol] === "r") {
+        if ($fromCol === 0) $hasMoved['blackRookLeft'] = true;
+        if ($fromCol === 7) $hasMoved['blackRookRight'] = true;
+    }
+
 
     return applyTurns($turns, $board, $currentPlayer === "white" ? "black" : "white", $hasMoved);
 }
@@ -238,6 +236,10 @@ function canCaptureKing($row, $col, $newRow, $newCol, $board, $currentPlayer, $h
             "toCol"   => $newCol,
         ]
     ], $board, $hasMoved)["board"];
+
+    if($row === 5 && $col === 6){
+        $a = 1;
+    }
 
     return !isCheck($currentPlayer, $newBoard);
 }
@@ -524,7 +526,10 @@ function isCheck($player, $board)
             } else {
                 if ($board[$i][$j] !== "" && strtolower($board[$i][$j]) !== $board[$i][$j]) {
                     if ($board[$i][$j] === "P") {
-                        if (validate($board[$i][$j], 7 - $i, $j, 7 - $kingRow, $kingCol, $board)) {
+                        $reversedBoard = array_reverse(array_map(function ($row) {
+                            return array_slice($row, 0);
+                        }, $board));
+                        if (validate($board[$i][$j], 7 - $i, $j, 7 - $kingRow, $kingCol, $reversedBoard)) {
                             return true;
                         }
                     }
