@@ -89,7 +89,6 @@ export const gameSlice = createSlice({
             }
           }
         }
-
         if (piece === "k" && !state.hasMoved.blackKing) {
           if (!state.hasMoved.blackRookLeft && canCastle(state.initialBoard, row, col, 0, state.currentPlayer)) {
             possibleMoves.push({ row: row, col: col - 2 });
@@ -341,6 +340,8 @@ const canCastle = (board, kingRow, kingCol, rookCol, player) => {
   return true;
 };
 
+
+
 function canCaptureKing (row, col, newRow, newCol, board, currentPlayer) {
   const piece = board[row][col];
   const newBoard = board.map(row => [...row]);
@@ -467,6 +468,7 @@ const isCheck = (player, board) => {
       }
     }
   }
+
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
       if (player === "white") {

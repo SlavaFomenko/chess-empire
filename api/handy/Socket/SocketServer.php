@@ -499,7 +499,7 @@ class SocketServer implements IEventFlow
         $framePos = 0;
 
         while ($framePos < $length) {
-            $headers = $this->extractHeaders($packet);
+            $headers = @$this->extractHeaders($packet);
             $headersSize = $this->calcOffset($headers);
 
             $frameSize = $headers['length'] + $headersSize;
@@ -547,7 +547,7 @@ class SocketServer implements IEventFlow
      */
     protected function deFrame(string $message, SocketClient $client): false|string
     {
-        $headers = $this->extractHeaders($message);
+        $headers = @$this->extractHeaders($message);
         $pong = false;
         switch ($headers['opCode']) {
             case 9:

@@ -46,7 +46,26 @@ class GameRoom extends SocketRoom
             "blackRookLeft"  => false,
             "blackRookRight" => false
         ];
-        $this->history = [];
+        $this->history = array_map(fn($t)=>turnToCords($t), [
+            "e7e6",
+            "a2a4",
+            "d8h4",
+            "a1a3",
+            "h4a4",
+            "h2h4",
+            "a4c2",
+            "a3h3",
+            "h7h5",
+            "f2f3",
+            "c2d2",
+            "e1f2",
+            "d2b2",
+            "d1d6",
+            "b2b1",
+            "d6h2",
+            "b1c1",
+            "f2g3"
+        ]);
         $this->players = [];
     }
 
@@ -69,15 +88,27 @@ class GameRoom extends SocketRoom
 
         $this->on("turn", function ($data, ChessClient $client) {
             $cords = turnToCords($data);
-            $apply = applyTurns($this->history);
+            $apply = applyTurns($this->history, hasMoved:  $this->hasMoved);
+
+            $possibleMoves = getPossibleMoves($cords['fromRow'],$cords['fromCol'],$apply["board"],$this->hasMoved);
+
             if (!validateTurn($cords, $apply["board"], $this->currentTurn) && !str_contains($data, "00") && strlen($data) !== 5) {
                 return;
             }
-            $this->hasMoved = $apply["hasMoved"];
+            $newApply = applyTurns([$cords], $apply["board"], hasMoved:  $apply["hasMoved"]);
+
+            $this->hasMoved = $newApply["hasMoved"];
             $this->history[] = $cords;
             $this->currentTurn = $this->currentTurn === "white" ? "black" : "white";
+
             foreach ($this->players as $p) {
                 $p["client"]->emit("game_update", $this->getGameState());
+            }
+
+            if(!canPlayerMove($this->currentTurn, $newApply["board"], $newApply["hasMoved"])){
+                $reason = isCheck($this->currentTurn, $newApply["board"]) ? "mate" : "tie";
+                $opponent = $this->currentTurn === "white" ? "black" : "white";
+                $this->endGame($reason === "tie" ? "tie" : $opponent, $reason);
             }
         });
 

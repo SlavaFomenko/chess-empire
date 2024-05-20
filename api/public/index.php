@@ -15,5 +15,3 @@ $a = [
     "a" => 1,
     "b" => 2
 ];
-
-var_dump(current(array_keys(array_filter($a, fn($x)=>$x>1))));

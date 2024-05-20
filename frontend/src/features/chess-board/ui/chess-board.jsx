@@ -81,7 +81,8 @@ export function ChessBoard () {
 
   return (
     <div className={styles.chess_board}>
-      {myColor === "white" ? renderBoard : renderBoard.reverse()}
+      {/*{myColor === "white" ? renderBoard : renderBoard.reverse()}*/}
+      {renderBoard}
     </div>
   );
 }
