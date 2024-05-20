@@ -22,6 +22,7 @@ export const searchingGameState = ({ socket, dispatch, history, getState }) => {
         myColor = "white";
       }
       socket.setState(inGameState, { dispatch, history, getState });
+
       dispatch({
         type: "game/updateState",
         payload: { ...data, myColor: myColor }

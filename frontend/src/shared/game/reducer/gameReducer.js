@@ -30,12 +30,14 @@ export const gameSlice = createSlice({
       position: null,
       selectedPiece: null
     },
-    gameOverYet: {
+    gameOver: {
       winner: null,
       reason: null,
       w_rating:null,
       b_rating:null
-    }
+    },
+    black: null,
+    white: null,
   },
   reducers: {
     selectPiece: (state, action) => {
@@ -285,151 +287,8 @@ export const gameSlice = createSlice({
         moveAllowed: newStep === state.gameHistory.length
       };
     },
-    applyTurn: (state) => {
-
-      if (state.gameHistory.length === state.currentStep) {
-        return state;
-      }
-
-      const {
-        fromRow,
-        fromCol,
-        toRow,
-        toCol,
-        castling,
-        rookFromCol,
-        rookToCol,
-        newPiece
-      } = state.gameHistory[state.currentStep];
-
-      if (newPiece) {
-        state.initialBoard[toRow][toCol] = "";
-        state.initialBoard[fromRow][fromCol] = state.currentPlayer === "white" ? newPiece : newPiece.toLowerCase();
-      }
-
-      if (castling) {
-        const newBoard = state.initialBoard.map(row => [...row]);
-        const piece = newBoard[fromRow][fromCol];
-        newBoard[fromRow][fromCol] = "";
-        newBoard[toRow][toCol] = piece;
-        newBoard[fromRow][rookFromCol] = "";
-        newBoard[fromRow][rookToCol] = state.currentPlayer === "white" ? "R" : "r";
-        state.initialBoard = newBoard;
-      } else {
-        const piece = state.initialBoard[fromRow][fromCol];
-        state.initialBoard[toRow][toCol] = piece;
-        state.initialBoard[fromRow][fromCol] = "";
-      }
-
-      if (state.currentPlayer === "white") {
-        if (state.initialBoard[toRow][toCol] === "K") {
-          state.hasMoved.whiteKing = true;
-        }
-        if (state.initialBoard[toRow][toCol] === "R") {
-          if (fromCol === 0) state.hasMoved.whiteRookLeft = true;
-          if (fromCol === 7) state.hasMoved.whiteRookRight = true;
-        }
-      } else {
-        if (state.initialBoard[toRow][toCol] === "k") {
-          state.hasMoved.blackKing = true;
-        }
-        if (state.initialBoard[toRow][toCol] === "r") {
-          if (fromCol === 0) state.hasMoved.blackRookLeft = true;
-          if (fromCol === 7) state.hasMoved.blackRookRight = true;
-        }
-      }
-
-      state.currentPlayer = state.currentPlayer === "white" ? "black" : "white";
-      state.currentStep++;
-      state.moveAllowed = state.gameHistory.length === state.currentStep;
-    },
-    undoTurn: (state) => {
-      if (state.currentStep === 0) return state;
-
-      state.currentStep -= 1;
-      const initialBoard = [
-        ["r", "n", "b", "q", "k", "b", "n", "r"],
-        ["p", "p", "p", "p", "p", "p", "p", "p"],
-        ["", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", ""],
-        ["", "", "", "", "", "", "", ""],
-        ["P", "P", "P", "P", "P", "P", "P", "P"],
-        ["R", "N", "B", "Q", "K", "B", "N", "R"]
-      ];
-
-      state.initialBoard = initialBoard;
-      state.hasMoved = {
-        whiteKing: false,
-        whiteRookLeft: false,
-        whiteRookRight: false,
-        blackKing: false,
-        blackRookLeft: false,
-        blackRookRight: false
-      };
-
-      for (let i = 0; i < state.currentStep; i++) {
-        const move = state.gameHistory[i];
-
-        if (move.castling) {
-          const kingRow = move.fromRow;
-          const kingCol = move.fromCol;
-          const newKingCol = move.toCol;
-          const rookCol = move.rookFromCol;
-          const newRookCol = move.rookToCol;
-          const kingPiece = state.initialBoard[kingRow][kingCol];
-          const rookPiece = state.initialBoard[kingRow][rookCol];
-
-          state.initialBoard[kingRow][kingCol] = "";
-          state.initialBoard[kingRow][newKingCol] = kingPiece;
-          state.initialBoard[kingRow][rookCol] = "";
-          state.initialBoard[kingRow][newRookCol] = rookPiece;
-
-          if (kingPiece === "K") {
-            state.hasMoved.whiteKing = true;
-            if (rookCol === 0) state.hasMoved.whiteRookLeft = true;
-            if (rookCol === 7) state.hasMoved.whiteRookRight = true;
-          } else {
-            state.hasMoved.blackKing = true;
-            if (rookCol === 0) state.hasMoved.blackRookLeft = true;
-            if (rookCol === 7) state.hasMoved.blackRookRight = true;
-          }
-        } else {
-          const piece = state.initialBoard[move.fromRow][move.fromCol];
-          state.initialBoard[move.toRow][move.toCol] = piece;
-          state.initialBoard[move.fromRow][move.fromCol] = "";
-
-          if (move.newPiece) {
-            state.initialBoard[move.toRow][move.toCol] = move.newPiece;
-          }
-
-          if (piece.toUpperCase() === "K") {
-            if (piece === "K") {
-              state.hasMoved.whiteKing = true;
-            } else {
-              state.hasMoved.blackKing = true;
-            }
-          } else if (piece.toUpperCase() === "R") {
-            if (piece === "R") {
-              if (move.fromCol === 0) state.hasMoved.whiteRookLeft = true;
-              if (move.fromCol === 7) state.hasMoved.whiteRookRight = true;
-            } else {
-              if (move.fromCol === 0) state.hasMoved.blackRookLeft = true;
-              if (move.fromCol === 7) state.hasMoved.blackRookRight = true;
-            }
-          }
-        }
-      }
-
-      state.currentPlayer = state.currentPlayer === "white" ? "black" : "white";
-      state.selectedPiece = null;
-      state.possibleMoves = [];
-      state.moveAllowed = false;
-
-      return state;
-    },
     updateState: (state, action) => {
-      const { id, turn, history, b, w, myColor } = action.payload;
+      const { id, turn, history, black, white, myColor } = action.payload;
       const newHistory = history === "" ? [] : history.split(" ").map(turn => turnToCords(turn));
       const { board, hasMoved } = applyTurns([...newHistory]);
       return {
@@ -439,18 +298,23 @@ export const gameSlice = createSlice({
         myColor: myColor ?? state.myColor,
         gameHistory: newHistory,
         currentStep: newHistory.length,
-        b: b,
-        w: w,
+        black: black,
+        white: white,
         initialBoard: board,
         hasMoved: hasMoved,
         hasMadeTurn: false
       };
     },
+    updateTimers: (state, action) => {
+      const { black, white } = action.payload;
+      state.black.time = black ?? state.black.time;
+      state.white.time = white ?? state.white.time;
+    },
     gameOver: (state, action) => {
       return {
         ...state,
         moveAllowed: false,
-        gameOverYet: {
+        gameOver: {
           winner: action.payload.winner,
           reason: action.payload.reason,
           w_rating: action.payload.w_rating,

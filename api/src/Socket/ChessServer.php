@@ -87,7 +87,7 @@ class ChessServer extends SocketServer
             @$this->randomSearch = array_diff($this->randomSearch, [$secondPlayer]);
 
             $roomId = uniqid('gr');
-            $room = new GameRoom($data["rated"], $data["time"], $this, $roomId);
+            $room = new GameRoom($data["rated"], $data["time"] * 60, $this, $roomId);
             $availableColors = array_diff(["black","white"], [$secondPlayer["color"],$data["color"]]);
             shuffle($availableColors);
             if ($data["color"] === "r") {

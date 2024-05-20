@@ -33,10 +33,17 @@ const searchGame = (data) => {
   };
 };
 
+const resign = () => {
+  return {
+    type: "socket/resign"
+  };
+};
+
 export const s = {
   connect: connect,
   disconnect: disconnect,
   on: on,
   searchGame: searchGame,
-  turn: turn
+  turn: turn,
+  resign: resign
 }

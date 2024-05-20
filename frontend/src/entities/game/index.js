@@ -1,0 +1,1 @@
+export { GameOverDialog } from './game-over-dialog/ui/game-over-dialog';

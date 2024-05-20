@@ -11,11 +11,10 @@ export const movePiece = (newCoordinates) => {
     payload: newCoordinates,
   };
 };
+
 export const goToStep = (step) => {
   return {
     type: "game/goToStep",
     payload: {step}
   };
 };
-
-

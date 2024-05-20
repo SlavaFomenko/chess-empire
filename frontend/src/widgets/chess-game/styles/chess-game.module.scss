@@ -1,23 +1,17 @@
 .wrapper{
+  position: relative;
   width: 800px;
   height: 800px;
   display: flex;
   justify-content: center;
-  .gameOverCard {
-    width: 300px;
-    height: 100px;
-    background-color: white;
+  gap: 10px;
+
+  .rightPanel{
     display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    gap:10px;
-    border:2px solid black;
-    top:40%;
+    flex-direction: column;
   }
 
   .buttons{
-    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -27,5 +21,4 @@
       text-wrap: none;
     }
   }
-
 }

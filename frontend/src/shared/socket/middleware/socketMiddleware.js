@@ -35,6 +35,9 @@ export const socketMiddleware = (params) => (next) => (action) => {
     case "turn":
       socket.emit("turn", action.payload);
       break;
+    case "resign":
+      socket.emit("resign");
+      break;
     default:
       break;
   }

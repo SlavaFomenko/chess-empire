@@ -1,6 +1,6 @@
-import { showNotification } from "../../notification";
+
 import { baseState } from "./baseState";
-import { defaultState } from "./defaultState";
+import { gameOver } from "../../../widgets/chess-game/model/chess-game";
 
 export const inGameState = ({ socket, dispatch, history }) => {
   return {
@@ -11,6 +11,15 @@ export const inGameState = ({ socket, dispatch, history }) => {
         type: "game/updateState",
         payload: data,
       });
+    },
+    game_timer_update: (data) => {
+      dispatch({
+        type: "game/updateTimers",
+        payload: data,
+      });
+    },
+    game_end: (data) => {
+      dispatch(gameOver(data));
     }
   };
 };
