@@ -27,7 +27,7 @@ class UnauthorizedState extends ClientState
                 return;
             }
 
-            $repo = Context::$entityManager->getRepository(User::class);
+            $repo = $this->client->server->em->getRepository(User::class);
             /** @var User $user */
             $user = $repo->find($tokenData["id"]);
 

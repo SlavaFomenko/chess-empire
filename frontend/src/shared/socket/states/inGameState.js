@@ -1,10 +1,11 @@
 
 import { baseState } from "./baseState";
 import { gameOver } from "../../../widgets/chess-game/model/chess-game";
+import { defaultState } from "./defaultState";
 
-export const inGameState = ({ socket, dispatch, history }) => {
+export const inGameState = ({ socket, dispatch, history, getState }) => {
   return {
-    ...baseState({ socket, dispatch, history }),
+    ...baseState({ socket, dispatch, history, getState }),
     name: "inGame",
     game_update: (data) => {
       dispatch({

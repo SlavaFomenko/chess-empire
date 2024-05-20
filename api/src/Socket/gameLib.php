@@ -275,15 +275,9 @@ function canPlayerMove($player, $board, $hasMoved)
                 continue;
             }
 
-//            var_dump($i, $j);
-//            var_dump($board[$i][$j]);
-//            var_dump(getPossibleMoves($i, $j, $board, $hasMoved));
-
             $possibleMoves = array_merge($possibleMoves, getPossibleMoves($i, $j, $board, $hasMoved));
         }
     }
-
-    var_dump($possibleMoves);
 
     return !empty($possibleMoves);
 }
@@ -291,8 +285,6 @@ function canPlayerMove($player, $board, $hasMoved)
 function getPossibleMoves($row, $col, $board, $hasMoved)
 {
     $piece = $board[$row][$col];
-    var_dump("====================PIECE====================");
-    var_dump($piece);
 
     $possibleMoves = [];
 
@@ -333,9 +325,6 @@ function getPossibleMoves($row, $col, $board, $hasMoved)
             for ($j = 0; $j < 8; $j++) {
                 $valid = validate(strtoupper($piece), 7 - $row, $col, 7 - $i, $j, $reversedBoard);
                 $canCapture = canCaptureKing(7 - $row, $col, 7 - $i, $j, $reversedBoard, "black", $hasMoved);
-//                echo $valid ? "VALID " : "INVALID ";
-//                echo $canCapture ? "CAN " : "CANNOT ";
-//                echo "$row, $col, $i, $j" . PHP_EOL;
                 if ($valid && $canCapture) {
                     if ($board[$i][$j] === "" || strtoupper($board[$i][$j]) === $board[$i][$j]) {
                         $possibleMoves[] = [
@@ -363,7 +352,6 @@ function getPossibleMoves($row, $col, $board, $hasMoved)
         }
     }
 
-    var_dump($possibleMoves);
     return $possibleMoves;
 }
 
@@ -393,16 +381,13 @@ function validatePawn($row, $col, $newRow, $newCol, $board)
         } else {
             $a = $newRow === $row - 1 && $board[$newRow][$newCol] === "";
         }
-//        var_dump(($a ? "IN" : "") . "VALID $row $col $newRow $newCol");
         return $a;
     } else {
         if (abs($newCol - $col) === 1) {
             if ($newRow === $row - 1 && $board[$newRow][$newCol] !== "") {
-//                var_dump("VALID $row $col $newRow $newCol");
                 return true;
             }
         }
-//        var_dump("INVALID $row $col $newRow $newCol");
         return false;
     }
 }
@@ -489,7 +474,6 @@ function validateKing($row, $col, $newRow, $newCol, $board)
 
 function getKing($player, $board)
 {
-//    var_dump($player, $board);
     for ($i = 0; $i < 8; $i++) {
         for ($j = 0; $j < 8; $j++) {
             if ($board[$i][$j] === ($player === "white" ? "K" : "k")) {

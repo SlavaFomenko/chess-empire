@@ -2,6 +2,8 @@
 
 namespace App\Socket;
 
+use App\Entity\User;
+use Handy\Context;
 use Handy\Socket\SocketClient;
 use Handy\Socket\SocketRoom;
 use Handy\Socket\SocketServer;
@@ -143,16 +145,26 @@ class GameRoom extends SocketRoom
         $this->removeAllListeners("turn");
         $w_rating = $winner === "white" ? 10 : -10;
         $w_rating = $winner === "tie" ? 0 : $w_rating;
-        foreach ($this->clients as $clientId) {
-            $client = $this->server->getClientById($clientId);
-            $client->emit("game_end", [
+        $w_rating = $this->rated ? $w_rating : 0;
+        foreach ($this->players as $color => $player) {
+            $player["client"]->emit("game_end", [
                 "winner"   => $winner,
                 "reason"   => $reason,
                 "w_rating" => $w_rating,
                 "b_rating" => -$w_rating
             ]);
-            $this->kick($client);
+            $this->kick($player["client"]);
+            if($this->rated){
+                $repo = $this->server->em->getRepository(User::class);
+                $user = $repo->find($player["client"]->user->getId());
+                $newRating = $user->getRating() + ($color === "white" ? $w_rating : -$w_rating);
+                $user->setRating(max($newRating, 0));
+                $this->server->em?->persist($user);
+            }
         }
+
+        $this->server->em?->flush();
+
         unset($this->server->rooms[$this->id]);
     }
 

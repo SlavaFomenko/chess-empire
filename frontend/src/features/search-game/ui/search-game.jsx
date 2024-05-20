@@ -108,7 +108,7 @@ export function SearchGame () {
             </div>
 
             {socketState.state === "default" && <button type="submit">Search</button>}
-            {socketState.state !== "default" && <button type="button">Cancel</button>}
+            {socketState.state === "searchingGame" && <button type="button">Cancel</button>}
           </Form>
         )}
       </Formik>

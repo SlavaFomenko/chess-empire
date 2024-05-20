@@ -11,7 +11,6 @@ export function HomePage () {
         <h1>
           HomePage
         </h1>
-        <SearchGame/>
       </div>
     </LayoutPage>
   );

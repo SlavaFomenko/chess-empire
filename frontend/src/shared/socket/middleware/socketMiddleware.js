@@ -3,6 +3,7 @@ import { showNotification } from "../../notification";
 import { unauthorizedState } from "../states/unauthorizedState";
 import { history } from "../../routing";
 import { searchingGameState } from "../states/searchingGameState";
+import { defaultState } from "../states/defaultState";
 
 export const socketMiddleware = (params) => (next) => (action) => {
   const { dispatch, getState } = params;
@@ -30,13 +31,19 @@ export const socketMiddleware = (params) => (next) => (action) => {
       break;
     case "searchGame":
       socket.emit("play_random", action.payload);
-      socket.setState(searchingGameState, { dispatch, history, getState })
+      socket.setState(searchingGameState, { dispatch, history, getState });
       break;
     case "turn":
       socket.emit("turn", action.payload);
       break;
     case "resign":
       socket.emit("resign");
+      break;
+    case "closeEndGame":
+      dispatch({
+        type: "game/reset"
+      });
+      socket.setState(defaultState, { dispatch, history, getState });
       break;
     default:
       break;

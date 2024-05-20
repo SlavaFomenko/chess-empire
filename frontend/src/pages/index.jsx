@@ -20,7 +20,7 @@ export class Routing extends React.Component {
         <Route path="/game" element={<GamePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegistrationPage />} />
-        <Route path={'/profile'} element={<ProfilePage/>}/>
+        <Route path="/profile" element={<ProfilePage/>}/>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     );

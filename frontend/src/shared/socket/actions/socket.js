@@ -39,11 +39,18 @@ const resign = () => {
   };
 };
 
+const closeEndGame = () => {
+  return {
+    type: "socket/closeEndGame"
+  };
+};
+
 export const s = {
   connect: connect,
   disconnect: disconnect,
   on: on,
   searchGame: searchGame,
   turn: turn,
-  resign: resign
+  resign: resign,
+  closeEndGame: closeEndGame
 }

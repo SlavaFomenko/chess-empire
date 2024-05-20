@@ -2,43 +2,45 @@ import { createSlice } from "@reduxjs/toolkit";
 import { applyTurns, turnToCords } from "../lib";
 import { DEFAULT_BOARD } from "../config/config";
 
+const initialState = {
+  id: null,
+  hasMadeTurn: false,
+  initialBoard: DEFAULT_BOARD,
+  selectedPiece: null,
+  currentPlayer: "white",
+  possibleMoves: [],
+  check: false,
+  gameHistory: [],
+  currentStep: 0,
+  moveAllowed: true,
+  colorSelectedPiece: null,
+  myColor: null,
+  hasMoved: {
+    whiteKing: false,
+    whiteRookLeft: false,
+    whiteRookRight: false,
+    blackKing: false,
+    blackRookLeft: false,
+    blackRookRight: false
+  },
+  promotion: {
+    isPending: false,
+    position: null,
+    selectedPiece: null
+  },
+  gameOver: {
+    winner: null,
+    reason: null,
+    w_rating: null,
+    b_rating: null
+  },
+  black: null,
+  white: null
+}
+
 export const gameSlice = createSlice({
   name: "game",
-  initialState: {
-    id: null,
-    hasMadeTurn: false,
-    initialBoard: DEFAULT_BOARD,
-    selectedPiece: null,
-    currentPlayer: "white",
-    possibleMoves: [],
-    check: false,
-    gameHistory: [],
-    currentStep: 0,
-    moveAllowed: true,
-    colorSelectedPiece: null,
-    myColor: null,
-    hasMoved: {
-      whiteKing: false,
-      whiteRookLeft: false,
-      whiteRookRight: false,
-      blackKing: false,
-      blackRookLeft: false,
-      blackRookRight: false
-    },
-    promotion: {
-      isPending: false,
-      position: null,
-      selectedPiece: null
-    },
-    gameOver: {
-      winner: null,
-      reason: null,
-      w_rating: null,
-      b_rating: null
-    },
-    black: null,
-    white: null
-  },
+  initialState: {...initialState},
   reducers: {
     selectPiece: (state, action) => {
       if (action.payload === null || !state.moveAllowed || state.myColor !== state.currentPlayer) {
@@ -320,6 +322,9 @@ export const gameSlice = createSlice({
           b_rating: action.payload.b_rating
         }
       };
+    },
+    reset: (state) => {
+      return {...initialState}
     }
   }
 });

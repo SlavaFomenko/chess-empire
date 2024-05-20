@@ -16,8 +16,9 @@ use Handy\Socket\SocketServer;
 class ChessServer extends SocketServer
 {
 
-    public array $users = [];
-    public array $randomSearch = [];
+    public array $users;
+    public array $randomSearch;
+    public EntityManager $em;
 
     public function __construct(string $ip, int $port, int $maxBufferSize = 2048, string $userClass = ChessClient::class)
     {
@@ -25,6 +26,7 @@ class ChessServer extends SocketServer
         Context::$connection = new Connection();
         Context::$connection->connect();
         Context::$entityManager = new EntityManager();
+        $this->em = Context::$entityManager;
         $this->users = [];
         $this->randomSearch = [];
         $this->initListeners();

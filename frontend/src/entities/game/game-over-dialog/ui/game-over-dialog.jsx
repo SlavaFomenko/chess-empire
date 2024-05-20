@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styles from "../styles/game-over-dialog.module.scss";
+import { s } from "../../../../shared/socket/";
+import { useDispatch } from "react-redux";
 
-export function GameOverDialog ({gameState}) {
+export function GameOverDialog ({ gameState }) {
   const gameOverState = gameState.gameOver;
+  const dispatch = useDispatch();
 
   const endTitle = gameOverState.winner === "tie" ? "TIE" : `${gameOverState.winner} won`.toUpperCase();
 
@@ -12,15 +15,15 @@ export function GameOverDialog ({gameState}) {
     resign: "The opponent resigned",
     mate: "Mate!",
     tie: "There's nothing we can do"
-  }
+  };
 
   const rating = {
     b: gameState.gameOver.b_rating,
     w: gameState.gameOver.w_rating
-  }
+  };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} onClick={() => {dispatch(s.closeEndGame());}}>
       <div className={styles.gameOverDialog}>
         <h1>{endTitle}</h1>
         <p>{reasonMessage[gameOverState.reason]}</p>
