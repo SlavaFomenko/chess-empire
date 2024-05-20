@@ -87,7 +87,6 @@ export const gameSlice = createSlice({
             }
           }
         }
-
         if (piece === "k" && !state.hasMoved.blackKing) {
           if (!state.hasMoved.blackRookLeft && canCastle(state.initialBoard, row, col, 0, state.currentPlayer)) {
             possibleMoves.push({ row: row, col: col - 2 });
@@ -476,6 +475,8 @@ const canCastle = (board, kingRow, kingCol, rookCol, player) => {
   }
   return true;
 };
+
+
 
 function canCaptureKing (row, col, newRow, newCol, board, currentPlayer) {
   const piece = board[row][col];

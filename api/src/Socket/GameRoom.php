@@ -70,19 +70,24 @@ class GameRoom extends SocketRoom
         $this->on("turn", function ($data, ChessClient $client) {
             $cords = turnToCords($data);
             $apply = applyTurns($this->history);
-            var_dump($data);
+
+            $possibleMoves = getPossibleMoves($cords['fromRow'],$cords['fromCol'],$apply["board"],$this->hasMoved);
+
+            var_dump($possibleMoves);
+
             if (!validateTurn($cords, $apply["board"], $this->currentTurn) && !str_contains($data, "00") && strlen($data) !== 5) {
                 return;
             }
             $this->hasMoved = $apply["hasMoved"];
             $this->history[] = $cords;
-            var_dump(applyTurns($this->history));
             $this->currentTurn = $this->currentTurn === "white" ? "black" : "white";
             foreach ($this->players as $p) {
                 $p["client"]->emit("game_update", $this->getGameState());
             }
         });
     }
+
+
 
     public function join(SocketClient $client, $color = "-"): void
     {

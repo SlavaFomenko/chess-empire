@@ -62,6 +62,9 @@ function cordsToTurn(array $cords) {
     return $turn;
 }
 
+
+
+
 function applyTurns($turns, $board = DEFAULT_BOARD, $currentPlayer = "white", $hasMoved = [
     "whiteKing" => false,
     "whiteRookLeft" => false,
@@ -144,17 +147,95 @@ function canCaptureKing($row, $col, $newRow, $newCol, $board, $currentPlayer) {
         return array_slice($row, 0);
     }, $board);
 
-    if ($newBoard[$newRow][$newCol] === "" ||
-        ($currentPlayer === "white" && strtolower($newBoard[$newRow][$newCol]) === $newBoard[$newRow][$newCol]) ||
-        ($currentPlayer === "black" && strtoupper($newBoard[$newRow][$newCol]) === $newBoard[$newRow][$newCol])) {
-        $newBoard[$newRow][$newCol] = $piece;
-        $newBoard[$row][$col] = "";
-    } else {
-        return false;
-    }
+    $newBoard[$newRow][$newCol] = $piece;
+    $newBoard[$row][$col] = "";
 
     return !isCheck($currentPlayer, $newBoard);
+
+
+
+
+//    return $val;
 }
+
+
+function canCastle($board, $kingRow, $kingCol, $rookCol, $player) {
+    if (isCheck($player, $board)) return false;
+
+    $direction = $rookCol > $kingCol ? 1 : -1;
+    for ($col = $kingCol + $direction; $col !== $rookCol; $col += $direction) {
+        if ($board[$kingRow][$col] !== "") return false;
+        $newBoard = array_map(function($row) { return $row; }, $board);
+        $newBoard[$kingRow][$col] = $player === "white" ? "K" : "k";
+        $newBoard[$kingRow][$kingCol] = "";
+        if (isCheck($player, $newBoard)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+function getPossibleMoves($row, $col, $board, $hasMoved) {
+
+    $piece  = $board[$row][$col];
+//    var_dump($hasMoved);
+
+//    var_dump($board);
+
+
+    $possibleMoves = [];
+
+    if (strtoupper($piece) === $piece) { // white piece
+        for ($i = 0; $i < 8; $i++) {
+            for ($j = 0; $j < 8; $j++) {
+                if (validate($piece, $row, $col, $i, $j, $board) && canCaptureKing($row, $col, $i, $j, $board, "white")) {
+                    if ($board[$i][$j] === "" || strtolower($board[$i][$j]) === $board[$i][$j]) {
+                        $possibleMoves[] = ['row' => $i, 'col' => $j];
+                    }
+                }
+            }
+        }
+
+        if ($piece === "K" && !$hasMoved['whiteKing']) {
+            if (!$hasMoved['whiteRookLeft'] && canCastle($board, $row, $col, 0, "white")) {
+                $possibleMoves[] = ['row' => $row, 'col' => $col - 2];
+            }
+            if (!$hasMoved['whiteRookRight'] && canCastle($board, $row, $col, 7, "white")) {
+                $possibleMoves[] = ['row' => $row, 'col' => $col + 2];
+            }
+        }
+    } else {
+//        $reversedBoard = array_reverse($board);
+
+        $reversedBoard = array_reverse(array_map(function($row) {
+            return array_slice($row, 0);
+        }, $board));
+
+        for ($i = 0; $i < 8; $i++) {
+            for ($j = 0; $j < 8; $j++) {
+                if (validate(strtoupper($piece), 7-$row, $col, 7-$i, $j, $reversedBoard) && canCaptureKing(7 - $row, $col, 7 - $i, $j, $reversedBoard, "black")) {
+                    if ($board[$i][$j] === "" || strtoupper($board[$i][$j]) === $board[$i][$j]) {
+                        $possibleMoves[] = ['row' => $i, 'col' => $j];
+                    }
+                }
+            }
+        }
+
+        if ($piece === "k" && !$hasMoved['blackKing']) {
+            if (!$hasMoved['blackRookLeft'] && canCastle($board, $row, $col, 0, "black")) {
+                $possibleMoves[] = ['row' => $row, 'col' => $col - 2];
+            }
+            if (!$hasMoved['blackRookRight'] && canCastle($board, $row, $col, 7, "black")) {
+                $possibleMoves[] = ['row' => $row, 'col' => $col + 2];
+            }
+        }
+    }
+
+    return $possibleMoves;
+}
+
+
 
 function validate($piece, $row, $col, $newRow, $newCol, $board) {
     $validateFns = [
@@ -202,6 +283,7 @@ function validateBishop($row, $col, $newRow, $newCol, $board) {
         $i = $row + $directionX;
         $j = $col + $directionY;
         while ($i !== $newRow && $j !== $newCol) {
+            if ($i < 0 || $i >= count($board) || $j < 0 || $j >= count($board[0])) return false;
             if ($board[$i][$j] !== "") return false;
             $i += $directionX;
             $j += $directionY;
@@ -280,24 +362,21 @@ function isCheck($player, $board) {
         for ($j = 0; $j < 8; $j++) {
             if ($player === "white") {
                 if ($board[$i][$j] !== "" && strtolower($board[$i][$j]) === $board[$i][$j]) {
-                    $validateFn = "validate" . strtoupper($board[$i][$j]);
                     $reversedBoard = array_reverse(array_map(function($row) {
                         return array_slice($row, 0);
                     }, $board));
-                    if (call_user_func($validateFn, 7 - $i, $j, 7 - $kingRow, $kingCol, $reversedBoard)) {
+                    if (validate($board[$i][$j], 7 - $i, $j, 7 - $kingRow, $kingCol, $reversedBoard)) {
                         return true;
                     }
                 }
             } else {
                 if ($board[$i][$j] !== "" && strtoupper($board[$i][$j]) === $board[$i][$j]) {
-                    $validateFn = "validate" . strtoupper($board[$i][$j]);
-                    if (call_user_func($validateFn, $i, $j, $kingRow, $kingCol, $board)) {
+                    if (validate($board[$i][$j], 7 - $i, $j, 7 - $kingRow, $kingCol, $board)) {
                         return true;
                     }
                 }
             }
         }
     }
-
     return false;
 }
