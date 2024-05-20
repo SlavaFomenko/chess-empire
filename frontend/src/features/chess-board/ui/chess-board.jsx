@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "../styles/chess-board.module.scss";
 import { Rook, Bishop, EmptyField, King, Knight, Pawn, Queen } from "../../../entities/chess-figures";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { COORDS } from "../../../shared/game";
+import { s } from "../../../shared/socket";
+
 
 export function ChessBoard () {
-  const board = useSelector(state => state.game.initialBoard);
-  const myColor = useSelector(state => state.game.myColor);
+  const {initialBoard, currentPlayer, myColor, gameHistory, hasMadeTurn } = useSelector(state => state.game);
+  const dispatch = useDispatch();
 
   const renderBoard = [];
 
-  board.map((row, rowIndex) =>
+  useEffect(() => {
+    if (hasMadeTurn && gameHistory.length > 0) {
+      dispatch(s.turn(gameHistory[gameHistory.length - 1]));
+    }
+  }, [hasMadeTurn]);
+
+  initialBoard.map((row, rowIndex) =>
     row.map((e, columnIndex) => {
       const specialColumnIndex = columnIndex+1
         switch (e) {

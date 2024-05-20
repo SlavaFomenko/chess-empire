@@ -62,26 +62,68 @@ function cordsToTurn(array $cords) {
     return $turn;
 }
 
-function applyTurns(array $turns, $board = DEFAULT_BOARD) {
-    if (count($turns) === 0) {
-        return $board;
+function applyTurns($turns, $board = DEFAULT_BOARD, $currentPlayer = "white", $hasMoved = [
+    "whiteKing" => false,
+    "whiteRookLeft" => false,
+    "whiteRookRight" => false,
+    "blackKing" => false,
+    "blackRookLeft" => false,
+    "blackRookRight" => false
+]) {
+    if (empty($turns)) {
+        return ["board" => $board, "hasMoved" => $hasMoved];
     }
 
-    $board = array_map(function ($row) {
+    $board = array_map(function($row) {
         return array_slice($row, 0);
     }, $board);
 
-    $currentTurn = array_shift($turns);
-    $fromRow = $currentTurn['fromRow'];
-    $fromCol = $currentTurn['fromCol'];
-    $toRow = $currentTurn['toRow'];
-    $toCol = $currentTurn['toCol'];
-    $piece = $board[$fromRow][$fromCol];
+    $turn = array_shift($turns);
 
-    $board[$toRow][$toCol] = $piece;
-    $board[$fromRow][$fromCol] = "";
+    $fromRow = $turn['fromRow'];
+    $fromCol = $turn['fromCol'];
+    $toRow = $turn['toRow'];
+    $toCol = $turn['toCol'];
+    @$castling = $turn['castling'];
+    @$rookFromCol = $turn['rookFromCol'];
+    @$rookToCol = $turn['rookToCol'];
+    $newPiece = isset($turn['newPiece']) ? $turn['newPiece'] : null;
 
-    return applyTurns($turns, $board);
+    if ($castling) {
+        $newBoard = array_map(function($row) {
+            return array_slice($row, 0);
+        }, $board);
+        $piece = $newBoard[$fromRow][$fromCol];
+        $newBoard[$fromRow][$fromCol] = "";
+        $newBoard[$toRow][$toCol] = $piece;
+        $newBoard[$fromRow][$rookFromCol] = "";
+        $newBoard[$fromRow][$rookToCol] = $currentPlayer === "white" ? "R" : "r";
+        $board = $newBoard;
+    } else {
+        $piece = $newPiece ?? $board[$fromRow][$fromCol];
+        $board[$toRow][$toCol] = $piece;
+        $board[$fromRow][$fromCol] = "";
+    }
+
+    if ($currentPlayer === "white") {
+        if ($board[$toRow][$toCol] === "K") {
+            $hasMoved['whiteKing'] = true;
+        }
+        if ($board[$toRow][$toCol] === "R") {
+            if ($fromCol === 0) $hasMoved['whiteRookLeft'] = true;
+            if ($fromCol === 7) $hasMoved['whiteRookRight'] = true;
+        }
+    } else {
+        if ($board[$toRow][$toCol] === "k") {
+            $hasMoved['blackKing'] = true;
+        }
+        if ($board[$toRow][$toCol] === "r") {
+            if ($fromCol === 0) $hasMoved['blackRookLeft'] = true;
+            if ($fromCol === 7) $hasMoved['blackRookRight'] = true;
+        }
+    }
+
+    return applyTurns($turns, $board, $currentPlayer === "white" ? "black" : "white", $hasMoved);
 }
 
 function validateTurn($cords, $board, $player) {

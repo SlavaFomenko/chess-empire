@@ -1,7 +1,7 @@
 import { DEFAULT_BOARD } from "../config/config";
 
 export const turnToCords = (turn) => {
-  if(["b00", "b000", "w00", "w000"].includes(turn)){
+  if (["b00", "b000", "w00", "w000"].includes(turn)) {
     const row = turn[0] === "b" ? 0 : 7;
     const long = turn.length === 4;
     return {
@@ -12,7 +12,7 @@ export const turnToCords = (turn) => {
       castling: true,
       rookFromCol: long ? 0 : 7,
       rookToCol: long ? 3 : 5
-    }
+    };
   }
 
   const charCodeShift = "a".charCodeAt(0);
@@ -24,13 +24,13 @@ export const turnToCords = (turn) => {
     toRow: turn.charCodeAt(3) - numCodeShift
   };
 
-  const exchange = turn.length === 5 ? {newPiece: turn[5]} : {};
+  const exchange = turn.length === 5 ? { newPiece: turn[5] } : {};
 
-  return {...cords, exchange};
-}
+  return { ...cords, exchange };
+};
 
 export const cordsToTurn = (cords) => {
-  if(cords.castling){
+  if (cords.castling) {
     const color = cords.fromRow === 0 ? "b" : "w";
     const zeros = cords.rookToCol === 3 ? "000" : "00";
     return `${color}${zeros}`;
@@ -43,22 +43,68 @@ export const cordsToTurn = (cords) => {
     cords.fromRow + numCodeShift,
     cords.toCol + charCodeShift,
     cords.toRow + numCodeShift
-  )
+  );
 
   return `${turn}${cords.newPiece ?? ""}`;
-}
+};
 
-export const applyTurns = (turns, board = DEFAULT_BOARD) => {
+export const applyTurns = (turns, board = DEFAULT_BOARD, currentPlayer = "white", hasMoved = {
+  whiteKing: false,
+  whiteRookLeft: false,
+  whiteRookRight: false,
+  blackKing: false,
+  blackRookLeft: false,
+  blackRookRight: false
+}) => {
+  // debugger
   if (turns.length === 0) {
-    return board;
+    return { board, hasMoved };
   }
 
   board = board.map(row => [...row]);
 
-  const { fromRow, fromCol, toRow, toCol } = turns.shift()
-  const piece = board[fromRow][fromCol];
-  board[toRow][toCol] = piece;
-  board[fromRow][fromCol] = "";
+  const {
+    fromRow,
+    fromCol,
+    toRow,
+    toCol,
+    castling,
+    rookFromCol,
+    rookToCol,
+    newPiece
+  } = turns.shift();
 
-  return applyTurns(turns, board);
-}
+  if (castling) {
+    const newBoard = board.map(row => [...row]);
+    const piece = newBoard[fromRow][fromCol];
+    newBoard[fromRow][fromCol] = "";
+    newBoard[toRow][toCol] = piece;
+    newBoard[fromRow][rookFromCol] = "";
+    newBoard[fromRow][rookToCol] = currentPlayer === "white" ? "R" : "r";
+    board = newBoard;
+  } else {
+    const piece = newPiece ?? board[fromRow][fromCol];
+    board[toRow][toCol] = piece;
+    board[fromRow][fromCol] = "";
+  }
+
+  if (currentPlayer === "white") {
+    if (board[toRow][toCol] === "K") {
+      hasMoved.whiteKing = true;
+    }
+    if (board[toRow][toCol] === "R") {
+      if (fromCol === 0) hasMoved.whiteRookLeft = true;
+      if (fromCol === 7) hasMoved.whiteRookRight = true;
+    }
+  } else {
+    if (board[toRow][toCol] === "k") {
+      hasMoved.blackKing = true;
+    }
+    if (board[toRow][toCol] === "r") {
+      if (fromCol === 0) hasMoved.blackRookLeft = true;
+      if (fromCol === 7) hasMoved.blackRookRight = true;
+    }
+  }
+
+  return applyTurns(turns, board, currentPlayer === "white" ? "black" : "white", hasMoved);
+};

@@ -10,6 +10,7 @@ require_once "gameLib.php";
 
 class GameRoom extends SocketRoom
 {
+
     public ?int $startedAt;
 
     public ?int $lastTimeUpdate;
@@ -26,6 +27,8 @@ class GameRoom extends SocketRoom
 
     public array $players;
 
+    public array $hasMoved;
+
     public function __construct(bool $rated, int $time, SocketServer $server, string $id)
     {
         parent::__construct($server, $id);
@@ -35,6 +38,14 @@ class GameRoom extends SocketRoom
         $this->time = $time;
         $this->currentTurn = "-";
         $this->winner = "-";
+        $this->hasMoved = [
+            "whiteKing"      => false,
+            "whiteRookLeft"  => false,
+            "whiteRookRight" => false,
+            "blackKing"      => false,
+            "blackRookLeft"  => false,
+            "blackRookRight" => false
+        ];
         $this->history = [];
         $this->players = [];
     }
@@ -56,12 +67,16 @@ class GameRoom extends SocketRoom
             $p["client"]->emit("game_update", $this->getGameState());
         }
 
-        $this->on("turn", function($data, ChessClient $client) {
+        $this->on("turn", function ($data, ChessClient $client) {
             $cords = turnToCords($data);
-            if(!validateTurn($cords, applyTurns($this->history), $this->currentTurn)){
+            $apply = applyTurns($this->history);
+            var_dump($data);
+            if (!validateTurn($cords, $apply["board"], $this->currentTurn) && !str_contains($data, "00") && strlen($data) !== 5) {
                 return;
             }
+            $this->hasMoved = $apply["hasMoved"];
             $this->history[] = $cords;
+            var_dump(applyTurns($this->history));
             $this->currentTurn = $this->currentTurn === "white" ? "black" : "white";
             foreach ($this->players as $p) {
                 $p["client"]->emit("game_update", $this->getGameState());
@@ -73,7 +88,10 @@ class GameRoom extends SocketRoom
     {
         /** @var ChessClient $client */
         parent::join($client);
-        if (in_array($color, ["black", "white"])) {
+        if (in_array($color, [
+            "black",
+            "white"
+        ])) {
             if (isset($this->players[$color])) {
                 trigger_error("Player " . $color . " has already joined");
                 $this->kick($client);
@@ -104,19 +122,20 @@ class GameRoom extends SocketRoom
         @$b = $this->players["black"];
         @$w = $this->players["white"];
         return [
-            "id"         => $this->id,
-            "turn"       => $this->currentTurn,
-            "history"    => implode(" ", array_map(fn($cords)=>cordsToTurn($cords), $this->history)),
-            "black"          => [
+            "id"       => $this->id,
+            "turn"     => $this->currentTurn,
+            "history"  => implode(" ", array_map(fn($cords) => cordsToTurn($cords), $this->history)),
+            "black"    => [
                 "id"       => @$b["client"]->user?->getId(),
                 "username" => @$b["client"]->user?->getUserName(),
                 "time"     => @$b["time"]
             ],
-            "white"          => [
+            "white"    => [
                 "id"       => @$w["client"]->user?->getId(),
                 "username" => @$w["client"]->user?->getUserName(),
                 "time"     => @$w["time"]
-            ]
+            ],
+            "hasMoved" => $this->hasMoved
         ];
     }
 

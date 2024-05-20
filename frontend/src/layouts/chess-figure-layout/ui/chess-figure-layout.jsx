@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "../styles/chess-figure-layout.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { movePiece, selectPiece } from "../model/chess-figure-layout";
@@ -7,13 +7,18 @@ import { s } from "../../../shared/socket";
 
 export const ChessFigureLayout = ({ figureProps: { coordinate, color }, children }) => {
   const dispatch = useDispatch();
-  const {selectedPiece, possibleMoves, colorSelectedPiece, moveAllowed} = useSelector(state => state.game);
+  const {
+    selectedPiece,
+    possibleMoves,
+    colorSelectedPiece,
+    moveAllowed
+  } = useSelector(state => state.game);
   const isSelected = selectedPiece && selectedPiece.row === coordinate.row && selectedPiece.col === coordinate.col;
   const isHighlighted = possibleMoves.some(move => move.row === coordinate.row && move.col === coordinate.col);
 
   const handleSquareClick = () => {
-    if(!moveAllowed){
-      return
+    if (!moveAllowed) {
+      return;
     }
 
     if (isSelected) {
@@ -30,10 +35,7 @@ export const ChessFigureLayout = ({ figureProps: { coordinate, color }, children
       figuresColor: color
     };
 
-    const { row, col } = selectedPiece;
-
     dispatch(movePiece(newCoordinate));
-    dispatch(s.turn({fromRow:row, fromCol:col, toRow:coordinate.row, toCol: coordinate.col}))
   };
 
   return (
