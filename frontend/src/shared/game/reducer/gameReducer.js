@@ -29,6 +29,12 @@ export const gameSlice = createSlice({
       isPending: false,
       position: null,
       selectedPiece: null
+    },
+    gameOverYet: {
+      winner: null,
+      reason: null,
+      w_rating:null,
+      b_rating:null
     }
   },
   reducers: {
@@ -101,14 +107,14 @@ export const gameSlice = createSlice({
       const { row, col } = state.selectedPiece;
       const { newRow, newCol } = action.payload;
       const piece = state.initialBoard[row][col];
-      let newState = {...JSON.parse(JSON.stringify(state)), hasMadeTurn: true};
+      let newState = { ...JSON.parse(JSON.stringify(state)), hasMadeTurn: true };
 
       const newGameHistory = [...state.gameHistory, { fromRow: row, fromCol: col, toRow: newRow, toCol: newCol }];
 
       if (piece.toUpperCase() === "P" && (newRow === 0 || newRow === 7)) {
         newState.promotion.isPending = true;
         newState.promotion.position = action.payload;
-        newState.hasMadeTurn = false
+        newState.hasMadeTurn = false;
       }
       if (piece.toUpperCase() === "K" && Math.abs(newCol - col) === 2) {
         const kingRow = row;
@@ -158,7 +164,7 @@ export const gameSlice = createSlice({
             currentPlayer: newState.currentPlayer === "white" ? "black" : "white",
             gameHistory: newGameHistory,
             currentStep: newState.currentStep + 1,
-            check,
+            check
           };
           return newState;
         }
@@ -196,7 +202,7 @@ export const gameSlice = createSlice({
               currentPlayer: newState.currentPlayer === "white" ? "black" : "white",
               gameHistory: newGameHistory,
               currentStep: newState.currentStep + 1,
-              check,
+              check
             };
             return newState;
           }
@@ -235,7 +241,7 @@ export const gameSlice = createSlice({
               currentPlayer: newState.currentPlayer === "white" ? "black" : "white",
               gameHistory: newGameHistory,
               currentStep: newState.currentStep + 1,
-              check,
+              check
             };
 
             return newState;
@@ -251,7 +257,7 @@ export const gameSlice = createSlice({
       state.promotion.isPending = false;
       state.initialBoard[newRow][newCol] = state.currentPlayer === "white" ? selectedPiece.toLowerCase() : selectedPiece;
       state.gameHistory[state.gameHistory.length - 1].newPiece = state.currentPlayer === "white" ? selectedPiece.toLowerCase() : selectedPiece;
-      state.hasMadeTurn = true
+      state.hasMadeTurn = true;
     },
     goToStep: (state, action) => {
       const newStep = action.payload.step;
@@ -262,7 +268,7 @@ export const gameSlice = createSlice({
 
       const historyToApply = state.gameHistory.slice(0, Math.max(newStep, 0));
 
-      const {board, hasMoved} = applyTurns(historyToApply);
+      const { board, hasMoved } = applyTurns(historyToApply);
       const newCurrentPlayer = newStep % 2 === 0 ? "white" : "black";
 
       const check = isCheck(newCurrentPlayer, board);
@@ -279,7 +285,6 @@ export const gameSlice = createSlice({
         moveAllowed: newStep === state.gameHistory.length
       };
     },
-
     applyTurn: (state) => {
 
       if (state.gameHistory.length === state.currentStep) {
@@ -426,7 +431,7 @@ export const gameSlice = createSlice({
     updateState: (state, action) => {
       const { id, turn, history, b, w, myColor } = action.payload;
       const newHistory = history === "" ? [] : history.split(" ").map(turn => turnToCords(turn));
-      const {board, hasMoved} = applyTurns([...newHistory]);
+      const { board, hasMoved } = applyTurns([...newHistory]);
       return {
         ...state,
         id: id,
@@ -439,6 +444,18 @@ export const gameSlice = createSlice({
         initialBoard: board,
         hasMoved: hasMoved,
         hasMadeTurn: false
+      };
+    },
+    gameOver: (state, action) => {
+      return {
+        ...state,
+        moveAllowed: false,
+        gameOverYet: {
+          winner: action.payload.winner,
+          reason: action.payload.reason,
+          w_rating: action.payload.w_rating,
+          b_rating: action.payload.b_rating
+        }
       };
     }
   }
