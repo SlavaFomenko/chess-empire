@@ -1,19 +1,31 @@
-.wrapper{
+.wrapper {
   width: 100%;
   height: 100%;
 
-  border: 1px solid blue;
   display: flex;
   justify-content: center;
   align-items: center;
-  img{
+
+  background-color: #DCD7C9;
+
+  img {
     width: 90%;
     height: 90%;
   }
 }
-  .isSelected{
-    background-color: lightgreen;
-  }
-  .isHighlighted{
-    background-color: lightcoral;
-  }
+
+.dark {
+  background-color: #A27B5C;
+}
+
+.isSelected {
+  background-color: #83CD83;
+}
+
+.isHighlighted {
+  background-color: #F88379;
+}
+
+.dark.isHighlighted {
+  background-color: #FFA9A2;
+}

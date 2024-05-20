@@ -1,5 +1,28 @@
 .side_bar {
-  background-color: lightgray;
-  width: 10%;
+  background-color: #3F4E4F;
+  width: 10rem;
   height: 100%;
+
+  button {
+    margin: 0;
+    padding: 0 0.5rem;
+    width: 100%;
+    height: 2.5rem;
+    border: none;
+    color: #D2D4D4;
+    background-color: rgba(0,0,0,0);
+    font-size: 1.5rem;
+    font-weight: 500;
+    text-align: left;
+    transition: 200ms ease-in-out;
+  }
+
+  .current {
+    color: #FDFDFD;
+    font-weight: 700;
+  }
+
+  button:hover {
+    background-color: #576667;
+  }
 }

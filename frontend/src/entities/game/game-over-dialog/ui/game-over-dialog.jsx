@@ -2,6 +2,7 @@ import React from "react";
 import styles from "../styles/game-over-dialog.module.scss";
 import { s } from "../../../../shared/socket/";
 import { useDispatch } from "react-redux";
+import classNames from "classnames";
 
 export function GameOverDialog ({ gameState }) {
   const gameOverState = gameState.gameOver;
@@ -23,7 +24,7 @@ export function GameOverDialog ({ gameState }) {
   };
 
   return (
-    <div className={styles.container} onClick={() => {dispatch(s.closeEndGame());}}>
+    <div className={styles.container}>
       <div className={styles.gameOverDialog}>
         <h1>{endTitle}</h1>
         <p>{reasonMessage[gameOverState.reason]}</p>
@@ -31,16 +32,31 @@ export function GameOverDialog ({ gameState }) {
           <tr>
             <td>{gameState.black.username}</td>
             <td>
-              <span>{`${rating.b > 0 ? "+" : ""}${rating.b}`}</span>
+              <span
+                className={classNames({
+                  [styles.ratingRed]: rating.b < 0,
+                  [styles.ratingGreen]: rating.b > 0
+                })}
+              >
+                {`${rating.b > 0 ? "+" : ""}${rating.b}`}
+              </span>
             </td>
           </tr>
           <tr>
             <td>{gameState.white.username}</td>
             <td>
-              <span>{`${rating.w > 0 ? "+" : ""}${rating.w}`}</span>
+              <span
+                className={classNames({
+                  [styles.ratingRed]: rating.w < 0,
+                  [styles.ratingGreen]: rating.w > 0
+                })}
+              >
+                {`${rating.w > 0 ? "+" : ""}${rating.w}`}
+              </span>
             </td>
           </tr>
         </table>
+        <button onClick={() => {dispatch(s.closeEndGame());}}>Got it</button>
       </div>
     </div>
   );

@@ -33,6 +33,13 @@ const searchGame = (data) => {
   };
 };
 
+const cancelSearchGame = (data) => {
+  return {
+    type: "socket/cancelSearchGame",
+    payload: data
+  };
+};
+
 const resign = () => {
   return {
     type: "socket/resign"
@@ -50,6 +57,7 @@ export const s = {
   disconnect: disconnect,
   on: on,
   searchGame: searchGame,
+  cancelSearchGame: cancelSearchGame,
   turn: turn,
   resign: resign,
   closeEndGame: closeEndGame

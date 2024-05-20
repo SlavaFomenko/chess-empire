@@ -80,7 +80,7 @@ export function ChessBoard () {
   );
 
   return (
-    <div className={styles.chess_board}>
+    <div className={styles.chessBoard}>
       {myColor === "white" ? renderBoard : renderBoard.reverse()}
     </div>
   );

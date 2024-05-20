@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { showNotification, hideNotification } from "../../../../shared/notification";
 import { useNavigate } from "react-router-dom";
 import { s } from "../../../../shared/socket/actions/socket";
+import styles from "../styles/login.module.scss"
 
 export function LoginPage () {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export function LoginPage () {
 
   return (
     <LayoutPage>
-      <div>
+      <div className={styles.loginPage}>
         <h1>Sign In</h1>
         <Login />
       </div>

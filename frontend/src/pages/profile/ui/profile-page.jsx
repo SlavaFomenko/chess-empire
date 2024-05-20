@@ -4,15 +4,12 @@ import { LayoutPage } from "../../../layouts/page-layout";
 import axios from "axios";
 import { GET_USER_BY_ID_URL } from "../../../shared/config";
 import { useNavigate } from "react-router-dom";
+import styles from "../styles/profile.module.scss"
 
 export function ProfilePage() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate()
   const userStore = useSelector(state => state.user);
-
-  console.log(userStore);
-
-
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,16 +31,13 @@ export function ProfilePage() {
 
   return (
     <LayoutPage>
-      <div>
-        <h1>Profile</h1>
+      <div className={styles.profilePage}>
         {user ? (
           <div>
-            <p>id: {user.id}</p>
-            <p>user name: {user.username}</p>
+            <h1>Hi, {user?.username}!</h1>
+            <p className={styles.aka}>Also known as {user.firstName} {user.lastName}</p>
             <p>Email: {user.email}</p>
-            <p>first name: {user.firstName}</p>
-            <p>last name: {user.lastName}</p>
-            <p>rating: {user.rating}</p>
+            <p>Rating: {user.rating}</p>
           </div>
         ) : (
           <p>Loading...</p>

@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import styles from "../styles/chess-figure-layout.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { movePiece, selectPiece } from "../model/chess-figure-layout";
 import classNames from "classnames";
-import { s } from "../../../shared/socket";
 
 export const ChessFigureLayout = ({ figureProps: { coordinate, color }, children }) => {
   const dispatch = useDispatch();
@@ -41,7 +40,11 @@ export const ChessFigureLayout = ({ figureProps: { coordinate, color }, children
   return (
     <div
       onClick={handleSquareClick}
-      className={classNames(styles.wrapper, { [styles.isSelected]: isSelected, [styles.isHighlighted]: isHighlighted })}
+      className={classNames(styles.wrapper, {
+        [styles.isSelected]: isSelected,
+        [styles.isHighlighted]: isHighlighted,
+        [styles.dark]: (coordinate.row + coordinate.col) % 2 === 1
+      })}
     >
       {children}
     </div>

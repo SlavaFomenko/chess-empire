@@ -1,16 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from '../styles/login.module.scss'
 import { Field, Form, Formik } from "formik";
 import { loginUser } from "../model/login";
 import { useDispatch } from "react-redux";
 
 export function Login () {
-
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch()
 
   const initialValues = {
-    email:'test1@email.com',
-    password:'Pass2222'
+    email:'',
+    password:''
   }
 
   const validate = (values) => {
@@ -28,6 +28,10 @@ export function Login () {
     dispatch(loginUser(values));
   }
 
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className={styles.login}>
       <Formik initialValues={initialValues} validate={validate} onSubmit={onSubmitLogin}>
@@ -42,14 +46,20 @@ export function Login () {
               value={values.email}
             />
 
-            <Field
-              type="password"
-              name="password"
-              placeholder="Password"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.password}
-            />
+            <div>
+              <Field
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={values.password}
+              />
+              <button className={styles.showPasswordToggle} type="button" onClick={toggleShowPassword}>
+                {showPassword ? "◡" : "⨀"}
+              </button>
+            </div>
+
             <button type="submit">Submit</button>
           </Form>
         )}

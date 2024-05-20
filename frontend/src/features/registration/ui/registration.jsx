@@ -7,12 +7,12 @@ export function Registration ({notification, navigate}) {
   const [showPassword, setShowPassword] = useState(false);
 
   const initialValues = {
-    email: "test1@email.com",
-    username: "tim",
-    first_name: "Tim",
-    last_name: "Spaceman",
-    password: "Pass1234",
-    password_confirm: "Pass1234"
+    email: "",
+    username: "",
+    first_name: "",
+    last_name: "",
+    password: "",
+    password_confirm: ""
   };
 
   const validateForm = (values) => {
@@ -159,8 +159,8 @@ export function Registration ({notification, navigate}) {
                 value={values.password}
                 validate={validate.password}
               />
-              <button type="button" onClick={toggleShowPassword}>
-                {showPassword ? "H" : "S"}
+              <button className={styles.showPasswordToggle} type="button" onClick={toggleShowPassword}>
+                {showPassword ? "◡" : "⨀"}
               </button>
             </div>
             {errors.password && touched.password && <p className={styles.error}>{errors.password}</p>}

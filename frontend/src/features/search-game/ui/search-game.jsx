@@ -7,11 +7,10 @@ import { s } from "../../../shared/socket";
 export function SearchGame () {
   const socketState = useSelector(store => store.socket);
   const dispatch = useDispatch();
-  const initialSettings = { time: "15", rated: false, color: "r" };
+  const initialSettings = { time: "5", rated: false, color: "r" };
 
   const onSubmitSearch = (values) => {
-    values.time = +values.time;
-    dispatch(s.searchGame(values));
+    dispatch(s.searchGame({...values, time: +values.time}));
   };
 
   return (
@@ -20,10 +19,11 @@ export function SearchGame () {
         {({ handleChange, handleBlur, handleSubmit }) => (
           <Form onSubmit={handleSubmit}>
             <div>
-              <p>Time:</p>
+              <h2>Time:</h2>
 
               <label>
                 <Field
+                  disabled={socketState.state !== "default"}
                   type="radio"
                   name="time"
                   onChange={handleChange}
@@ -35,6 +35,7 @@ export function SearchGame () {
 
               <label>
                 <Field
+                  disabled={socketState.state !== "default"}
                   type="radio"
                   name="time"
                   onChange={handleChange}
@@ -46,6 +47,7 @@ export function SearchGame () {
 
               <label>
                 <Field
+                  disabled={socketState.state !== "default"}
                   type="radio"
                   name="time"
                   onChange={handleChange}
@@ -57,10 +59,11 @@ export function SearchGame () {
             </div>
 
             <div>
-              <p>Time:</p>
+              <h2>Color:</h2>
 
               <label>
                 <Field
+                  disabled={socketState.state !== "default"}
                   type="radio"
                   name="color"
                   onChange={handleChange}
@@ -72,6 +75,7 @@ export function SearchGame () {
 
               <label>
                 <Field
+                  disabled={socketState.state !== "default"}
                   type="radio"
                   name="color"
                   onChange={handleChange}
@@ -83,6 +87,7 @@ export function SearchGame () {
 
               <label>
                 <Field
+                  disabled={socketState.state !== "default"}
                   type="radio"
                   name="color"
                   onChange={handleChange}
@@ -94,10 +99,11 @@ export function SearchGame () {
             </div>
 
             <div>
-              <p>Rated:</p>
+              <h2>Rating:</h2>
 
               <label>
                 <Field
+                  disabled={socketState.state !== "default"}
                   type="checkbox"
                   name="rated"
                   onChange={handleChange}
@@ -108,7 +114,7 @@ export function SearchGame () {
             </div>
 
             {socketState.state === "default" && <button type="submit">Search</button>}
-            {socketState.state === "searchingGame" && <button type="button">Cancel</button>}
+            {socketState.state === "searchingGame" && <button type="button" onClick={()=>{dispatch(s.cancelSearchGame())}}>Cancel</button>}
           </Form>
         )}
       </Formik>
