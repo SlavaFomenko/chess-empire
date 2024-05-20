@@ -39,9 +39,14 @@ export function SideBar () {
               <button onClick={() => redirect("/register")}>Sign up</button>
             </li>
           </> :
-          <li>
-            <button onClick={logout}>Log out</button>
-          </li>
+          <>
+            <li>
+              <button onClick={() => redirect("/profile")}>profile</button>
+            </li>
+            <li>
+              <button onClick={logout}>Log out</button>
+            </li>
+          </>
         }
       </ul>
     </div>

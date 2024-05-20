@@ -71,6 +71,24 @@ class UserController extends BaseController
         return new JsonResponse($user, 201);
     }
 
+
+    #[Route(name: "get_user_by_id", path: "/users", methods: [Request::METHOD_GET])]
+    public function getByID():Response
+    {
+        $queryParams = $this->request->getQuery();
+        if (!isset($queryParams["id"])) {
+            return new JsonResponse(["message" => "Missing fields in request query"], 400);
+        }
+        $repo = $this->em->getRepository(User::class);
+        $user = $repo->findOneBy(["id" => $queryParams['id']]);
+        if(empty($user)){
+            return new JsonResponse(["message" => "User is not defined"], 404);
+        }
+        return new JsonResponse(['user'=>$user],200);
+    }
+
+
+
     function validateEmail($email): bool
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL);
