@@ -24,9 +24,9 @@ export const turnToCords = (turn) => {
     toRow: turn.charCodeAt(3) - numCodeShift
   };
 
-  const exchange = turn.length === 5 ? { newPiece: turn[5] } : {};
+  const exchange = turn.length === 5 ? { newPiece: turn[4] } : {};
 
-  return { ...cords, exchange };
+  return { ...cords, ...exchange };
 };
 
 export const cordsToTurn = (cords) => {
@@ -56,7 +56,6 @@ export const applyTurns = (turns, board = DEFAULT_BOARD, currentPlayer = "white"
   blackRookLeft: false,
   blackRookRight: false
 }) => {
-  // debugger
   if (turns.length === 0) {
     return { board, hasMoved };
   }
