@@ -11,7 +11,6 @@ export function ChessGame () {
   const dispatch = useDispatch();
   const gameState = useSelector(state => state.game);
   const { currentStep, currentPlayer, black, white, gameOver } = gameState;
-  const isPending = useSelector(state => state.game.promotion.isPending);
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
@@ -52,7 +51,6 @@ export function ChessGame () {
       </h1>
       <div className={styles.horizontal}>
         <ChessBoard />
-        {isPending && <PromotionDialog />}
         <div className={styles.rightPanel}>
           <div>
             <p className={`${styles.timer} ${black?.time <= 10 ? styles.timerRed : ""}`}>Black: {black && formatTime(black.time)}</p>

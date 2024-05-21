@@ -1,14 +1,44 @@
-.wrapper{
-  width: 300px;
-  height: 100px;
-  background-color: white;
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
-  gap:10px;
-  border:2px solid black;
+  background-color: rgba(0,0,0,0.25);
+  backdrop-filter: blur(0.15rem);
+}
 
-  top:40%;
+.wrapper{
+  padding: 1rem 1rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap:1rem;
 
+  background-color: #2C363A;
+  box-shadow: 0 0.5rem 1rem 0 rgba(0,0,0,0.3);
+
+  img{
+    width: 100%;
+    height: 100%;
+  }
+
+  button {
+    aspect-ratio: 1;
+    width: 7rem;
+    margin: 0;
+    border: none;
+    color: #D2D4D4;
+    background-color: #465458;
+    font-size: 1.5rem;
+    font-weight: 500;
+    transition: 200ms ease-in-out;
+  }
+
+  button:hover {
+    background-color: #576667;
+  }
 }
