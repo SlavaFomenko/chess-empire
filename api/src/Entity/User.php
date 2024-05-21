@@ -89,6 +89,7 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $username
+     * @return User
      */
     public function setUserName(?string $username): User
     {

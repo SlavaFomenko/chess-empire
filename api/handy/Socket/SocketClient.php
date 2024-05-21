@@ -4,7 +4,7 @@ namespace Handy\Socket;
 
 use Socket;
 
-class SocketUser implements IEventFlow
+class SocketClient implements IEventFlow
 {
 
     /**
@@ -114,14 +114,14 @@ class SocketUser implements IEventFlow
     /**
      * @param string $event
      * @param mixed $data
-     * @param SocketUser|null $user
+     * @param SocketClient|null $client
      * @return void
      */
-    public function notifyListeners(string $event, mixed $data, ?SocketUser $user = null): void
+    public function notifyListeners(string $event, mixed $data, ?SocketClient $client = null): void
     {
         if (isset($this->events[$event])) {
             foreach ($this->events[$event] as $listener) {
-                $listener($data, $user);
+                $listener($data, $client);
             }
         }
     }

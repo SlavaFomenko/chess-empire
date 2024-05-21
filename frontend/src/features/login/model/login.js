@@ -6,13 +6,11 @@ export const loginUser = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     try {
       const result = await login(data);
-      console.log(result)
       if(!result.token){
         throw new Error();
       }
       return result;
     } catch (error) {
-      console.log(error)
       if (!error.response) {
         throw error;
       }

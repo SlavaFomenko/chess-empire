@@ -15,8 +15,8 @@ class CorsHandler extends AbstractHandler
         header("Access-Control-Allow-Origin: *");
         if(Context::$request->getMethod() == Request::METHOD_OPTIONS){
             Context::$response = new JsonResponse(null, 204);
-            header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-            header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Origin');
+            header('Access-Control-Allow-Methods: POST, GET, PUT, PATCH, DELETE, OPTIONS');
+            header('Access-Control-Allow-Headers: Authorization, Content-Type, Access-Control-Allow-Origin');
             return;
         }
         parent::handle();

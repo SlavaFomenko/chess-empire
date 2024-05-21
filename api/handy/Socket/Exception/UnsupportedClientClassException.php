@@ -4,7 +4,7 @@ namespace Handy\Socket\Exception;
 
 use Exception;
 
-class UnsupportedUserClassException extends Exception
+class UnsupportedClientClassException extends Exception
 {
 
 }

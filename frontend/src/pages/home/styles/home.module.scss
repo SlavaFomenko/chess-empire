@@ -1,13 +1,8 @@
-.home_page{
-  height: 100%;
-  width: 100%;
+.homePage{
+  padding: 1rem;
 
-  display: flex;
-
-  flex-direction: column;
-  gap:20px;
-  button{
-    width:min-content;
-    padding: 20px;
+  h1 {
+    font-size: 2.5rem;
+    color: #FDFDFD;
   }
 }

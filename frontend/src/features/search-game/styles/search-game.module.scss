@@ -1,0 +1,55 @@
+.search_game{
+  color: #D2D4D4;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    h2 {
+      margin-bottom: 0.8rem;
+    }
+
+    input {
+      display: none;
+    }
+
+    label {
+      font-size: 1.5rem;
+      padding: 0.5rem 1rem;
+      background-color: #182327;
+      transition: 200ms ease-in-out;
+    }
+
+    label:has(input:checked) {
+      color: #FDFDFD;
+      background-color: #617074;
+    }
+
+    label:has(input:disabled) {
+      cursor: not-allowed;
+      color: #576667;
+    }
+
+    label:has(input:disabled:checked) {
+      background-color: #314348;
+    }
+
+    button {
+      margin: 0;
+      padding: 0 0.5rem;
+      width: 100%;
+      height: 2.5rem;
+      border: none;
+      color: #D2D4D4;
+      background-color: #465458;
+      font-size: 1.5rem;
+      font-weight: 500;
+      transition: 200ms ease-in-out;
+    }
+
+    button:hover {
+      background-color: #576667;
+    }
+  }
+}

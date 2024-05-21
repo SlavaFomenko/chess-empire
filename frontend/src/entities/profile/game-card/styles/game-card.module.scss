@@ -1,0 +1,43 @@
+.card{
+  padding: 0.5rem 1rem;
+  background-color: #3F4E4F;
+
+  table {
+    width: 100%;
+  }
+
+  .players {
+    color: #617074;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .username {
+    color: #FDFDFD;
+  }
+
+  .stats {
+    font-size: 1.2rem;
+  }
+
+  .playedDate {
+    color: #617074;
+    font-size: 1.2rem;
+  }
+
+  .result {
+    color: #D2D4D4;
+    font-size: 1.6rem;
+    font-weight: 600;
+    text-align: right;
+    vertical-align: center;
+  }
+
+  .resultRed {
+    color: #FF4545;
+  }
+
+  .resultGreen {
+    color: #4CD04C;
+  }
+}

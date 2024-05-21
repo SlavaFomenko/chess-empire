@@ -144,12 +144,12 @@ class MySQL8QueryStrategy implements QueryStrategy
             return "";
         }
 
-        $sql = " ORDER BY ";
+        $orderBys = "";
         foreach ($q->getOrderBy() as $orderBy) {
-            $sql .= implode(" ", $orderBy) . ', ';
+            $orderBys .= implode(" ", $orderBy) . ', ';
         }
 
-        return trim($sql, ', ');
+        return " ORDER BY " . trim($orderBys, ', ');
     }
 
     /**

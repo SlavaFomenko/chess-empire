@@ -16,7 +16,7 @@ class SocketRoom implements IEventFlow
     /**
      * @var array
      */
-    public array $users;
+    public array $clients;
     /**
      * @var array
      */
@@ -30,31 +30,31 @@ class SocketRoom implements IEventFlow
     {
         $this->server = $server;
         $this->id = $id;
-        $this->users = [];
+        $this->clients = [];
         $this->events = [];
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @return void
      */
-    public function join(SocketUser $user): void
+    public function join(SocketClient $client): void
     {
-        if ($user->room !== null) {
-            $this->server->getRoomById($user->room)?->kick($user);
+        if ($client->room !== null) {
+            $this->server->getRoomById($client->room)?->kick($client);
         }
-        $user->room = $this->id;
-        $this->users[] = $user->id;
+        $client->room = $this->id;
+        $this->clients[] = $client->id;
     }
 
     /**
-     * @param SocketUser $user
+     * @param SocketClient $client
      * @return void
      */
-    public function kick(SocketUser $user): void
+    public function kick(SocketClient $client): void
     {
-        $user->room = null;
-        $this->users = array_diff($this->users, [$user->id]);
+        $client->room = null;
+        $this->clients = array_diff($this->clients, [$client->id]);
     }
 
     /**
@@ -90,14 +90,14 @@ class SocketRoom implements IEventFlow
     /**
      * @param string $event
      * @param mixed $data
-     * @param SocketUser|null $user
+     * @param SocketClient|null $client
      * @return void
      */
-    public function notifyListeners(string $event, mixed $data, ?SocketUser $user = null): void
+    public function notifyListeners(string $event, mixed $data, ?SocketClient $client = null): void
     {
         if (isset($this->events[$event])) {
             foreach ($this->events[$event] as $listener) {
-                $listener($data, $user);
+                $listener($data, $client);
             }
         }
     }

@@ -38,12 +38,12 @@ class BaseEntityRepository
         return $this->findOneBy([$idColumn => $id]);
     }
 
-    public function findAll(?int $limit = null, ?int $offset = null): array
+    public function findAll(?int $limit = null, ?int $offset = null, array $orderBy = []): array
     {
-        return $this->findBy([], $limit, $offset);
+        return $this->findBy([], false, $limit, $offset, $orderBy);
     }
 
-    public function findBy(array $criteria, bool $or = false, ?int $limit = null, ?int $offset = null): array
+    public function findBy(array $criteria, bool $or = false, ?int $limit = null, ?int $offset = null, array $orderBy = []): array
     {
         $qb = new QueryBuilder();
         $qb->select()
@@ -60,6 +60,8 @@ class BaseEntityRepository
 
         $limit !== null && $qb->limit($limit);
         $offset !== null && $qb->offset($offset);
+
+        $qb->orderBy($orderBy);
 
         $q = $qb->getQuery();
 

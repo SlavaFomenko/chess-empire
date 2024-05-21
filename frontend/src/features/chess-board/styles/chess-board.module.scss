@@ -1,7 +1,6 @@
-.chess_board{
-  width: 600px;
-  height: 600px;
-  border: 1px solid black;
+.chessBoard{
+  width: 45rem;
+  height: 45rem;
 
   display: grid;
   grid-template-columns: repeat(8,1fr);

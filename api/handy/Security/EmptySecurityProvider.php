@@ -39,4 +39,9 @@ class EmptySecurityProvider implements ISecurityProvider
         return [];
     }
 
+    public static function validateToken(string $token): bool
+    {
+        return true;
+    }
+
 }

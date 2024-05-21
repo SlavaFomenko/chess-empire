@@ -6,36 +6,45 @@ import classNames from "classnames";
 
 export const ChessFigureLayout = ({ figureProps: { coordinate, color }, children }) => {
   const dispatch = useDispatch();
-  const selectedPiece = useSelector((state) => state.game.selectedPiece);
-  const possibleMoves = useSelector((state) => state.game.possibleMoves);
+  const {
+    selectedPiece,
+    possibleMoves,
+    colorSelectedPiece,
+    moveAllowed
+  } = useSelector(state => state.game);
   const isSelected = selectedPiece && selectedPiece.row === coordinate.row && selectedPiece.col === coordinate.col;
   const isHighlighted = possibleMoves.some(move => move.row === coordinate.row && move.col === coordinate.col);
-  const colorSelectedPiece = useSelector(state => state.game.colorSelectedPiece)
 
   const handleSquareClick = () => {
-    if (isSelected) {
-      dispatch(selectPiece(null));
-    } else if (selectedPiece) {
-
-      if(colorSelectedPiece === color){
-        dispatch(selectPiece(coordinate));
-      }
-
-      const newCoordinate = {
-        newRow: coordinate.row,
-        newCol: coordinate.col,
-        figuresColor: color
-      };
-      dispatch(movePiece(newCoordinate));
-    } else {
-      dispatch(selectPiece(coordinate));
+    if (!moveAllowed) {
+      return;
     }
+
+    if (isSelected) {
+      return dispatch(selectPiece(null));
+    }
+
+    if (selectedPiece === null || colorSelectedPiece === color) {
+      return dispatch(selectPiece(coordinate));
+    }
+
+    const newCoordinate = {
+      newRow: coordinate.row,
+      newCol: coordinate.col,
+      figuresColor: color
+    };
+
+    dispatch(movePiece(newCoordinate));
   };
 
   return (
     <div
       onClick={handleSquareClick}
-      className={classNames(styles.wrapper, { [styles.isSelected]: isSelected, [styles.isHighlighted]: isHighlighted })}
+      className={classNames(styles.wrapper, {
+        [styles.isSelected]: isSelected,
+        [styles.isHighlighted]: isHighlighted,
+        [styles.dark]: (coordinate.row + coordinate.col) % 2 === 1
+      })}
     >
       {children}
     </div>

@@ -4,8 +4,7 @@ import styles from "../styles/notification-layout.module.scss";
 import { useDispatch } from "react-redux";
 import { hideNotification } from "../../../shared/notification";
 
-export function NotificationLayout ({ children, onClose }) {
-
+export function NotificationLayout ({ children, buttons }) {
   const dispatch = useDispatch();
 
   const btnHandler = () => {
@@ -13,10 +12,10 @@ export function NotificationLayout ({ children, onClose }) {
   };
 
   return createPortal(
-    <div className={styles.wrapper}>
-      <span>Notification</span>
-      {children}
-      <button onClick={btnHandler}>close</button>
+    <div className={styles.wrapper} onClick={()=>{dispatch(hideNotification())}}>
+      <div className={styles.notification} onClick={(e)=>{e.stopPropagation()}}>
+        {children}
+      </div>
     </div>,
     document.body
   );
