@@ -15,6 +15,7 @@ enum ColumnType: string
     case DATETIME = 'DATETIME';
     case TIMESTAMP = 'TIMESTAMP';
     case VARCHAR = 'VARCHAR';
+    case BOOL = "BOOL";
     case TEXT = 'TEXT';
     case JSON = 'JSON';
 
@@ -43,6 +44,7 @@ enum ColumnType: string
             self::DECIMAL => "float",
             self::DATETIME => DateTimeInterface::class,
             self::JSON => "array",
+            self::BOOL => "bool",
             default => "string"
         };
     }
@@ -55,6 +57,7 @@ enum ColumnType: string
             self::DECIMAL => fn($value) => (float)$value,
             self::DATETIME => fn($value) => DateTime::createFromFormat(self::DATETIME_FORMAT, $value),
             self::TIMESTAMP => fn($value) => (int)$value,
+            self::BOOL => fn($value) => (bool)$value,
             self::VARCHAR => fn($value) => (string)$value,
             self::TEXT => fn($value) => (string)$value,
             self::JSON => fn($value) => json_decode($value, true)
@@ -64,14 +67,15 @@ enum ColumnType: string
     public function phpToSql(): Closure
     {
         return match ($this) {
-            self::INT => fn(int $value) => $value,
-            self::BIGINT => fn(int $value) => $value,
-            self::DECIMAL => fn(float $value) => $value,
-            self::DATETIME => fn(DateTimeInterface $value) => $value->format(self::DATETIME_FORMAT),
-            self::TIMESTAMP => fn(int $value) => $value,
-            self::VARCHAR => fn(string $value) => $value,
-            self::TEXT => fn(string $value) => $value,
-            self::JSON => fn(array $value) => json_encode($value)
+            self::INT => fn(?int $value) => $value,
+            self::BIGINT => fn(?int $value) => $value,
+            self::DECIMAL => fn(?float $value) => $value,
+            self::DATETIME => fn(?DateTimeInterface $value) => $value->format(self::DATETIME_FORMAT),
+            self::TIMESTAMP => fn(?int $value) => $value,
+            self::BOOL => fn(?bool $value) => $value ? 1 : 0,
+            self::VARCHAR => fn(?string $value) => $value,
+            self::TEXT => fn(?string $value) => $value,
+            self::JSON => fn(?array $value) => json_encode($value)
         };
     }
 

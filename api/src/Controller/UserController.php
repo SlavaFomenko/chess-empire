@@ -60,7 +60,7 @@ class UserController extends BaseController
             ->setUserName($username)
             ->setLastName($lastName)
             ->setPassword($hashedPassword)
-            ->setRating(0)
+            ->setRating(100)
             ->setRole(User::ROLE_USER);
 
         $this->em->persist($user);

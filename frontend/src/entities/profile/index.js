@@ -1,0 +1,1 @@
+export { GamesList } from './games-list/ui/games-list'

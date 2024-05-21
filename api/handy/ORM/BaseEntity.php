@@ -37,8 +37,8 @@ class BaseEntity
 
         foreach ($props as $prop) {
             $columnAttribute = $prop->getAttributes(Column::class)[0]->newInstance();
-
-            $stateSnapshot[$columnAttribute->getColumn()] = $prop->getValue($this);
+            $phpToSql = $columnAttribute->getType()->phpToSql();
+            $stateSnapshot[$columnAttribute->getColumn()] = $phpToSql($prop->getValue($this));
         }
 
         return $stateSnapshot;

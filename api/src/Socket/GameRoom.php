@@ -2,6 +2,7 @@
 
 namespace App\Socket;
 
+use App\Entity\Game;
 use App\Entity\User;
 use Handy\Context;
 use Handy\Socket\SocketClient;
@@ -146,6 +147,20 @@ class GameRoom extends SocketRoom
         $w_rating = $winner === "white" ? 10 : -10;
         $w_rating = $winner === "tie" ? 0 : $w_rating;
         $w_rating = $this->rated ? $w_rating : 0;
+
+        $gameRecord = new Game();
+        $gameRecord->setTime($this->time)
+            ->setRated($this->rated)
+            ->setWinner($winner[0])
+            ->setBRating($this->players["black"]["client"]->user->getRating())
+            ->setWRating($this->players["white"]["client"]->user->getRating())
+            ->setBId($this->players["black"]["client"]->user->getId())
+            ->setWId($this->players["white"]["client"]->user->getId())
+            ->setHistory(implode(" ", array_map(fn($cords) => cordsToTurn($cords), $this->history)))
+            ->setPlayedDate($this->startedAt);
+
+        $this->server->em?->persist($gameRecord);
+
         foreach ($this->players as $color => $player) {
             $player["client"]->emit("game_end", [
                 "winner"   => $winner,
@@ -157,6 +172,7 @@ class GameRoom extends SocketRoom
             if($this->rated){
                 $repo = $this->server->em->getRepository(User::class);
                 $user = $repo->find($player["client"]->user->getId());
+                $player["client"]->user = $user;
                 $newRating = $user->getRating() + ($color === "white" ? $w_rating : -$w_rating);
                 $user->setRating(max($newRating, 0));
                 $this->server->em?->persist($user);

@@ -297,10 +297,10 @@ class Query
 
     /**
      * @param string $name
-     * @param array|string|null $values
+     * @param array|string|bool|null $values
      * @return void
      */
-    public function addParam(string $name, array|string|null $values): void
+    public function addParam(string $name, array|string|bool|null $values): void
     {
         $this->params[$name] = $values;
     }
