@@ -90,6 +90,50 @@ After performing all the necessary operations, the API can call the EntityManage
 walks through its states list, comparing for each item its `before` and `after` states, and preparing INSERT, UPDATE or DELETE query
 depend on the differences between these two states.
 
+## Builder (Vyacheslav Fomenko)
+Of course, native functionality gives us the ability to write an SQL query like a regular string and execute it. But this process
+can be inconvenient, and sometimes even dangerous. There are a lot of aspects to automate, validate or simplify.
+And that's when the QueryBuilder is more than happy to help us.
+
+Instead of storing all queries in plain strings or some weird associative arrays, the [Query class](./api/handy/ORM/Query.php) is used as the query representation.
+And there's an instrument for simple and flexible creation of object of this class - [QueryBuilder](./api/handy/ORM/QueryBuilder.php).
+
+As the pattern implies, QueryBuilder provides simple and convenient methods for building the query step-by-step and performs
+some additional logic "under its hood".
+
+Use-cases can be found [here](./api/handy/ORM/BaseEntityRepository.php#L48-L68) and [here](./api/handy/ORM/EntityManager.php#L152-L158).
+
+## Strategy (Vyacheslav Fomenko)
+Previous pattern sounds pretty nice, but hold on: there's another problem. Keep in mind that Handy is not just a bunch of classes
+for the Chess Empire. It's a framework. Meaning that it's good to have instruments for different project configurations.
+And pretty important part of almost every project is the database. But not all the projects uses MySQL as we do. There are also
+nice DBMS like Postgre, Mongo, Redis etc. And they all have differences in query syntax and format. So how we can enable our Query
+to be used with different DBMS?
+
+Let's assume that the main difference for executing the query for different DBMS is the query syntax. Now we just separate the
+query string generating process into strategies, and make a specific strategy for every DBMS we want Handy to support.
+
+All these strategies are placed [here](./api/handy/ORM/QueryStrategy). [QueryStrategy interface](./api/handy/ORM/QueryStrategy/QueryStrategy.php)
+is just a general interface. And the strategies itself (f.e. [MySQL8QueryStrategy](./api/handy/ORM/QueryStrategy/MySQL8QueryStrategy.php))
+are just classes implements this interface. In these classes we can do anything required for generating query string for the specific DBMS.
+
+Strategy applies during database connection initializing, and the strategy class
+[is selected depending on the database configuration](./api/handy/ORM/Connection.php#L47-L55).
+
+## FSD (Vyacheslav Fomenko)
+React app can have lots of stuff going on, especially the complex one. And nice app structure is important for scalability, flexibility,
+and developers mental health. One of the best architectures I know for this task - [FSD (Feature Sliced Design)](https://feature-sliced.design/docs).
+
+Long story short, in FSD, a project consists of layers, each layer is made up of slices and each slice is made up of segments.
+The layers are standardized across all projects and vertically arranged. Modules on one layer can only interact with modules from the layers strictly below.
+Then there are slices, which partition the code by business domain. This makes your codebase easy to navigate by keeping
+logically related modules close together. Slices cannot use other slices on the same layer, and that helps with high cohesion
+and low coupling.
+
+Each slice, in turn, consists of segments. These are tiny modules that are meant to help with separating code within a slice
+by its technical purpose. The most common segments are ui, model (store, actions), api and lib (utils/hooks), but you can omit
+some or add more, as you see fit.
+
 
 # usePrinciples
 
