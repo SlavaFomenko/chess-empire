@@ -4,6 +4,7 @@ namespace App\Socket;
 
 use App\Entity\User;
 use App\Socket\States\DefaultState;
+use App\Socket\States\SearchingGameState;
 use App\Socket\States\UnauthorizedState;
 use Exception;
 use Handy\Context;
@@ -66,6 +67,21 @@ class ChessServer extends SocketServer
                 return;
             }
 
+            $id = $client->user->getId();
+
+            foreach ($this->users[$id] as $clientId){
+                /** @var ChessClient $c */
+                $c = $this->getClientById($clientId);
+                if($c===null){
+                    $this->users[$id] = array_diff($this->users[$id], [$clientId]);
+                    continue;
+                }
+                if(!is_a($c->state, DefaultState::class)){
+                    $client->emit("play_random_err", null);
+                    return;
+                }
+            }
+
             $availablePlayers = array_filter($this->randomSearch, function ($settings) use ($data) {
                 $time = $settings["time"] === $data["time"];
                 $rated = $settings["rated"] === $data["rated"];
@@ -74,6 +90,7 @@ class ChessServer extends SocketServer
             });
 
             if (empty($availablePlayers)) {
+                $client->setState(SearchingGameState::class);
                 $this->randomSearch[] = array_merge($data, ["client" => $client->id]);
                 return;
             }
@@ -108,6 +125,7 @@ class ChessServer extends SocketServer
         });
 
         $this->on("cancel_random", function ($data, ChessClient $client) {
+            $client->setState(DefaultState::class);
             $this->randomSearch = array_filter($this->randomSearch, fn($c)=>$c["client"] !== $client->id);
         });
     }

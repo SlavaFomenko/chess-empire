@@ -13,7 +13,7 @@ export function NotificationLayout ({ children, buttons }) {
 
   return createPortal(
     <div className={styles.wrapper} onClick={()=>{dispatch(hideNotification())}}>
-      <div className={styles.notification}>
+      <div className={styles.notification} onClick={(e)=>{e.stopPropagation()}}>
         {children}
       </div>
     </div>,

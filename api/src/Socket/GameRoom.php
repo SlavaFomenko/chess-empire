@@ -4,6 +4,8 @@ namespace App\Socket;
 
 use App\Entity\Game;
 use App\Entity\User;
+use App\Socket\States\DefaultState;
+use App\Socket\States\InGameState;
 use Handy\Context;
 use Handy\Socket\SocketClient;
 use Handy\Socket\SocketRoom;
@@ -124,6 +126,7 @@ class GameRoom extends SocketRoom
                 "time"   => $this->time
             ];
         }
+        $client->setState(InGameState::class);
         $client->emit("game_join", $this->getGameState());
     }
 
@@ -168,6 +171,7 @@ class GameRoom extends SocketRoom
                 "w_rating" => $w_rating,
                 "b_rating" => -$w_rating
             ]);
+            $player["client"]->setState(DefaultState::class);
             $this->kick($player["client"]);
             if($this->rated){
                 $repo = $this->server->em->getRepository(User::class);
