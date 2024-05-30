@@ -76,8 +76,8 @@ class QueryBuilder
 
     /**
      * @param array $columns
-     * @return $this
-     * @throws Exception
+     * @return QueryBuilder
+     * @throws InvalidQueryTypeException
      */
     public function select(array $columns = ["*"]): self
     {
@@ -88,11 +88,15 @@ class QueryBuilder
 
     /**
      * @param $table
+     * @param string|null $alias
      * @return $this
      */
-    public function from($table): self
+    public function from($table, ?string $alias = null): self
     {
         $this->query->setTable($table);
+        if($alias !== null){
+            $this->query->addAlias($table, $alias);
+        }
         return $this;
     }
 

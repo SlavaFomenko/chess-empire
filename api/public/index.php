@@ -10,8 +10,3 @@ $localenv->load();
 $core = new Handy\Core();
 
 echo $core->handle();
-
-$a = [
-    "a" => 1,
-    "b" => 2
-];

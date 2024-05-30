@@ -64,7 +64,7 @@ class MySQL8QueryStrategy implements QueryStrategy
      */
     private function select(Query $q): string
     {
-        $sql = "SELECT " . implode(", ", $q->getColumns()) . " FROM " . $q->getTable();
+        $sql = "SELECT " . implode(", ", $q->getColumns()) . " FROM " . $q->getTable() . $this->alias($q, $q->getTable());
 
         $sql .= $this->where($q) . $this->groupBy($q) . $this->orderBy($q) . $this->limit($q) . $this->offset($q);
 
@@ -114,6 +114,17 @@ class MySQL8QueryStrategy implements QueryStrategy
         $sql = "DELETE FROM " . $q->getTable();
 
         return $sql .= $this->where($q) . $this->orderBy($q) . $this->limit($q);
+    }
+
+    /**
+     * @param Query $q
+     * @param string $table
+     * @return string
+     */
+    public function alias(Query $q, string $table): string
+    {
+        $alias = @$q->getAliases()[$table];
+        return $alias === null ? "" : " AS $alias";
     }
 
     /**

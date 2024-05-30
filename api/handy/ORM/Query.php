@@ -42,6 +42,11 @@ class Query
     /**
      * @var array
      */
+    private array $aliases;
+
+    /**
+     * @var array
+     */
     private array $columns;
 
     /**
@@ -83,6 +88,7 @@ class Query
      */
     public function __construct()
     {
+        $this->aliases = [];
         $this->conditions = [];
         $this->values = [];
         $this->params = [];
@@ -211,6 +217,32 @@ class Query
     public function setTable(string $table): void
     {
         $this->table = $table;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAliases(): array
+    {
+        return $this->aliases;
+    }
+
+    /**
+     * @param array $aliases
+     */
+    public function setAliases(array $aliases): void
+    {
+        $this->aliases = $aliases;
+    }
+
+    /**
+     * @param string $table
+     * @param string $alias
+     * @return void
+     */
+    public function addAlias(string $table, string $alias): void
+    {
+        $this->aliases[$table] = $alias;
     }
 
     /**
