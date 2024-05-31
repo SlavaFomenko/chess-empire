@@ -71,37 +71,23 @@ class UserController extends BaseController
         return new JsonResponse($user, 201);
     }
 
-    #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
-    public function getByID(int $id):Response
+
+    #[Route(name: "get_user_by_id", path: "/users", methods: [Request::METHOD_GET])]
+    public function getByID():Response
     {
         $queryParams = $this->request->getQuery();
+        if (!isset($queryParams["id"])) {
+            return new JsonResponse(["message" => "Missing fields in request query"], 400);
+        }
         $repo = $this->em->getRepository(User::class);
-        $user = $repo->findOneBy(["id" => $id]);
+        $user = $repo->findOneBy(["id" => $queryParams['id']]);
         if(empty($user)){
-            return new JsonResponse(["message" => "User not found"], 404);
+            return new JsonResponse(["message" => "User is not defined"], 404);
         }
         return new JsonResponse(['user'=>$user],200);
     }
 
-    #[Route(name: "get_all_users", path: "/users", methods: [Request::METHOD_GET])]
-    public function getAll():Response
-    {
-        $query = $this->request->getQuery();
-        $criteria = [];
-        [$limit, $offset] = $this->pagination();
 
-        if(isset($query["name"])){
-            $criteria = [
-                "username" => "LIKE " . $query["name"],
-                "first_name" => "LIKE " . $query["name"],
-                "last_name" => "LIKE " . $query["name"]
-            ];
-        }
-
-        $repo = $this->em->getRepository(User::class);
-        $users = $repo->findBy($criteria, true, $limit, $offset);
-        return new JsonResponse($users,200);
-    }
 
     function validateEmail($email): bool
     {
