@@ -50,10 +50,16 @@ class BaseEntityRepository
             ->from($this->entityTable);
 
         foreach ($criteria as $key => $value) {
+            $operator = "=";
+            if(str_starts_with($value, "LIKE")){
+                $operator = "LIKE";
+                $value = str_replace("LIKE ", "", $value) . "%";
+            }
+            $condition = $key . " " . $operator . " :" . $key;
             if($or){
-                $qb->orWhere($key . " = :" . $key);
+                $qb->orWhere($condition);
             } else {
-                $qb->andWhere($key . " = :" . $key);
+                $qb->andWhere($condition);
             }
             $qb->setParam([$key => $value]);
         }

@@ -14,8 +14,6 @@ use Handy\Routing\Attribute\Route;
 class GameController extends BaseController
 {
 
-    public const GAMES_BY_PAGE = 20;
-
     #[Route(name: "get_games", path: "/games", methods: [Request::METHOD_GET])]
     public function getForCurrentUser(): Response
     {
@@ -30,15 +28,13 @@ class GameController extends BaseController
             return new JsonResponse(["message" => "User not found"], 404);
         }
 
-        $query = $this->request->getQuery();
-        $page = @$query["page"] ?? 1;
-        $offset = ($page - 1) * self::GAMES_BY_PAGE;
+        [$limit, $offset] = $this->pagination();
 
         $gameRepo = $this->em->getRepository(Game::class);
         $games = $gameRepo->findBy([
             "b_id" => $user->getId(),
             "w_id" => $user->getId()
-        ], true, self::GAMES_BY_PAGE, $offset, [["played_date", "DESC"]]);
+        ], true, $limit, $offset, [["played_date", "DESC"]]);
 
         $result = [];
 
