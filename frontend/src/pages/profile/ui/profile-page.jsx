@@ -47,7 +47,9 @@ export function ProfilePage () {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(GET_USER_BY_ID_URL + "/" + userStore.user.id);
+        const response = await axios.get(GET_USER_BY_ID_URL, {
+          params: { id: userStore.user.id }
+        });
         setUser(response.data.user);
       } catch (error) {
         dispatch(showNotification("Error fetching your profile"));
