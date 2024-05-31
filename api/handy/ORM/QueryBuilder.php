@@ -3,13 +3,7 @@
 namespace Handy\ORM;
 
 use Exception;
-use Handy\Exception\AttributeNotFoundException;
-use Handy\ORM\Attribute\Column;
-use Handy\ORM\Attribute\Entity;
-use Handy\ORM\Exception\InvalidEntityClassException;
 use Handy\ORM\Exception\InvalidQueryTypeException;
-use Handy\Utils\Resolver;
-use ReflectionClass;
 
 class QueryBuilder
 {
@@ -81,33 +75,14 @@ class QueryBuilder
     }
 
     /**
-     * @param array|string $columns
-     * @return $this
-     * @throws Exception
+     * @param array $columns
+     * @return QueryBuilder
+     * @throws InvalidQueryTypeException
      */
-    public function select(array|string $columns = ["*"]): self
+    public function select(array $columns = ["*"]): self
     {
         $this->query->setType('SELECT');
-        if(is_array($columns)){
-            $this->query->setColumns($columns);
-            return $this;
-        }
-
-        if(!is_subclass_of($columns, BaseEntity::class)){
-            throw new InvalidEntityClassException($columns . " is not inherited from " . BaseEntity::class);
-        }
-
-        $entityAttribute = (new ReflectionClass($columns))->getAttributes(Entity::class);
-        $entityAttribute = @$entityAttribute[0] ?? throw new AttributeNotFoundException("Entity attribute not found in \"" . $columns . "\"");
-        $entityTable = $entityAttribute->newInstance()->getTable();
-        $entityColumns = [];
-        $props = Resolver::getPropsInClass($columns, [Column::class]);
-        foreach ($props as $prop) {
-            $columnAttribute = $prop->getAttributes(Column::class)[0]->newInstance();
-            $entityColumns[] = $entityTable . "." . $columnAttribute->getColumn();
-        }
-
-        $this->query->setColumns($entityColumns);
+        $this->query->setColumns($columns);
         return $this;
     }
 

@@ -34,7 +34,7 @@ class JWTSecurityProvider implements ISecurityProvider
         $payload = self::parseToken($token);
 
         Context::$security->setToken($token);
-        Context::$security->setRole($payload["role"]);
+        Context::$security->setRoles([$payload["role"]]);
         Context::$security->setData((object)($payload));
     }
 

@@ -11,11 +11,11 @@ use ReflectionClass;
 class BaseEntityRepository
 {
 
-    protected EntityManager $entityManager;
+    private EntityManager $entityManager;
 
-    protected string $entityClass;
+    private string $entityClass;
 
-    protected string $entityTable;
+    private string $entityTable;
 
     public function __construct(EntityManager $em)
     {
@@ -27,7 +27,7 @@ class BaseEntityRepository
         $this->entityClass = $repositoryAttribute->newInstance()->getEntity();
 
         $entityAttribute = (new ReflectionClass($this->entityClass))->getAttributes(Entity::class);
-        $entityAttribute = @$entityAttribute[0] ?? throw new AttributeNotFoundException("Entity attribute not found in \"" . $this->entityClass . "\"");
+        $entityAttribute = @$entityAttribute[0] ?? throw new AttributeNotFoundException("Entity attribute not found in \"" . $this::class . "\"");
         $this->entityTable = $entityAttribute->newInstance()->getTable();
     }
 

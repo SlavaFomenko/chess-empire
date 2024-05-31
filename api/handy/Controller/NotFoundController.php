@@ -9,7 +9,7 @@ class NotFoundController extends BaseController
 
     public function index(): Response
     {
-        return new Response("No route found for \"" . $this->request->getMethod() . " " . $this->request->getPath() . "\"", 404);
+        return new Response("No route found for \"" . $this->request->getMethod() . " " . $this->request->getPath() . "\"");
     }
 
 }

@@ -15,7 +15,6 @@ class User extends BaseEntity implements JsonSerializable
 {
 
     public const ROLE_USER = "ROLE_USER";
-    public const ROLE_ADMIN = "ROLE_ADMIN";
 
     #[Id]
     #[Column(type: ColumnType::INT, column: "id")]
