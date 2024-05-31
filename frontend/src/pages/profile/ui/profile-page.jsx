@@ -22,7 +22,10 @@ export function ProfilePage () {
     try {
       setGames({...games, loading: true})
       axios.get(GET_GAMES_FOR_USER, {
-        params: { page: games.page + 1 },
+        params: {
+          page: games.page + 1,
+          userId: userStore.user.id
+        },
         headers: {
           Authorization: `Bearer ${userStore.user.token}`
         }

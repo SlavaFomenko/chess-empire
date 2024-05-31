@@ -4,15 +4,16 @@ namespace Handy\Security;
 
 class Security
 {
+    public const ROLE_UNAUTHORIZED = "UNAUTHORIZED";
 
     private ?string $token;
-    private array $roles;
+    private string $role;
     private ?object $data;
 
-    public function __construct($token = null, $roles = ['unauthorized'], $data = null)
+    public function __construct(?string $token = null, string $role = self::ROLE_UNAUTHORIZED, ?object $data = null)
     {
         $this->token = $token;
-        $this->roles = $roles;
+        $this->role = $role;
         $this->data = $data;
     }
 
@@ -26,6 +27,7 @@ class Security
 
     /**
      * @param object $data
+     * @return void
      */
     public function setData(object $data): void
     {
@@ -34,37 +36,37 @@ class Security
 
 
     /**
-     * @return mixed|string|null
+     * @return string|null
      */
-    public function getToken(): mixed
+    public function getToken(): ?string
     {
         return $this->token;
     }
 
     /**
-     * @param $token
+     * @param string $token
      * @return void
      */
-    public function setToken($token): void
+    public function setToken(string $token): void
     {
         $this->token = $token;
     }
 
     /**
-     * @return mixed|string[]
+     * @return string
      */
-    public function getRoles(): mixed
+    public function getRole(): string
     {
-        return $this->roles;
+        return $this->role;
     }
 
     /**
-     * @param $roles
+     * @param string $role
      * @return void
      */
-    public function setRoles($roles): void
+    public function setRole(string $role): void
     {
-        $this->roles = $roles;
+        $this->role = $role;
     }
 
 }
