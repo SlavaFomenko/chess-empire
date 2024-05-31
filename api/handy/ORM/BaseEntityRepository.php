@@ -11,11 +11,11 @@ use ReflectionClass;
 class BaseEntityRepository
 {
 
-    private EntityManager $entityManager;
+    protected EntityManager $entityManager;
 
-    private string $entityClass;
+    protected string $entityClass;
 
-    private string $entityTable;
+    protected string $entityTable;
 
     public function __construct(EntityManager $em)
     {
@@ -27,7 +27,7 @@ class BaseEntityRepository
         $this->entityClass = $repositoryAttribute->newInstance()->getEntity();
 
         $entityAttribute = (new ReflectionClass($this->entityClass))->getAttributes(Entity::class);
-        $entityAttribute = @$entityAttribute[0] ?? throw new AttributeNotFoundException("Entity attribute not found in \"" . $this::class . "\"");
+        $entityAttribute = @$entityAttribute[0] ?? throw new AttributeNotFoundException("Entity attribute not found in \"" . $this->entityClass . "\"");
         $this->entityTable = $entityAttribute->newInstance()->getTable();
     }
 
@@ -50,10 +50,16 @@ class BaseEntityRepository
             ->from($this->entityTable);
 
         foreach ($criteria as $key => $value) {
+            $operator = "=";
+            if(str_starts_with($value, "LIKE")){
+                $operator = "LIKE";
+                $value = str_replace("LIKE ", "", $value) . "%";
+            }
+            $condition = $key . " " . $operator . " :" . $key;
             if($or){
-                $qb->orWhere($key . " = :" . $key);
+                $qb->orWhere($condition);
             } else {
-                $qb->andWhere($key . " = :" . $key);
+                $qb->andWhere($condition);
             }
             $qb->setParam([$key => $value]);
         }
