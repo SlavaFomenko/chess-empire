@@ -66,7 +66,7 @@ class MySQL8QueryStrategy implements QueryStrategy
     {
         $sql = "SELECT " . implode(", ", $q->getColumns()) . " FROM " . $q->getTable() . $this->alias($q, $q->getTable());
 
-        $sql .= $this->where($q) . $this->groupBy($q) . $this->orderBy($q) . $this->limit($q) . $this->offset($q);
+        $sql .= $this->joins($q) . $this->where($q) . $this->groupBy($q) . $this->orderBy($q) . $this->limit($q) . $this->offset($q);
 
         return $sql;
     }
@@ -125,6 +125,30 @@ class MySQL8QueryStrategy implements QueryStrategy
     {
         $alias = @$q->getAliases()[$table];
         return $alias === null ? "" : " AS $alias";
+    }
+
+    public function joins(Query $q): string
+    {
+        if (empty($q->getJoins())) {
+            return "";
+        }
+
+        $joins = "";
+        foreach ($q->getJoins() as $table => $join) {
+            $joins .= " " . $join["type"] . " JOIN " . $table . $this->alias($q, $table) . $this->on($q, $table);
+        }
+        return " " . trim($joins);
+    }
+
+    /**
+     * @param Query $q
+     * @param string $table
+     * @return string
+     */
+    public function on(Query $q, string $table): string
+    {
+        $ons = $q->getJoins()[$table]["on"];
+        return empty($ons) ? "" : " ON " . implode(" ", $ons);
     }
 
     /**
