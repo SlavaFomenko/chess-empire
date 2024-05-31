@@ -82,7 +82,7 @@ class QueryBuilder
 
     /**
      * @param array|string $columns
-     * @return QueryBuilder
+     * @return $this
      * @throws Exception
      */
     public function select(array|string $columns = ["*"]): self
