@@ -76,8 +76,8 @@ class QueryBuilder
 
     /**
      * @param array $columns
-     * @return QueryBuilder
-     * @throws InvalidQueryTypeException
+     * @return $this
+     * @throws Exception
      */
     public function select(array $columns = ["*"]): self
     {
@@ -87,25 +87,21 @@ class QueryBuilder
     }
 
     /**
-     * @param string $table
-     * @param string|null $alias
+     * @param $table
      * @return $this
      */
-    public function from(string $table, ?string $alias = null): self
+    public function from($table): self
     {
         $this->query->setTable($table);
-        if ($alias !== null) {
-            $this->query->addAlias($table, $alias);
-        }
         return $this;
     }
 
     /**
-     * @param string $table
+     * @param $table
      * @return $this
-     * @throws InvalidQueryTypeException
+     * @throws Exception
      */
-    public function insertInto(string $table): self
+    public function insertInto($table): self
     {
         $this->query->setType('INSERT');
         $this->query->setTable($table);
@@ -113,11 +109,11 @@ class QueryBuilder
     }
 
     /**
-     * @param string $table
+     * @param $table
      * @return $this
-     * @throws InvalidQueryTypeException
+     * @throws Exception
      */
-    public function update(string $table): self
+    public function update($table): self
     {
         $this->query->setType('UPDATE');
         $this->query->setTable($table);
@@ -125,11 +121,11 @@ class QueryBuilder
     }
 
     /**
-     * @param string $table
+     * @param $table
      * @return $this
-     * @throws InvalidQueryTypeException
+     * @throws Exception
      */
-    public function deleteFrom(string $table): self
+    public function deleteFrom($table): self
     {
         $this->query->setType('DELETE');
         $this->query->setTable($table);
@@ -137,108 +133,20 @@ class QueryBuilder
     }
 
     /**
-     * @param string $table
-     * @param string|null $alias
-     * @return QueryBuilder
-     * @throws Exception
-     */
-    public function join(string $table, ?string $alias = null): self
-    {
-        $this->query->addJoin($table, Query::JOIN_INNER);
-        if ($alias !== null) {
-            $this->query->addAlias($table, $alias);
-        }
-        return $this;
-    }
-
-    /**
-     * @param string $table
-     * @param string|null $alias
-     * @return QueryBuilder
-     * @throws Exception
-     */
-    public function rightJoin(string $table, ?string $alias = null): self
-    {
-        $this->query->addJoin($table, Query::JOIN_RIGHT);
-        if ($alias !== null) {
-            $this->query->addAlias($table, $alias);
-        }
-        return $this;
-    }
-
-    /**
-     * @param string $table
-     * @param string|null $alias
-     * @return QueryBuilder
-     * @throws Exception
-     */
-    public function leftJoin(string $table, ?string $alias = null): self
-    {
-        $this->query->addJoin($table, Query::JOIN_LEFT);
-        if ($alias !== null) {
-            $this->query->addAlias($table, $alias);
-        }
-        return $this;
-    }
-
-    /**
-     * @param string $condition
-     * @return $this
-     * @throws Exception
-     */
-    public function on(string $condition): self
-    {
-        $this->query->addOn($condition);
-        return $this;
-    }
-
-    /**
-     * @param string $condition
-     * @return $this
-     * @throws Exception
-     */
-    public function andOn(string $condition): self
-    {
-        $tables = array_keys($this->query->getJoins());
-        $table = end($tables);
-        if (@!empty($this->query->getJoins()[$table]["on"])) {
-            $this->query->addOn(Query::OPERATOR_AND);
-        }
-        $this->query->addOn($condition);
-        return $this;
-    }
-
-    /**
-     * @param string $condition
-     * @return $this
-     * @throws Exception
-     */
-    public function orOn(string $condition): self
-    {
-        $tables = array_keys($this->query->getJoins());
-        $table = end($tables);
-        if (@!empty($this->query->getJoins()[$table]["on"])) {
-            $this->query->addOn(Query::OPERATOR_OR);
-        }
-        $this->query->addOn($condition);
-        return $this;
-    }
-
-    /**
-     * @param string $condition
+     * @param $condition
      * @return $this
      */
-    public function where(string $condition): self
+    public function where($condition): self
     {
         $this->query->addCondition($condition);
         return $this;
     }
 
     /**
-     * @param string $condition
+     * @param $condition
      * @return $this
      */
-    public function andWhere(string $condition): self
+    public function andWhere($condition): self
     {
         if (!empty($this->query->getConditions())) {
             $this->query->addCondition(Query::OPERATOR_AND);
@@ -248,10 +156,10 @@ class QueryBuilder
     }
 
     /**
-     * @param string $condition
+     * @param $condition
      * @return $this
      */
-    public function orWhere(string $condition): self
+    public function orWhere($condition): self
     {
         if (!empty($this->query->getConditions())) {
             $this->query->addCondition(Query::OPERATOR_OR);
@@ -261,10 +169,10 @@ class QueryBuilder
     }
 
     /**
-     * @param array $values
+     * @param $values
      * @return $this
      */
-    public function setParam(array $values): self
+    public function setParam($values): self
     {
         foreach ($values as $key => $value) {
             $this->query->addParam($key, $value);

@@ -2,21 +2,11 @@
 
 namespace Handy\ORM;
 
-use Handy\ORM\Exception\InvalidJoinTypeException;
 use Handy\ORM\Exception\InvalidQueryTypeException;
-use Handy\ORM\Exception\UnknownOnTableException;
 
 class Query
 {
 
-    public const JOIN_INNER        = 'INNER';
-    public const JOIN_LEFT         = 'LEFT';
-    public const JOIN_RIGHT        = 'RIGHT';
-    public const JOINS             = [
-        self::JOIN_INNER,
-        self::JOIN_LEFT,
-        self::JOIN_RIGHT
-    ];
     public const TYPE_EMPTY        = 'EMPTY';
     public const TYPE_SELECT       = 'SELECT';
     public const TYPE_INSERT       = 'INSERT';
@@ -52,17 +42,7 @@ class Query
     /**
      * @var array
      */
-    private array $aliases;
-
-    /**
-     * @var array
-     */
     private array $columns;
-
-    /**
-     * @var array
-     */
-    private array $joins;
 
     /**
      * @var array
@@ -103,8 +83,6 @@ class Query
      */
     public function __construct()
     {
-        $this->aliases = [];
-        $this->joins = [];
         $this->conditions = [];
         $this->values = [];
         $this->params = [];
@@ -233,86 +211,6 @@ class Query
     public function setTable(string $table): void
     {
         $this->table = $table;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAliases(): array
-    {
-        return $this->aliases;
-    }
-
-    /**
-     * @param array $aliases
-     */
-    public function setAliases(array $aliases): void
-    {
-        $this->aliases = $aliases;
-    }
-
-    /**
-     * @param string $table
-     * @param string $alias
-     * @return void
-     */
-    public function addAlias(string $table, string $alias): void
-    {
-        $this->aliases[$table] = $alias;
-    }
-
-    /**
-     * @return array
-     */
-    public function getJoins(): array
-    {
-        return $this->joins;
-    }
-
-    /**
-     * @param array $joins
-     */
-    public function setJoins(array $joins): void
-    {
-        $this->joins = $joins;
-    }
-
-    /**
-     * @param string $table
-     * @param string $type
-     * @return void
-     * @throws InvalidJoinTypeException
-     */
-    public function addJoin(string $table, string $type): void
-    {
-        if (!in_array($type, self::JOINS)) {
-            throw new InvalidJoinTypeException("Invalid join type: " . $type);
-        }
-        $this->joins[$table] = [
-            "type" => $type,
-            "on"   => []
-        ];
-    }
-
-    /**
-     * @param string $condition
-     * @param string|null $table
-     * @return void
-     * @throws UnknownOnTableException
-     */
-    public function addOn(string $condition, ?string $table = null): void
-    {
-        if ($table === null) {
-            if (empty($this->joins)) {
-                throw new UnknownOnTableException("Target table is not specified and cannot be automatically determined");
-            }
-            $tables = array_keys($this->joins);
-            $table = end($tables);
-        }
-        if (!isset($this->joins[$table])) {
-            throw new UnknownOnTableException("No joins initialized for " . $table);
-        }
-        $this->joins[$table]["on"][] = $condition;
     }
 
     /**
