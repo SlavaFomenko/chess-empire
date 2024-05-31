@@ -16,6 +16,8 @@ use Handy\Security\Security;
 class GameController extends BaseController
 {
 
+    public const GAMES_BY_PAGE = 20;
+
     #[Route(name: "get_games", path: "/games", methods: [Request::METHOD_GET])]
     public function getForCurrentUser(): Response
     {
@@ -30,7 +32,9 @@ class GameController extends BaseController
             return new JsonResponse(["message" => "User not found"], 404);
         }
 
-        [$limit, $offset] = $this->pagination();
+        $query = $this->request->getQuery();
+        $page = @$query["page"] ?? 1;
+        $offset = ($page - 1) * self::GAMES_BY_PAGE;
 
         /** @var GameRepository $gameRepo */
         $gameRepo = $this->em->getRepository(Game::class);

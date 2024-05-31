@@ -10,8 +10,6 @@ use Handy\ORM\EntityManager;
 class BaseController
 {
 
-    public const ITEMS_PER_PAGE = 20;
-
     /**
      * @var Request
      */
@@ -30,14 +28,6 @@ class BaseController
 
         $this->request = Context::$request;
         $this->em = Context::$entityManager;
-    }
-
-    public function pagination($itemsPerPage = self::ITEMS_PER_PAGE): array
-    {
-        $query = $this->request->getQuery();
-        $page = max(1, @$query["page"]);
-        $offset = ($page - 1) * $itemsPerPage;
-        return [$itemsPerPage, $offset, $page];
     }
 
 }
