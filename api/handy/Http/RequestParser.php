@@ -37,9 +37,14 @@ class RequestParser
         }
 
         $content = null;
+        $files = null;
 
         if ($headers["Content-Type"] == "application/json") {
             $content = json_decode(file_get_contents('php://input'), true);
+        }
+        if (str_starts_with($headers["Content-Type"], "multipart/form-data")) {
+            $content = $_POST;
+            $files = $_FILES;
         }
 
         $request->setMethod($_SERVER['REQUEST_METHOD'])
@@ -47,7 +52,8 @@ class RequestParser
             ->setUrl("$protocol://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]")
             ->setPath($path)
             ->setQuery($_GET)
-            ->setContent($content);
+            ->setContent($content)
+            ->setFiles($files);
 
         Context::$request = $request;
     }

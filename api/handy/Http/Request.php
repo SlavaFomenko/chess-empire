@@ -41,6 +41,11 @@ class Request
     protected mixed $content;
 
     /**
+     * @var ?array
+     */
+    protected ?array $files;
+
+    /**
      * @var string
      */
     protected string $url;
@@ -128,6 +133,24 @@ class Request
     public function setContent(mixed $content): self
     {
         $this->content = $content;
+        return $this;
+    }
+
+    /**
+     * @return ?array
+     */
+    public function getFiles(): ?array
+    {
+        return $this->files;
+    }
+
+    /**
+     * @param ?array $files
+     * @return self
+     */
+    public function setFiles(?array $files): self
+    {
+        $this->files = $files;
         return $this;
     }
 
