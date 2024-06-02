@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LayoutPage } from "../../../layouts/page-layout";
 import axios from "axios";
-import { GET_GAMES_FOR_USER, GET_USER_BY_ID_URL } from "../../../shared/config";
+import { GET_GAMES_FOR_USER, GET_USER_BY_ID_URL, HOST_URL } from "../../../shared/config";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/profile.module.scss";
 import { GamesList } from "../../../entities/profile";
 import { showNotification } from "../../../shared/notification";
+import defaultProfilePic from "../../../shared/icons/defaultProfilePic.png";
 
 export function ProfilePage () {
   const userStore = useSelector(state => state.user);
@@ -51,6 +52,7 @@ export function ProfilePage () {
     const fetchUser = async () => {
       try {
         const response = await axios.get(GET_USER_BY_ID_URL + "/" + userStore.user.id);
+        console.log(response.data.user.profilePic)
         setUser(response.data.user);
       } catch (error) {
         dispatch(showNotification("Error fetching your profile"));
@@ -68,7 +70,8 @@ export function ProfilePage () {
       <div className={styles.profilePage}>
         {user ? (
           <div>
-            <h1>Hi, {user?.username}!</h1>
+            <img src={user.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${user.profilePic}`} alt="Profile pic"/>
+            <h1>Hi, {user.username}!</h1>
             <p className={styles.aka}>Also known as {user.firstName} {user.lastName}</p>
             <p>Email: {user.email}</p>
             <p>Rating: {user.rating}</p>
