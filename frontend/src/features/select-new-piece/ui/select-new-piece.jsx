@@ -13,8 +13,8 @@ import whiteKnight from "../../../entities/chess-figures/styles/icons/wn.png"
 
 export const PromotionDialog = () => {
   const dispatch = useDispatch();
-  const { isPending, position } = useSelector((state) => state.game.promotion);
-  const { gameHistory, myColor } = useSelector((state) => state.game);
+  const { isPending } = useSelector((state) => state.game.promotion);
+  const { myColor } = useSelector((state) => state.game);
 
   const figures = myColor === "black" ?
     {
@@ -40,10 +40,10 @@ export const PromotionDialog = () => {
   return (
     <div  className={styles.container}>
       <div className={styles.wrapper}>
-        <button onClick={() => handleSelect('Q')}><img src={figures.q}/></button>
-        <button onClick={() => handleSelect('R')}><img src={figures.r}/></button>
-        <button onClick={() => handleSelect('B')}><img src={figures.b}/></button>
-        <button onClick={() => handleSelect('N')}><img src={figures.n}/></button>
+        <button onClick={() => handleSelect('Q')}><img src={figures.q} alt="Queen"/></button>
+        <button onClick={() => handleSelect('R')}><img src={figures.r} alt="Rook"/></button>
+        <button onClick={() => handleSelect('B')}><img src={figures.b} alt="Bishop"/></button>
+        <button onClick={() => handleSelect('N')}><img src={figures.n} alt="Knight"/></button>
       </div>
     </div>
   );

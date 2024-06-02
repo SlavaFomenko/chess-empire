@@ -1,19 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "../styles/chess-game.module.scss";
 import { ChessBoard } from "../../../features/chess-board";
 import { useDispatch, useSelector } from "react-redux";
 import { hideNotification, showNotification } from "../../../shared/notification";
 import { s } from "../../../shared/socket";
 import { goToStep, movePiece, selectPiece } from "../../../shared/game";
+import { pieceColor } from "../../../shared/game/lib";
 
 export function ChessGame () {
   const dispatch = useDispatch();
 
-
   const gameState = useSelector(state => state.game);
+  const { selectedPiece, currentColor, board, hasMadeTurn, gameHistory } = gameState;
   const { currentStep, black, white } = gameState;
-
-
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -47,29 +46,24 @@ export function ChessGame () {
   };
 
 
-  const handleSquareClick = (moveAllowed,selectedPiece,coordinate,color) => {
-    const isSelected = selectedPiece && selectedPiece.row === coordinate.row && selectedPiece.col === coordinate.col;
-
-    if (!moveAllowed) {
-      return;
-    }
-
-    if (isSelected) {
+  const handleSquareClick = (cords) => {
+    if (selectedPiece && selectedPiece.row === cords.row && selectedPiece.col === cords.col) {
       return dispatch(selectPiece(null));
     }
 
-    if (selectedPiece === null) {
-      return dispatch(selectPiece(coordinate));
+    const color = pieceColor(board[cords.row][cords.col]);
+    if (selectedPiece === null || currentColor === color) {
+      return dispatch(selectPiece(cords));
     }
 
-    const newCoordinate = {
-      newRow: coordinate.row,
-      newCol: coordinate.col,
-      figuresColor: color
-    };
-
-    dispatch(movePiece(newCoordinate));
+    dispatch(movePiece(cords));
   };
+
+  useEffect(() => {
+    if (hasMadeTurn && gameHistory.length > 0) {
+      dispatch(s.turn(gameHistory[gameHistory.length - 1]));
+    }
+  }, [hasMadeTurn]);
 
   return (
     <div className={styles.wrapper}>

@@ -1,73 +1,47 @@
-import React, { useEffect } from "react";
+import React from "react";
 import styles from "../styles/chess-board.module.scss";
 import { Rook, Bishop, EmptyField, King, Knight, Pawn, Queen } from "../../../entities/chess-figures";
 import { COORDS } from "../../../shared/game";
 
-
-export function ChessBoard ({ gameState:{initialBoard, moveAllowed,selectedPiece,myColor, gameHistory, hasMadeTurn }, event:handleSquareClick }) {
+export function ChessBoard ({
+  gameState: { board, myColor },
+  event: handleSquareClick
+}) {
   const renderBoard = [];
 
-  useEffect(() => {
-    if (hasMadeTurn && gameHistory.length > 0) {
-      // dispatch(s.turn(gameHistory[gameHistory.length - 1]));
-    }
-  }, [hasMadeTurn]);
-
-  initialBoard.map((row, rowIndex) =>
-    row.map((e, columnIndex) => {
-      const specialColumnIndex = columnIndex+1
-        switch (e) {
+  board.map((row, rowIndex) =>
+    row.map((piece, columnIndex) => {
+        const color = "PNBRQK".includes(piece) ? "white" : "black";
+        const coordinate = { row: rowIndex, col: columnIndex };
+        const key = `${COORDS[rowIndex]}${columnIndex}`;
+        switch (piece.toUpperCase()) {
           case "R":
             renderBoard.push(
-              <Rook event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Rook event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "N":
             renderBoard.push(
-              <Knight event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Knight event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "B":
             renderBoard.push(
-              <Bishop event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Bishop event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "Q":
             renderBoard.push(
-              <Queen event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Queen event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "K":
             renderBoard.push(
-              <King event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <King event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "P":
             renderBoard.push(
-              <Pawn event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
-            break;
-          case "r":
-            renderBoard.push(
-              <Rook event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
-            break;
-          case "n":
-            renderBoard.push(
-              <Knight event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
-            break;
-          case "b":
-            renderBoard.push(
-              <Bishop event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
-            break;
-          case "q":
-            renderBoard.push(
-              <Queen event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
-            break;
-          case "k":
-            renderBoard.push(
-              <King event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
-            break;
-          case "p":
-            renderBoard.push(
-              <Pawn event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Pawn event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           default:
             renderBoard.push(
-              <EmptyField event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"empty"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <EmptyField event={handleSquareClick} color={"empty"} key={key} coordinate={coordinate} />);
             break;
         }
       }

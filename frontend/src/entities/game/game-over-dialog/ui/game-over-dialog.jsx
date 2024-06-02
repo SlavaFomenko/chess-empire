@@ -19,8 +19,8 @@ export function GameOverDialog ({ gameState }) {
   };
 
   const rating = {
-    b: gameState.gameOver.b_rating,
-    w: gameState.gameOver.w_rating
+    b: gameState.gameOver.black_rating,
+    w: gameState.gameOver.white_rating
   };
 
   return (

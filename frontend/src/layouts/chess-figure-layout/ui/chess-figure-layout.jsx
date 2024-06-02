@@ -6,17 +6,15 @@ import classNames from "classnames";
 export const ChessFigureLayout = ({ figureProps: { coordinate, event }, children }) => {
   const {
     selectedPiece,
-    possibleMoves,
-
+    availableMoves,
   } = useSelector(state => state.game);
 
   const isSelected = selectedPiece && selectedPiece.row === coordinate.row && selectedPiece.col === coordinate.col;
-  const isHighlighted = possibleMoves.some(move => move.row === coordinate.row && move.col === coordinate.col);
-
+  const isHighlighted = availableMoves.some(move => move.row === coordinate.row && move.col === coordinate.col);
 
   return (
     <div
-      onClick={event}
+      onClick={()=>event(coordinate)}
       className={classNames(styles.wrapper, {
         [styles.isSelected]: isSelected,
         [styles.isHighlighted]: isHighlighted,
