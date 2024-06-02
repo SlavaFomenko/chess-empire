@@ -1,20 +1,15 @@
 import React, { useEffect } from "react";
 import styles from "../styles/chess-board.module.scss";
 import { Rook, Bishop, EmptyField, King, Knight, Pawn, Queen } from "../../../entities/chess-figures";
-import { useDispatch, useSelector } from "react-redux";
 import { COORDS } from "../../../shared/game";
-import { s } from "../../../shared/socket";
 
 
-export function ChessBoard () {
-  const {initialBoard, currentPlayer, myColor, gameHistory, hasMadeTurn } = useSelector(state => state.game);
-  const dispatch = useDispatch();
-
+export function ChessBoard ({ gameState:{initialBoard, moveAllowed,selectedPiece,myColor, gameHistory, hasMadeTurn }, event:handleSquareClick }) {
   const renderBoard = [];
 
   useEffect(() => {
     if (hasMadeTurn && gameHistory.length > 0) {
-      dispatch(s.turn(gameHistory[gameHistory.length - 1]));
+      // dispatch(s.turn(gameHistory[gameHistory.length - 1]));
     }
   }, [hasMadeTurn]);
 
@@ -24,55 +19,55 @@ export function ChessBoard () {
         switch (e) {
           case "R":
             renderBoard.push(
-              <Rook color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Rook event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "N":
             renderBoard.push(
-              <Knight color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Knight event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "B":
             renderBoard.push(
-              <Bishop color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Bishop event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "Q":
             renderBoard.push(
-              <Queen color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Queen event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "K":
             renderBoard.push(
-              <King color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <King event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "P":
             renderBoard.push(
-              <Pawn color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Pawn event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"white"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "r":
             renderBoard.push(
-              <Rook color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Rook event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "n":
             renderBoard.push(
-              <Knight color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Knight event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "b":
             renderBoard.push(
-              <Bishop color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Bishop event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "q":
             renderBoard.push(
-              <Queen color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Queen event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "k":
             renderBoard.push(
-              <King color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <King event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           case "p":
             renderBoard.push(
-              <Pawn color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <Pawn event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"black"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
           default:
             renderBoard.push(
-              <EmptyField color={"empty"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
+              <EmptyField event={()=>handleSquareClick(moveAllowed,selectedPiece,{row:rowIndex,col:columnIndex},e.toUpperCase()===e?'white':"black")} color={"empty"} key={`${COORDS[rowIndex]}${columnIndex}`} coordinate = {{row:rowIndex,col:columnIndex}} notation={`${COORDS[rowIndex]}${specialColumnIndex}`} />);
             break;
         }
       }
