@@ -9,15 +9,16 @@
 
   background-color: #DCD7C9;
 
-  img {
-    width: 90%;
-    height: 90%;
-  }
   .coords{
     position: absolute;
     top: 0;
     right: 0;
   }
+}
+
+.wrapper img {
+  width: 90%;
+  height: 90%;
 }
 
 .dark {

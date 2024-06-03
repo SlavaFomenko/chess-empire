@@ -9,7 +9,7 @@ export function ChessBoard ({
 }) {
   const renderBoard = [];
 
-  board.map((row, rowIndex) =>
+  board?.map((row, rowIndex) =>
     row.map((piece, columnIndex) => {
         const color = "PNBRQK".includes(piece) ? "white" : "black";
         const coordinate = { row: rowIndex, col: columnIndex };

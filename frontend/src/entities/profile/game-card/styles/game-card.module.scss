@@ -1,6 +1,7 @@
-.card{
+.card {
   padding: 0.5rem 1rem;
   background-color: #3F4E4F;
+  transition: 150ms ease-in-out;
 
   table {
     width: 100%;
@@ -23,6 +24,7 @@
   .playedDate {
     color: #617074;
     font-size: 1.2rem;
+    transition: 150ms ease-in-out;
   }
 
   .result {
@@ -40,4 +42,13 @@
   .resultGreen {
     color: #4CD04C;
   }
+}
+
+.card:hover {
+  padding: 0.5rem 1rem;
+  background-color: #576667;
+}
+
+.card:hover .playedDate {
+  color: #949C9C;
 }
