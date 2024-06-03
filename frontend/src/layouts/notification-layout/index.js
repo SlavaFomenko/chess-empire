@@ -1,1 +1,1 @@
-export { NotificationLayout } from "./ui/notificatio-layout";
+export { NotificationLayout } from "./ui/notification-layout";

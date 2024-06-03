@@ -2,26 +2,25 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LayoutPage } from "../../../layouts/page-layout";
 import axios from "axios";
-import { GET_GAMES_FOR_USER, GET_USER_BY_ID_URL, HOST_URL } from "../../../shared/config";
-import { useNavigate } from "react-router-dom";
+import { GET_GAMES_FOR_USER, GET_USER_BY_ID_URL, HOST_URL, UPLOAD_USER_PIC } from "../../../shared/config";
 import styles from "../styles/profile.module.scss";
-import { GamesList } from "../../../entities/profile";
+import { ChangePicDialog, GamesList } from "../../../entities/profile";
 import { showNotification } from "../../../shared/notification";
-import defaultProfilePic from "../../../shared/icons/defaultProfilePic.png";
+import defaultProfilePic from "../../../shared/images/icons/defaultProfilePic.png";
 
 export function ProfilePage () {
   const userStore = useSelector(state => state.user);
   const [user, setUser] = useState(null);
-  const [games, setGames] = useState({loading: false, list: [], page: 0, lastPage: false})
-  const navigate = useNavigate();
+  const [games, setGames] = useState({ loading: false, list: [], page: 0, lastPage: false });
+  const [picForm, setPicForm] = useState({opened: false, selectedFile: null})
   const dispatch = useDispatch();
 
   const fetchGames = () => {
-    if(!user || !userStore.user.token || games.lastPage){
+    if (!user || !userStore.user.token || games.lastPage) {
       return;
     }
     try {
-      setGames({...games, loading: true})
+      setGames({ ...games, loading: true });
       axios.get(GET_GAMES_FOR_USER, {
         params: {
           page: games.page + 1,
@@ -38,30 +37,47 @@ export function ProfilePage () {
           lastPage: response.data.length < 20
         });
       });
-    }
-    catch (error) {
-      dispatch(showNotification("Error fetching your games"))
+    } catch (error) {
+      dispatch(showNotification("Error fetching your games"));
     }
   };
 
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(GET_USER_BY_ID_URL + "/" + userStore.user.id);
+      setUser(response.data.user);
+    } catch (error) {
+      dispatch(showNotification("Error fetching your profile"));
+    }
+  };
+
+  const uploadPic = async () => {
+    if(!picForm.selectedFile){
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('pic',picForm.selectedFile)
+      axios.post(UPLOAD_USER_PIC(userStore.user.id), formData, {
+        headers: {
+          'content-type': 'multipart/form-data',
+          Authorization: `Bearer ${userStore.user.token}`
+        }
+      }).then(response => {
+        window.location.reload();
+      }).catch(error => dispatch(showNotification("Error uploading new pic")));
+    } catch (error) {
+      dispatch(showNotification("Error uploading new pic"));
+    }
+  }
+
   useEffect(() => {
-    fetchGames()
+    fetchGames();
   }, [user]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(GET_USER_BY_ID_URL + "/" + userStore.user.id);
-        console.log(response.data.user.profilePic)
-        setUser(response.data.user);
-      } catch (error) {
-        dispatch(showNotification("Error fetching your profile"));
-      }
-    };
     if (userStore.user) {
       fetchUser();
-    } else {
-      navigate("/");
     }
   }, [userStore]);
 
@@ -69,12 +85,17 @@ export function ProfilePage () {
     <LayoutPage>
       <div className={styles.profilePage}>
         {user ? (
-          <div>
-            <img src={user.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${user.profilePic}`} alt="Profile pic"/>
-            <h1>Hi, {user.username}!</h1>
-            <p className={styles.aka}>Also known as {user.firstName} {user.lastName}</p>
-            <p>Email: {user.email}</p>
-            <p>Rating: {user.rating}</p>
+          <div className={styles.profileData}>
+            <div className={styles.profilePicDiv}>
+              <img src={user.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${user.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic"/>
+              <button onClick={()=>setPicForm({...picForm, opened: true})}>Change</button>
+            </div>
+            <div>
+              <h1>Hi, {user.username}!</h1>
+              <p className={styles.aka}>Also known as {user.firstName} {user.lastName}</p>
+              <p>Email: {user.email}</p>
+              <p>Rating: {user.rating}</p>
+            </div>
           </div>
         ) : (
           <p>Loading...</p>
@@ -88,6 +109,7 @@ export function ProfilePage () {
           {games.loading && <p>Loading...</p>}
         </div>
       </div>
+      {picForm.opened && <ChangePicDialog state={picForm} setState={setPicForm} onSubmit={()=>{uploadPic()}}/>}
     </LayoutPage>
   );
 }

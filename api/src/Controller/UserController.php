@@ -134,7 +134,7 @@ class UserController extends BaseController
             return new JsonResponse(["message" => "User not found"], 404);
         }
 
-        $fileName = uniqid('profile-pic-') . "." . $fileExt;
+        $fileName = "profile-pic-" . $id . ".png";
         $uploadName = "img/" . strtolower($fileName);
         $uploadName = preg_replace('/\s+/', '-', $uploadName);
 
@@ -169,11 +169,7 @@ class UserController extends BaseController
             $dst = imagecreatetruecolor($width, $height);
             imagecopyresampled($dst, $src, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
 
-            if ($fileExt == 'jpg' || $fileExt == 'jpeg') {
-                imagejpeg($dst, $targetFile);
-            } elseif ($fileExt == 'png') {
-                imagepng($dst, $targetFile);
-            }
+            imagepng($dst, $targetFile);
 
             imagedestroy($src);
             imagedestroy($dst);
