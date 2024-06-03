@@ -21,10 +21,10 @@ CREATE TABLE `game` (
   `time` int,
   `rated` bool,
   `winner` varchar(1),
-  `b_rating` int,
-  `w_rating` int,
-  `b_id` int,
-  `w_id` int,
+  `black_rating` int,
+  `white_rating` int,
+  `black_id` int,
+  `white_id` int,
   `history` text,
   `played_date` bigint
 );
@@ -33,6 +33,6 @@ ALTER TABLE `friend_pair` ADD FOREIGN KEY (`user1_id`) REFERENCES `user` (`id`);
 
 ALTER TABLE `friend_pair` ADD FOREIGN KEY (`user2_id`) REFERENCES `user` (`id`);
 
-ALTER TABLE `game` ADD FOREIGN KEY (`b_id`) REFERENCES `user` (`id`);
+ALTER TABLE `game` ADD FOREIGN KEY (`black_id`) REFERENCES `user` (`id`);
 
-ALTER TABLE `game` ADD FOREIGN KEY (`w_id`) REFERENCES `user` (`id`);
+ALTER TABLE `game` ADD FOREIGN KEY (`white_id`) REFERENCES `user` (`id`);

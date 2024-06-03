@@ -39,6 +39,9 @@ class User extends BaseEntity implements JsonSerializable
     #[Column(type: ColumnType::VARCHAR, column: "last_name", length: 50)]
     private ?string $lastName = null;
 
+    #[Column(type: ColumnType::VARCHAR, column: "profile_pic", length: 255, nullable: true)]
+    private ?string $profilePic = null;
+
     #[Column(type: ColumnType::INT, column: "rating")]
     private ?int $rating = null;
 
@@ -56,8 +59,9 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $role
+     * @return self
      */
-    public function setRole(?string $role): User
+    public function setRole(?string $role): self
     {
         $this->role = $role;
         return $this;
@@ -73,8 +77,9 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $hashedPassword
+     * @return self
      */
-    public function setPassword(?string $hashedPassword): User
+    public function setPassword(?string $hashedPassword): self
     {
         $this->hashedPassword = $hashedPassword;
         return $this;
@@ -90,9 +95,9 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $username
-     * @return User
+     * @return self
      */
-    public function setUserName(?string $username): User
+    public function setUserName(?string $username): self
     {
         $this->userName = $username;
         return $this;
@@ -108,8 +113,9 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $firstName
+     * @return self
      */
-    public function setFirstName(?string $firstName): User
+    public function setFirstName(?string $firstName): self
     {
         $this->firstName = $firstName;
         return $this;
@@ -125,10 +131,29 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $lastName
+     * @return self
      */
-    public function setLastName(?string $lastName): User
+    public function setLastName(?string $lastName): self
     {
         $this->lastName = $lastName;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getProfilePic(): ?string
+    {
+        return $this->profilePic;
+    }
+
+    /**
+     * @param string|null $profilePic
+     * @return self
+     */
+    public function setProfilePic(?string $profilePic): self
+    {
+        $this->profilePic = $profilePic;
         return $this;
     }
 
@@ -142,8 +167,9 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param int|null $rating
+     * @return self
      */
-    public function setRating(?int $rating): User
+    public function setRating(?int $rating): self
     {
         $this->rating = $rating;
         return $this;
@@ -160,9 +186,9 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param int|null $id
-     * @return User
+     * @return self
      */
-    public function setId(?int $id): User
+    public function setId(?int $id): self
     {
         $this->id = $id;
         return $this;
@@ -178,9 +204,9 @@ class User extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $email
-     * @return User
+     * @return self
      */
-    public function setEmail(?string $email): User
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
         return $this;
@@ -189,16 +215,16 @@ class User extends BaseEntity implements JsonSerializable
 
     public function jsonSerialize(): array
     {
-        $data = [
+        return [
             "id" => $this->getId(),
             "role"=>$this->getRole(),
             "email" => $this->getEmail(),
             "username"=>$this->getUserName(),
             "firstName"=>$this->getFirstName(),
             "lastName"=>$this->getLastName(),
+            "profilePic"=>$this->getProfilePic(),
             "rating"=>$this->getRating()
         ];
-        return $data;
     }
 
 }

@@ -29,8 +29,7 @@ export const searchingGameState = ({ socket, dispatch, history, getState }) => {
         type: "game/updateState",
         payload: { ...data, myColor: myColor }
       });
-    }
-    ,
+    },
     play_random_err: (data) => {
       dispatch(showNotification("Oops! Seems like you're playing or searching the game from another device. Are you okay?"));
       socket.setState(defaultState, { dispatch, history, getState });

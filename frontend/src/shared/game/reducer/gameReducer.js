@@ -31,8 +31,8 @@ const initialState = {
   gameOver: {
     winner: null,
     reason: null,
-    w_rating: null,
-    b_rating: null
+    white_rating: null,
+    black_rating: null
   },
   black: null,
   white: null
@@ -318,8 +318,8 @@ export const gameSlice = createSlice({
         gameOver: {
           winner: action.payload.winner,
           reason: action.payload.reason,
-          w_rating: action.payload.w_rating,
-          b_rating: action.payload.b_rating
+          white_rating: action.payload.white_rating,
+          black_rating: action.payload.black_rating
         }
       };
     },

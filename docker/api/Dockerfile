@@ -14,7 +14,11 @@ RUN apt-get update -y \
         libcurl4-openssl-dev \
         libxslt-dev \
         libxml2-dev \
-    && docker-php-ext-install pdo_mysql pdo sockets bcmath xsl xml soap pcntl
+        libpng-dev \
+        libjpeg-dev \
+    && docker-php-ext-configure gd --with-jpeg \
+    && docker-php-ext-install pdo_mysql gd pdo sockets bcmath xsl xml soap pcntl \
+    && docker-php-ext-enable gd
 
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug

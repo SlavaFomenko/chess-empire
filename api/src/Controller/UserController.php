@@ -72,35 +72,112 @@ class UserController extends BaseController
     }
 
     #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
-    public function getByID(int $id):Response
+    public function getByID(int $id): Response
     {
-        $queryParams = $this->request->getQuery();
         $repo = $this->em->getRepository(User::class);
         $user = $repo->findOneBy(["id" => $id]);
-        if(empty($user)){
+        if (empty($user)) {
             return new JsonResponse(["message" => "User not found"], 404);
         }
-        return new JsonResponse(['user'=>$user],200);
+        return new JsonResponse(['user' => $user], 200);
     }
 
     #[Route(name: "get_all_users", path: "/users", methods: [Request::METHOD_GET])]
-    public function getAll():Response
+    public function getAll(): Response
     {
         $query = $this->request->getQuery();
         $criteria = [];
-        [$limit, $offset] = $this->pagination();
+        [
+            $limit,
+            $offset
+        ] = $this->pagination();
 
-        if(isset($query["name"])){
+        if (isset($query["name"])) {
             $criteria = [
-                "username" => "LIKE " . $query["name"],
+                "username"   => "LIKE " . $query["name"],
                 "first_name" => "LIKE " . $query["name"],
-                "last_name" => "LIKE " . $query["name"]
+                "last_name"  => "LIKE " . $query["name"]
             ];
         }
 
         $repo = $this->em->getRepository(User::class);
         $users = $repo->findBy($criteria, true, $limit, $offset);
-        return new JsonResponse($users,200);
+        return new JsonResponse($users, 200);
+    }
+
+    #[Route(name: "patch_user_pic", path: "/users/{id}/pic", methods: [Request::METHOD_POST])]
+    public function patchUserPic(int $id): Response
+    {
+        $files = $this->request->getFiles();
+        if (!$files || !isset($files["pic"])) {
+            return new JsonResponse(["message" => "File is not provided"], 400);
+        }
+
+        if ($_FILES["pic"]["error"] > 0) {
+            return new JsonResponse(["message" => "Error uploading the file"], 409);
+        }
+
+        $split = explode(".", $_FILES["pic"]["name"]);
+        $fileExt = end($split);
+        if (!in_array($fileExt, [
+            "png",
+            "jpg",
+            "jpeg"
+        ])) {
+            return new JsonResponse(["message" => "Unsupported file extension"]);
+        }
+
+        $repo = $this->em->getRepository(User::class);
+        /** @var User $user */
+        $user = $repo->findOneBy(["id" => $id]);
+        if (empty($user)) {
+            return new JsonResponse(["message" => "User not found"], 404);
+        }
+
+        $fileName = "profile-pic-" . $id . ".png";
+        $uploadName = "img/" . strtolower($fileName);
+        $uploadName = preg_replace('/\s+/', '-', $uploadName);
+
+        if ($this->resizeImage($_FILES["pic"]["tmp_name"], $_SERVER['DOCUMENT_ROOT'] . "/" . $uploadName)) {
+            $user->setProfilePic($uploadName);
+            $this->em->persist($user);
+            $this->em->flush();
+            return new JsonResponse($user, 201);
+        }
+
+        return new JsonResponse(["message" => "Error uploading the file"], 409);
+    }
+
+    public function resizeImage($file, $targetFile): bool
+    {
+        $width = 512;
+        $height = 512;
+
+        [$originalWidth, $originalHeight] = getimagesize($file);
+
+        $src = null;
+
+        $split = explode(".", $_FILES["pic"]["name"]);
+        $fileExt = end($split);
+        if ($fileExt == 'jpg' || $fileExt == 'jpeg') {
+            $src = imagecreatefromjpeg($file);
+        } elseif ($fileExt == 'png') {
+            $src = imagecreatefrompng($file);
+        }
+
+        if ($src) {
+            $dst = imagecreatetruecolor($width, $height);
+            imagecopyresampled($dst, $src, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
+
+            imagepng($dst, $targetFile);
+
+            imagedestroy($src);
+            imagedestroy($dst);
+
+            return true;
+        }
+
+        return false;
     }
 
     function validateEmail($email): bool

@@ -39,16 +39,16 @@ class GameController extends BaseController
             $query = $this->request->getQuery();
             if(isset($query["userId"])){
                 $games = $gameRepo->findBy([
-                    "b_id" => $query["userId"],
-                    "w_id" => $query["userId"]
+                    "black_id" => $query["userId"],
+                    "white_id" => $query["userId"]
                 ], true, $limit, $offset, [["played_date","DESC"]]);
             } else {
                 $games = $gameRepo->findByUserName(@$query["name"] ?? "", $limit, $offset, [["played_date","DESC"]]);
             }
         } else {
             $games = $gameRepo->findBy([
-                "b_id" => $user->getId(),
-                "w_id" => $user->getId()
+                "black_id" => $user->getId(),
+                "white_id" => $user->getId()
             ], true, $limit, $offset, [["played_date","DESC"]]);
         }
 
@@ -57,13 +57,13 @@ class GameController extends BaseController
         $opponents = [];
         /** @var Game $game */
         foreach ($games as $game) {
-            $b_user = $userRepo->findOneBy(["id" => $game->getBId()]);
-            $w_user = $userRepo->findOneBy(["id" => $game->getWId()]);
+            $black_user = $userRepo->findOneBy(["id" => $game->getBId()]);
+            $white_user = $userRepo->findOneBy(["id" => $game->getWId()]);
 
             $result[] = [
                 ...$game->jsonSerialize(),
-                "b_username" => $b_user->getUserName() ?? "UnknownUser",
-                "w_username" => $w_user->getUserName() ?? "UnknownUser",
+                "black_username" => $black_user->getUserName() ?? "UnknownUser",
+                "white_username" => $white_user->getUserName() ?? "UnknownUser",
             ];
         }
 

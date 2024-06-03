@@ -147,9 +147,9 @@ class GameRoom extends SocketRoom
     {
         $this->winner = $winner;
         $this->removeAllListeners("turn");
-        $w_rating = $winner === "white" ? 10 : -10;
-        $w_rating = $winner === "tie" ? 0 : $w_rating;
-        $w_rating = $this->rated ? $w_rating : 0;
+        $white_rating = $winner === "white" ? 10 : -10;
+        $white_rating = $winner === "tie" ? 0 : $white_rating;
+        $white_rating = $this->rated ? $white_rating : 0;
 
         $gameRecord = new Game();
         $gameRecord->setTime($this->time)
@@ -168,8 +168,8 @@ class GameRoom extends SocketRoom
             $player["client"]->emit("game_end", [
                 "winner"   => $winner,
                 "reason"   => $reason,
-                "w_rating" => $w_rating,
-                "b_rating" => -$w_rating
+                "white_rating" => $white_rating,
+                "black_rating" => -$white_rating
             ]);
             $player["client"]->setState(DefaultState::class);
             $this->kick($player["client"]);
@@ -177,7 +177,7 @@ class GameRoom extends SocketRoom
                 $repo = $this->server->em->getRepository(User::class);
                 $user = $repo->find($player["client"]->user->getId());
                 $player["client"]->user = $user;
-                $newRating = $user->getRating() + ($color === "white" ? $w_rating : -$w_rating);
+                $newRating = $user->getRating() + ($color === "white" ? $white_rating : -$white_rating);
                 $user->setRating(max($newRating, 0));
                 $this->server->em?->persist($user);
             }
@@ -224,11 +224,13 @@ class GameRoom extends SocketRoom
             "black"    => [
                 "id"       => @$b["client"]->user?->getId(),
                 "username" => @$b["client"]->user?->getUserName(),
+                "profilePic" => @$b["client"]->user?->getProfilePic(),
                 "time"     => @$b["time"]
             ],
             "white"    => [
                 "id"       => @$w["client"]->user?->getId(),
                 "username" => @$w["client"]->user?->getUserName(),
+                "profilePic" => @$w["client"]->user?->getProfilePic(),
                 "time"     => @$w["time"]
             ],
             "hasMoved" => $this->hasMoved
