@@ -549,7 +549,7 @@ function getPossibleMovesK(array $cords, array $board): array
 
 function validateMove(array $board, array $from, array $to, array $hasMoved): bool
 {
-    if (!in_array($to, getPossibleMoves($board, $from))) {
+    if (!in_array($to, getPossibleMoves($board, $from)) || $from === $to) {
         return false;
     }
 
@@ -564,7 +564,7 @@ function validateMove(array $board, array $from, array $to, array $hasMoved): bo
         return false;
     }
 
-    if (str_contains("kK", $piece) && abs($from["col"] !== $to["col"]) === 2) {
+    if (str_contains("kK", $piece) && abs($from["col"] - $to["col"]) === 2) {
         return canCastle($board, pieceColor($piece), $to["col"] === 2 ? 0 : 7, $hasMoved);
     }
 
