@@ -224,11 +224,13 @@ class GameRoom extends SocketRoom
             "black"    => [
                 "id"       => @$b["client"]->user?->getId(),
                 "username" => @$b["client"]->user?->getUserName(),
+                "profilePic" => @$b["client"]->user?->getProfilePic(),
                 "time"     => @$b["time"]
             ],
             "white"    => [
                 "id"       => @$w["client"]->user?->getId(),
                 "username" => @$w["client"]->user?->getUserName(),
+                "profilePic" => @$w["client"]->user?->getProfilePic(),
                 "time"     => @$w["time"]
             ],
             "hasMoved" => $this->hasMoved
