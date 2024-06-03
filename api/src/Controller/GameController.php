@@ -57,13 +57,13 @@ class GameController extends BaseController
         $opponents = [];
         /** @var Game $game */
         foreach ($games as $game) {
-            $black_user = $userRepo->findOneBy(["id" => $game->getBId()]);
-            $white_user = $userRepo->findOneBy(["id" => $game->getWId()]);
+            $blackUser = $userRepo->findOneBy(["id" => $game->getBlackId()]);
+            $whiteUser = $userRepo->findOneBy(["id" => $game->getWhiteId()]);
 
             $result[] = [
                 ...$game->jsonSerialize(),
-                "black_username" => $black_user->getUserName() ?? "UnknownUser",
-                "white_username" => $white_user->getUserName() ?? "UnknownUser",
+                "black_username" => $blackUser->getUserName() ?? "UnknownUser",
+                "white_username" => $whiteUser->getUserName() ?? "UnknownUser",
             ];
         }
 

@@ -41,10 +41,10 @@ export const PromotionDialog = () => {
   return (
     <BannerLayout>
       <div className={styles.wrapper}>
-        <button onClick={() => handleSelect("Q")}><img src={figures.q} /></button>
-        <button onClick={() => handleSelect("R")}><img src={figures.r} /></button>
-        <button onClick={() => handleSelect("B")}><img src={figures.b} /></button>
-        <button onClick={() => handleSelect("N")}><img src={figures.n} /></button>
+        <button onClick={() => handleSelect('Q')}><img src={figures.q} alt="Queen"/></button>
+        <button onClick={() => handleSelect('R')}><img src={figures.r} alt="Rook"/></button>
+        <button onClick={() => handleSelect('B')}><img src={figures.b} alt="Bishop"/></button>
+        <button onClick={() => handleSelect('N')}><img src={figures.n} alt="Knight"/></button>
       </div>
     </BannerLayout>
   );

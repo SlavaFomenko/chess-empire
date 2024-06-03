@@ -1,17 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "../styles/chess-game.module.scss";
 import { ChessBoard } from "../../../features/chess-board";
 import { useDispatch, useSelector } from "react-redux";
-import { goToStep } from "../../../layouts/chess-figure-layout/model/chess-figure-layout";
-import { PromotionDialog } from "../../../features/select-new-piece";
 import { hideNotification, showNotification } from "../../../shared/notification";
 import { s } from "../../../shared/socket";
+import { goToStep, movePiece, selectPiece } from "../../../shared/game";
+import { pieceColor } from "../../../shared/game/lib";
 import defaultProfilePic from "../../../shared/images/icons/defaultProfilePic.png";
 import { HOST_URL } from "../../../shared/config";
 
 export function ChessGame () {
   const dispatch = useDispatch();
+
   const gameState = useSelector(state => state.game);
+  const { selectedPiece, currentColor, board, hasMadeTurn, gameHistory } = gameState;
   const { currentStep, black, white } = gameState;
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -44,6 +46,26 @@ export function ChessGame () {
     ));
   };
 
+
+  const handleSquareClick = (cords) => {
+    if (selectedPiece && selectedPiece.row === cords.row && selectedPiece.col === cords.col) {
+      return dispatch(selectPiece(null));
+    }
+
+    const color = pieceColor(board[cords.row][cords.col]);
+    if (selectedPiece === null || currentColor === color) {
+      return dispatch(selectPiece(cords));
+    }
+
+    dispatch(movePiece(cords));
+  };
+
+  useEffect(() => {
+    if (hasMadeTurn && gameHistory.length > 0) {
+      dispatch(s.turn(gameHistory[gameHistory.length - 1]));
+    }
+  }, [hasMadeTurn]);
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.playersBar}>
@@ -58,7 +80,7 @@ export function ChessGame () {
         </>}
       </div>
       <div className={styles.horizontal}>
-        <ChessBoard />
+        <ChessBoard gameState={gameState} event={handleSquareClick}/>
         <div className={styles.rightPanel}>
           <div>
             <p className={`${styles.timer} ${black?.time <= 10 ? styles.timerRed : ""}`}>Black: {black && formatTime(black.time)}</p>

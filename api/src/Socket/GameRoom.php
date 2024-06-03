@@ -43,19 +43,12 @@ class GameRoom extends SocketRoom
         $this->time = $time;
         $this->currentTurn = "-";
         $this->winner = "-";
-        $this->hasMoved = [
-            "whiteKing"      => false,
-            "whiteRookLeft"  => false,
-            "whiteRookRight" => false,
-            "blackKing"      => false,
-            "blackRookLeft"  => false,
-            "blackRookRight" => false
-        ];
+        $this->hasMoved = DEFAULT_HAS_MOVED;
         $this->history = [];
         $this->players = [];
     }
 
-    public function startGame()
+    public function startGame(): void
     {
         if (!isset($this->players["black"], $this->players["white"])) {
             trigger_error("Cannot start the game before both players join it");
@@ -73,14 +66,16 @@ class GameRoom extends SocketRoom
         }
 
         $this->on("turn", function ($data, ChessClient $client) {
+            /** @var array $cords */
             $cords = turnToCords($data);
             $apply = applyTurns($this->history, hasMoved: $this->hasMoved);
 
-            $possibleMoves = getPossibleMoves($cords['fromRow'], $cords['fromCol'], $apply["board"], $apply["hasMoved"]);
+            $possibleMoves = getPossibleMoves($apply["board"], $cords["from"], $apply["hasMoved"]);
 
-            if (!validateTurn($cords, $apply["board"], $this->currentTurn) && !str_contains($data, "00") && strlen($data) !== 5) {
+            if (!validateMove($apply["board"], $cords["from"], $cords["to"], $this->hasMoved)) {
                 return;
             }
+
             $newApply = applyTurns([$cords], $apply["board"], hasMoved: $apply["hasMoved"]);
 
             $this->hasMoved = $newApply["hasMoved"];
@@ -92,7 +87,7 @@ class GameRoom extends SocketRoom
             }
 
             if (!canPlayerMove($this->currentTurn, $newApply["board"], $newApply["hasMoved"])) {
-                $reason = isCheck($this->currentTurn, $newApply["board"]) ? "mate" : "tie";
+                $reason = isCheck($newApply["board"], $this->currentTurn, $newApply["hasMoved"]) ? "mate" : "tie";
                 $opponent = $this->currentTurn === "white" ? "black" : "white";
                 $this->endGame($reason === "tie" ? "tie" : $opponent, $reason);
             }
@@ -155,10 +150,10 @@ class GameRoom extends SocketRoom
         $gameRecord->setTime($this->time)
             ->setRated($this->rated)
             ->setWinner($winner[0])
-            ->setBRating($this->players["black"]["client"]->user->getRating())
-            ->setWRating($this->players["white"]["client"]->user->getRating())
-            ->setBId($this->players["black"]["client"]->user->getId())
-            ->setWId($this->players["white"]["client"]->user->getId())
+            ->setBlackRating($this->players["black"]["client"]->user->getRating())
+            ->setWhiteRating($this->players["white"]["client"]->user->getRating())
+            ->setBlackId($this->players["black"]["client"]->user->getId())
+            ->setWhiteId($this->players["white"]["client"]->user->getId())
             ->setHistory(implode(" ", array_map(fn($cords) => cordsToTurn($cords), $this->history)))
             ->setPlayedDate($this->startedAt);
 

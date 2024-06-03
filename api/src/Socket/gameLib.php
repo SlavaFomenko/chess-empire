@@ -21,44 +21,44 @@ const DEFAULT_BOARD = [
         "p"
     ],
     [
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
     ],
     [
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
     ],
     [
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
     ],
     [
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ""
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
     ],
     [
         "P",
@@ -82,8 +82,30 @@ const DEFAULT_BOARD = [
     ],
 ];
 
-function turnToCords(string $turn)
+const DEFAULT_HAS_MOVED = [
+    "white" => [
+        "king"      => false,
+        "rookLeft"  => false,
+        "rookRight" => false
+    ],
+    "black" => [
+        "king"      => false,
+        "rookLeft"  => false,
+        "rookRight" => false
+    ],
+];
+
+/**
+ * @param string $turn
+ * @return array Array with "from", "to", "newPiece" and "rookCol" keys
+ */
+function turnToCords(string $turn): array
 {
+    $cords = [
+        "newPiece" => null,
+        "rookCol"  => null,
+    ];
+
     if (in_array($turn, [
         "b00",
         "b000",
@@ -92,63 +114,91 @@ function turnToCords(string $turn)
     ])) {
         $row = $turn[0] === "b" ? 0 : 7;
         $long = strlen($turn) === 4;
-        return [
-            'fromRow'     => $row,
-            'fromCol'     => 4,
-            'toRow'       => $row,
-            'toCol'       => $long ? 2 : 6,
-            'castling'    => true,
-            'rookFromCol' => $long ? 0 : 7,
-            'rookToCol'   => $long ? 3 : 5,
+        $cords["from"] = [
+            "row" => $row,
+            "col" => 4,
         ];
+        $cords["to"] = [
+            "row" => $row,
+            "col" => $long ? 2 : 6,
+        ];
+        $cords["rookCol"] = $long ? 0 : 7;
+        return $cords;
     }
 
-    $charCodeShift = ord('a');
-    $numCodeShift = ord('1');
-    $cords = [
-        'fromCol' => ord($turn[0]) - $charCodeShift,
-        'fromRow' => ord($turn[1]) - $numCodeShift,
-        'toCol'   => ord($turn[2]) - $charCodeShift,
-        'toRow'   => ord($turn[3]) - $numCodeShift,
+    $charCodeShift = ord("a");
+    $numCodeShift = ord("1");
+    $cords["from"] = [
+        "row" => ord($turn[1]) - $numCodeShift,
+        "col" => ord($turn[0]) - $charCodeShift,
+    ];
+    $cords["to"] = [
+        "row" => ord($turn[3]) - $numCodeShift,
+        "col" => ord($turn[2]) - $charCodeShift,
     ];
 
     if (strlen($turn) === 5) {
-        $cords['newPiece'] = $turn[4];
+        $cords["newPiece"] = $turn[4];
     }
 
     return $cords;
 }
 
-function cordsToTurn(array $cords)
+/**
+ * @param array $cords
+ * @return string Turn notation in "a1b2" or "b000" format
+ */
+function cordsToTurn(array $cords): string
 {
-    if (isset($cords['castling']) && $cords['castling']) {
-        $color = $cords['fromRow'] === 0 ? "b" : "w";
-        $zeros = $cords['rookToCol'] === 3 ? "000" : "00";
+    if ($cords["rookCol"] !== null) {
+        $color = $cords["from"]["row"] === 0 ? "b" : "w";
+        $zeros = $cords["rookCol"] === 0 ? "000" : "00";
         return $color . $zeros;
     }
 
-    $charCodeShift = ord('a');
-    $numCodeShift = ord('1');
-    $turn = chr($cords['fromCol'] + $charCodeShift) .
-        chr($cords['fromRow'] + $numCodeShift) .
-        chr($cords['toCol'] + $charCodeShift) .
-        chr($cords['toRow'] + $numCodeShift);
+    $charCodeShift = ord("a");
+    $numCodeShift = ord("1");
+    $turn = chr($cords["from"]["col"] + $charCodeShift) .
+        chr($cords["from"]["row"] + $numCodeShift) .
+        chr($cords["to"]["col"] + $charCodeShift) .
+        chr($cords["to"]["row"] + $numCodeShift);
 
-    if (isset($cords['newPiece'])) {
-        $turn .= $cords['newPiece'];
+    if ($cords["newPiece"] !== null) {
+        $turn .= $cords["newPiece"];
     }
 
     return $turn;
 }
 
-function applyTurns($turns, $board = DEFAULT_BOARD, $currentPlayer = "white", $hasMoved = [
-    "whiteKing"      => false,
-    "whiteRookLeft"  => false,
-    "whiteRookRight" => false,
-    "blackKing"      => false,
-    "blackRookLeft"  => false,
-    "blackRookRight" => false
-])
+function copyBoard(array $board): array
+{
+    return array_map(fn($row) => array_slice($row, 0), $board);
+}
+
+function pieceColor(string $piece): string
+{
+    if (str_contains("PNBRQK", $piece)) {
+        return "white";
+    }
+    if (str_contains("pnbqrk", $piece)) {
+        return "black";
+    }
+    return "-";
+}
+
+function enemyColor(string $color): string
+{
+    return $color === "white" ? "black" : "white";
+}
+
+/**
+ * @param array $turns
+ * @param array $board
+ * @param string $currentPlayer
+ * @param array $hasMoved
+ * @return array Array with "board" and "hasMoved" keys
+ */
+function applyTurns(array $turns, array $board = DEFAULT_BOARD, string $currentPlayer = "white", array $hasMoved = DEFAULT_HAS_MOVED): array
 {
     if (empty($turns)) {
         return [
@@ -157,371 +207,475 @@ function applyTurns($turns, $board = DEFAULT_BOARD, $currentPlayer = "white", $h
         ];
     }
 
-    $board = array_map(function ($row) {
-        return array_slice($row, 0);
-    }, $board);
+    $board = copyBoard($board);
+    $hasMoved = (new ArrayObject($hasMoved))->getArrayCopy();
 
     $turn = array_shift($turns);
 
-    $fromRow = $turn['fromRow'];
-    $fromCol = $turn['fromCol'];
-    $toRow = $turn['toRow'];
-    $toCol = $turn['toCol'];
-    @$castling = $turn['castling'];
-    @$rookFromCol = $turn['rookFromCol'];
-    @$rookToCol = $turn['rookToCol'];
-    $newPiece = isset($turn['newPiece']) ? $turn['newPiece'] : null;
+    $from = $turn["from"];
+    $to = $turn["to"];
+    $rookCol = $turn["rookCol"];
+    $newPiece = $turn["newPiece"];
+    $piece = $board[$from["row"]][$from["col"]];
+    $color = pieceColor($piece);
 
-    if ($castling) {
-        $newBoard = array_map(function ($row) {
-            return array_slice($row, 0);
-        }, $board);
-        $piece = $newBoard[$fromRow][$fromCol];
-        $newBoard[$fromRow][$fromCol] = "";
-        $newBoard[$toRow][$toCol] = $piece;
-        $newBoard[$fromRow][$rookFromCol] = "";
-        $newBoard[$fromRow][$rookToCol] = $currentPlayer === "white" ? "R" : "r";
-        $board = $newBoard;
-    } else {
-        if ($board[$fromRow][$fromCol] === "k") {
-            $a = 1;
+    if ($turn["rookCol"] !== null) {
+        $board[$from["row"]][$from["col"]] = "-";
+        $board[$to["row"]][$to["col"]] = $piece;
+        $board[$from["row"]][$rookCol === 0 ? 3 : 5] = $board[$from["row"]][$rookCol];
+        $board[$from["row"]][$rookCol] = "-";
+
+        $hasMoved[$color]["king"] = true;
+        $hasMoved[$color][$rookCol === 0 ? "rookLeft" : "rookRight"] = true;
+
+        return applyTurns($turns, $board, enemyColor($color), $hasMoved);
+    }
+
+    if (!$hasMoved[$color]["king"] && str_contains("kK", $piece)) {
+        $hasMoved[$color]["king"] = true;
+    }
+
+    if (str_contains("rR", $piece)) {
+        if ($from["row"] === ($color === "white" ? 7 : 0)) {
+            if ($from["col"] === 0) {
+                $hasMoved[$color]["rookLeft"] = true;
+            } else if ($from["col"] === 7) {
+                $hasMoved[$color]["rookRight"] = true;
+            }
         }
-        $piece = $newPiece ?? $board[$fromRow][$fromCol];
-        $board[$toRow][$toCol] = $piece;
-        $board[$fromRow][$fromCol] = "";
     }
 
-
-    if ($board[$toRow][$toCol] === "K") {
-        $hasMoved['whiteKing'] = true;
-    }
-    if ($board[$toRow][$toCol] === "R") {
-        if ($fromCol === 0) $hasMoved['whiteRookLeft'] = true;
-        if ($fromCol === 7) $hasMoved['whiteRookRight'] = true;
-    }
-
-    if ($board[$toRow][$toCol] === "k") {
-        $hasMoved['blackKing'] = true;
-    }
-    if ($board[$toRow][$toCol] === "r") {
-        if ($fromCol === 0) $hasMoved['blackRookLeft'] = true;
-        if ($fromCol === 7) $hasMoved['blackRookRight'] = true;
+    if (str_contains("rR", $board[$to["row"]][$to["col"]])) {
+        if ($to["row"] === (enemyColor($color) === "white" ? 7 : 0)) {
+            if ($to["col"] === 0) {
+                $hasMoved[enemyColor($color)]["rookLeft"] = true;
+            } else if ($to["col"] === 7) {
+                $hasMoved[enemyColor($color)]["rookRight"] = true;
+            }
+        }
     }
 
+    $board[$to["row"]][$to["col"]] = $newPiece ?? $piece;
+    $board[$from["row"]][$from["col"]] = "-";
 
     return applyTurns($turns, $board, $currentPlayer === "white" ? "black" : "white", $hasMoved);
 }
 
-function validateTurn($cords, $board, $player)
+function isCordsValid(array $cords): bool
 {
-    $fromRow = $cords['fromRow'];
-    $fromCol = $cords['fromCol'];
-    $toRow = $cords['toRow'];
-    $toCol = $cords['toCol'];
-    $piece = $board[$fromRow][$fromCol];
-    $board = $player === "black" ? array_reverse($board) : $board;
-    $fromRow = $player === "black" ? 7 - $fromRow : $fromRow;
-    $toRow = $player === "black" ? 7 - $toRow : $toRow;
-    return validate(strtoupper($piece), $fromRow, $fromCol, $toRow, $toCol, $board);
+    return $cords["row"] >= 0 && $cords["row"] < 8 && $cords["col"] >= 0 && $cords["col"] < 8;
 }
 
-function canCaptureKing($row, $col, $newRow, $newCol, $board, $currentPlayer, $hasMoved)
+function isCordsBusy(array $from, array $to, array $board): bool
 {
-    $piece = $board[$row][$col];
-    $newBoard = applyTurns([
-        [
-            "fromRow" => $row,
-            "fromCol" => $col,
-            "toRow"   => $newRow,
-            "toCol"   => $newCol,
-        ]
-    ], $board, $hasMoved)["board"];
+    return pieceColor($board[$from["row"]][$from["col"]]) === pieceColor($board[$to["row"]][$to["col"]]);
+}
 
-    if($row === 5 && $col === 6){
-        $a = 1;
+function getPossibleMoves(array $board, array $cords): array
+{
+    $piece = $board[$cords["row"]][$cords["col"]];
+
+    if (!str_contains("PNBRQK", strtoupper($piece))) {
+        return [];
     }
 
-    return !isCheck($currentPlayer, $newBoard);
-}
+    $possibleMovesFns = [
+        "P" => "getPossibleMovesP",
+        "N" => "getPossibleMovesN",
+        "B" => "getPossibleMovesB",
+        "R" => "getPossibleMovesR",
+        "Q" => "getPossibleMovesQ",
+        "K" => "getPossibleMovesK"
+    ];
 
-
-function canCastle($board, $kingRow, $kingCol, $rookCol, $player)
-{
-    if (isCheck($player, $board)) return false;
-
-    $direction = $rookCol > $kingCol ? 1 : -1;
-    for ($col = $kingCol + $direction; $col !== $rookCol; $col += $direction) {
-        if ($board[$kingRow][$col] !== "") return false;
-        $newBoard = array_map(function ($row) {
-            return $row;
-        }, $board);
-        $newBoard[$kingRow][$col] = $player === "white" ? "K" : "k";
-        $newBoard[$kingRow][$kingCol] = "";
-        if (isCheck($player, $newBoard)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function canPlayerMove($player, $board, $hasMoved)
-{
-    $playerFigures = $player === "white" ? "PNBRQK" : "pnbrqk";
-
-    $possibleMoves = [];
-    for ($i = 0; $i < 8; $i++) {
-        for ($j = 0; $j < 8; $j++) {
-            if ($board[$i][$j] === "" || !str_contains($playerFigures, $board[$i][$j])) {
-                continue;
-            }
-
-            $possibleMoves = array_merge($possibleMoves, getPossibleMoves($i, $j, $board, $hasMoved));
-        }
+    if ($piece === "p" || $piece === "k") {
+        $cords["row"] = 7 - $cords["row"];
+        return array_map(fn($c) => [
+            "row" => 7 - $c["row"],
+            "col" => $c["col"]
+        ], $possibleMovesFns[strtoupper($piece)]($cords, array_reverse($board)));
     }
 
-    return !empty($possibleMoves);
+    return $possibleMovesFns[strtoupper($piece)]($cords, $board);
 }
 
-function getPossibleMoves($row, $col, $board, $hasMoved)
+function getPossibleMovesP(array $cords, array $board): array
 {
-    $piece = $board[$row][$col];
-
+    [
+        "row" => $row,
+        "col" => $col
+    ] = $cords;
     $possibleMoves = [];
 
-    if (strtoupper($piece) === $piece) { // white piece
-        for ($i = 0; $i < 8; $i++) {
-            for ($j = 0; $j < 8; $j++) {
-                if (validate($piece, $row, $col, $i, $j, $board) && canCaptureKing($row, $col, $i, $j, $board, "white", $hasMoved)) {
-                    if ($board[$i][$j] === "" || strtolower($board[$i][$j]) === $board[$i][$j]) {
-                        $possibleMoves[] = [
-                            'row' => $i,
-                            'col' => $j
-                        ];
-                    }
-                }
-            }
-        }
+    $turn = [
+        'row' => $row - 1,
+        'col' => $col - 1
+    ];
+    if (isCordsValid($turn) && pieceColor($board[$row - 1][$col - 1]) === enemyColor(pieceColor($board[$row][$col]))) {
+        $possibleMoves[] = $turn;
+    }
 
-        if ($piece === "K" && !$hasMoved['whiteKing']) {
-            if (!$hasMoved['whiteRookLeft'] && canCastle($board, $row, $col, 0, "white")) {
-                $possibleMoves[] = [
-                    'row' => $row,
-                    'col' => $col - 2
-                ];
-            }
-            if (!$hasMoved['whiteRookRight'] && canCastle($board, $row, $col, 7, "white")) {
-                $possibleMoves[] = [
-                    'row' => $row,
-                    'col' => $col + 2
-                ];
-            }
-        }
-    } else {
-        $reversedBoard = array_reverse(array_map(function ($row) {
-            return array_slice($row, 0);
-        }, $board));
+    $turn = [
+        'row' => $row - 1,
+        'col' => $col + 1
+    ];
+    if (isCordsValid($turn) && pieceColor($board[$row - 1][$col + 1]) === enemyColor(pieceColor($board[$row][$col]))) {
+        $possibleMoves[] = $turn;
+    }
 
-        for ($i = 0; $i < 8; $i++) {
-            for ($j = 0; $j < 8; $j++) {
-                $valid = validate(strtoupper($piece), 7 - $row, $col, 7 - $i, $j, $reversedBoard);
-                $canCapture = canCaptureKing(7 - $row, $col, 7 - $i, $j, $reversedBoard, "black", $hasMoved);
-                if ($valid && $canCapture) {
-                    if ($board[$i][$j] === "" || strtoupper($board[$i][$j]) === $board[$i][$j]) {
-                        $possibleMoves[] = [
-                            'row' => $i,
-                            'col' => $j
-                        ];
-                    }
-                }
-            }
-        }
-
-        if ($piece === "k" && !$hasMoved['blackKing']) {
-            if (!$hasMoved['blackRookLeft'] && canCastle($board, $row, $col, 0, "black")) {
-                $possibleMoves[] = [
-                    'row' => $row,
-                    'col' => $col - 2
-                ];
-            }
-            if (!$hasMoved['blackRookRight'] && canCastle($board, $row, $col, 7, "black")) {
-                $possibleMoves[] = [
-                    'row' => $row,
-                    'col' => $col + 2
-                ];
-            }
+    if ($board[$row - 1][$col] === "-") {
+        $possibleMoves[] = [
+            'row' => $row - 1,
+            'col' => $col
+        ];
+        if ($row === 6 && $board[4][$col] === "-") {
+            $possibleMoves[] = [
+                'row' => 4,
+                'col' => $col
+            ];
         }
     }
 
     return $possibleMoves;
 }
 
-
-function validate($piece, $row, $col, $newRow, $newCol, $board)
+function getPossibleMovesN(array $cords, array $board): array
 {
-    $validateFns = [
-        "P" => "validatePawn",
-        "N" => "validateKnight",
-        "B" => "validateBishop",
-        "R" => "validateRook",
-        "Q" => "validateQueen",
-        "K" => "validateKing"
+    [
+        "row" => $row,
+        "col" => $col
+    ] = $cords;
+    $possibleMoves = [
+        [
+            'row' => $row - 2,
+            'col' => $col - 1
+        ],
+        [
+            'row' => $row - 2,
+            'col' => $col + 1
+        ],
+        [
+            'row' => $row - 1,
+            'col' => $col - 2
+        ],
+        [
+            'row' => $row - 1,
+            'col' => $col + 2
+        ],
+        [
+            'row' => $row + 1,
+            'col' => $col - 2
+        ],
+        [
+            'row' => $row + 1,
+            'col' => $col + 2
+        ],
+        [
+            'row' => $row + 2,
+            'col' => $col - 1
+        ],
+        [
+            'row' => $row + 2,
+            'col' => $col + 1
+        ]
     ];
 
-    if (isset($validateFns[$piece])) {
-        return call_user_func($validateFns[$piece], $row, $col, $newRow, $newCol, $board);
-    }
-    return false;
+    $possibleMoves = array_filter($possibleMoves, 'isCordsValid');
+    return array_filter($possibleMoves, fn($to) => !isCordsBusy($cords, $to, $board));
 }
 
-function validatePawn($row, $col, $newRow, $newCol, $board)
+function getPossibleMovesB(array $cords, array $board): array
 {
-    if ($col === $newCol) {
-        if ($row === 6) {
-            $a = ($newRow === $row - 1 || $newRow === $row - 2) && $board[$row - 1][$col] === "" && ($newRow === $row - 2 || $board[$newRow][$newCol] === "") && $board[$newRow][$newCol] === "";
-        } else {
-            $a = $newRow === $row - 1 && $board[$newRow][$newCol] === "";
-        }
-        return $a;
-    } else {
-        if (abs($newCol - $col) === 1) {
-            if ($newRow === $row - 1 && $board[$newRow][$newCol] !== "") {
-                return true;
-            }
-        }
+    [
+        "row" => $row,
+        "col" => $col
+    ] = $cords;
+    $possibleMoves = array();
+
+    for ($i = 1; $i < 8; $i++) {
+        $to = array(
+            'row' => $row + $i,
+            'col' => $col + $i
+        );
+        if (!isCordsValid($to)) continue;
+        $possibleMoves[] = $to;
+        if ($board[$row + $i][$col + $i] !== "-") break;
+    }
+
+    for ($i = 1; $i < 8; $i++) {
+        $to = array(
+            'row' => $row - $i,
+            'col' => $col + $i
+        );
+        if (!isCordsValid($to)) continue;
+        $possibleMoves[] = $to;
+        if ($board[$row - $i][$col + $i] !== "-") break;
+    }
+
+    for ($i = 1; $i < 8; $i++) {
+        $to = array(
+            'row' => $row + $i,
+            'col' => $col - $i
+        );
+        if (!isCordsValid($to)) continue;
+        $possibleMoves[] = $to;
+        if ($board[$row + $i][$col - $i] !== "-") break;
+    }
+
+    for ($i = 1; $i < 8; $i++) {
+        $to = array(
+            'row' => $row - $i,
+            'col' => $col - $i
+        );
+        if (!isCordsValid($to)) continue;
+        $possibleMoves[] = $to;
+        if ($board[$row - $i][$col - $i] !== "-") break;
+    }
+
+    return $possibleMoves;
+}
+
+function getPossibleMovesR(array $cords, array $board): array
+{
+    [
+        "row" => $row,
+        "col" => $col
+    ] = $cords;
+    $possibleMoves = array();
+
+    for ($i = 1; $i < 8; $i++) {
+        $to = array(
+            'row' => $row + $i,
+            'col' => $col
+        );
+        if (!isCordsValid($to)) continue;
+        $possibleMoves[] = $to;
+        if ($board[$row + $i][$col] !== "-") break;
+    }
+
+    for ($i = 1; $i < 8; $i++) {
+        $to = array(
+            'row' => $row - $i,
+            'col' => $col
+        );
+        if (!isCordsValid($to)) continue;
+        $possibleMoves[] = $to;
+        if ($board[$row - $i][$col] !== "-") break;
+    }
+
+    for ($i = 1; $i < 8; $i++) {
+        $to = array(
+            'row' => $row,
+            'col' => $col + $i
+        );
+        if (!isCordsValid($to)) continue;
+        $possibleMoves[] = $to;
+        if ($board[$row][$col + $i] !== "-") break;
+    }
+
+    for ($i = 1; $i < 8; $i++) {
+        $to = array(
+            'row' => $row,
+            'col' => $col - $i
+        );
+        if (!isCordsValid($to)) continue;
+        $possibleMoves[] = $to;
+        if ($board[$row][$col - $i] !== "-") break;
+    }
+
+    return $possibleMoves;
+}
+
+function getPossibleMovesQ(array $cords, array $board): array
+{
+    return array_merge(getPossibleMovesR($cords, $board), getPossibleMovesB($cords, $board));
+}
+
+function getPossibleMovesK(array $cords, array $board): array
+{
+    [
+        "row" => $row,
+        "col" => $col
+    ] = $cords;
+    $possibleMoves = [
+        [
+            'row' => $row - 1,
+            'col' => $col - 1
+        ],
+        [
+            'row' => $row - 1,
+            'col' => $col
+        ],
+        [
+            'row' => $row - 1,
+            'col' => $col + 1
+        ],
+        [
+            'row' => $row,
+            'col' => $col - 1
+        ],
+        [
+            'row' => $row,
+            'col' => $col + 1
+        ],
+        [
+            'row' => $row + 1,
+            'col' => $col - 1
+        ],
+        [
+            'row' => $row + 1,
+            'col' => $col
+        ],
+        [
+            'row' => $row + 1,
+            'col' => $col + 1
+        ]
+    ];
+
+    if ($row === 7 && $col === 4) {
+        $possibleMoves[] = [
+            'row' => 7,
+            'col' => 2
+        ];
+        $possibleMoves[] = [
+            'row' => 7,
+            'col' => 6
+        ];
+    }
+
+    $possibleMoves = array_filter($possibleMoves, 'isCordsValid');
+    return array_filter($possibleMoves, fn($to) => !isCordsBusy($cords, $to, $board));
+}
+
+function validateMove(array $board, array $from, array $to, array $hasMoved): bool
+{
+    if (!in_array($to, getPossibleMoves($board, $from))) {
         return false;
     }
-}
 
-function validateKnight($row, $col, $newRow, $newCol)
-{
-    $dx = abs($newRow - $row);
-    $dy = abs($newCol - $col);
-    return ($dx === 2 && $dy === 1) || ($dx === 1 && $dy === 2);
-}
+    $piece = $board[$from["row"]][$from["col"]];
+    $target = $board[$to["row"]][$to["col"]];
 
-function validateBishop($row, $col, $newRow, $newCol, $board)
-{
-    if (abs($newRow - $row) === abs($newCol - $col)) {
-        $directionX = $newRow > $row ? 1 : -1;
-        $directionY = $newCol > $col ? 1 : -1;
-        $i = $row + $directionX;
-        $j = $col + $directionY;
-        while ($i !== $newRow && $j !== $newCol) {
-            if ($i < 0 || $i >= count($board) || $j < 0 || $j >= count($board[0])) return false;
-            if ($board[$i][$j] !== "") return false;
-            $i += $directionX;
-            $j += $directionY;
-        }
-        return true;
+    if (pieceColor($piece) === pieceColor($target)) {
+        return false;
     }
-    return false;
-}
 
-function validateRook($row, $col, $newRow, $newCol, $board)
-{
-    if ($newRow === $row) {
-        $direction = $newCol > $col ? 1 : -1;
-        for ($i = $col + $direction; $i !== $newCol; $i += $direction) {
-            if (@$board[$row][$i] !== "") return false;
-        }
-        return true;
-    } elseif ($newCol === $col) {
-        $direction = $newRow > $row ? 1 : -1;
-        for ($i = $row + $direction; $i !== $newRow; $i += $direction) {
-            if ($board[$i][$col] !== "") return false;
-        }
-        return true;
+    if (str_contains("pP", $piece) && $from["col"] !== $to["col"] && $target === "-") {
+        return false;
     }
-    return false;
-}
 
-function validateQueen($row, $col, $newRow, $newCol, $board)
-{
-    if (abs($newRow - $row) === abs($newCol - $col)) {
-        $directionX = $newRow > $row ? 1 : -1;
-        $directionY = $newCol > $col ? 1 : -1;
-        $i = max($row + $directionX, 0);
-        $j = max($col + $directionY, 0);
-        while ($i !== $newRow && $j !== $newCol) {
-            if ($board[$i][$j] !== "") return false;
-            $i += $directionX;
-            $j += $directionY;
-        }
-        return true;
-    } elseif ($newRow === $row) {
-        $direction = $newCol > $col ? 1 : -1;
-        for ($i = $col + $direction; $i !== $newCol; $i += $direction) {
-            if ($board[$row][$i] !== "") return false;
-        }
-        return true;
-    } elseif ($newCol === $col) {
-        $direction = $newRow > $row ? 1 : -1;
-        for ($i = $row + $direction; $i !== $newRow; $i += $direction) {
-            if ($board[$i][$col] !== "") return false;
-        }
-        return true;
+    if (str_contains("kK", $piece) && abs($from["col"] !== $to["col"]) === 2) {
+        return canCastle($board, pieceColor($piece), $to["col"] === 2 ? 0 : 7, $hasMoved);
     }
-    return false;
+
+    $turn = [
+        "from"     => $from,
+        "to"       => $to,
+        "newPiece" => null,
+        "rookCol"  => null,
+    ];
+
+    [
+        "board"    => $newBoard,
+        "hasMoved" => $newHasMoved
+    ] = applyTurns([$turn], $board, pieceColor($piece), $hasMoved);
+
+    return !isCheck($newBoard, pieceColor($piece), $newHasMoved);
 }
 
-function validateKing($row, $col, $newRow, $newCol, $board)
+function isCheck(array $board, string $color, array $hasMoved): bool
 {
-    $enemyFigures = $board[$row][$col] === strtoupper($board[$row][$col]) ? "pnbrqk" : "PNBRQK";
-    $dx = abs($newRow - $row);
-    $dy = abs($newCol - $col);
-    return ($dx <= 1 && $dy <= 1) && str_contains($enemyFigures, $board[$newRow][$newCol]);
-}
-
-function getKing($player, $board)
-{
-    for ($i = 0; $i < 8; $i++) {
-        for ($j = 0; $j < 8; $j++) {
-            if ($board[$i][$j] === ($player === "white" ? "K" : "k")) {
-                return [
+    $enemyPieces = [];
+    $kingCords = [];
+    $kingPiece = $color === "white" ? "K" : "k";
+    for ($i = 0; $i < 8; $i += 1) {
+        for ($j = 0; $j < 8; $j += 1) {
+            $piece = $board[$i][$j];
+            if ($piece === $kingPiece) {
+                $kingCords = [
                     "row" => $i,
-                    "col" => $j
+                    "col" => $j,
+                ];
+            } else if (pieceColor($piece) === enemyColor($color)) {
+                $enemyPieces[] = [
+                    "row" => $i,
+                    "col" => $j,
                 ];
             }
         }
     }
-    return [
-        "row" => -1,
-        "col" => -1
-    ];
+
+    foreach ($enemyPieces as $enemyPiece) {
+        if (validateMove($board, $enemyPiece, $kingCords, $hasMoved)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-function isCheck($player, $board)
+function canCastle(array $board, string $color, int $rookCol, array $hasMoved): bool
 {
-    $kingCords = getKing($player, $board);
-    $kingRow = $kingCords["row"];
-    $kingCol = $kingCords["col"];
+    if ($hasMoved[$color]["king"] || $hasMoved[$color][$rookCol === 0 ? "rookLeft" : "rookRight"]) {
+        return false;
+    }
 
+    $row = $color === "white" ? 7 : 0;
+    $colsToCheck = $rookCol === 0 ? [
+        1,
+        2,
+        3
+    ] : [
+        5,
+        6
+    ];
+    foreach ($colsToCheck as $col) {
+        if ($board[$row][$col] !== "-") {
+            return false;
+        }
+    }
+
+    if (isCheck($board, $color, $hasMoved)) {
+        return false;
+    }
+
+    $turn = [
+        "from"     => [
+            "row" => $row,
+            "col" => 4,
+        ],
+        "to"       => [
+            "row" => $row,
+            "col" => $rookCol === 0 ? 2 : 6,
+        ],
+        "newPiece" => null,
+        "rookCol"  => $rookCol,
+    ];
+
+    [
+        "board"    => $newBoard,
+        "hasMoved" => $newHasMoved
+    ] = applyTurns([$turn], $board, $color, $hasMoved);
+
+    return !isCheck($newBoard, $color, $newHasMoved);
+}
+
+function getValidMoves(array $board, array $from, array $hasMoved): array
+{
+    return array_filter(getPossibleMoves($board, $from), fn($to) => validateMove($board, $from, $to, $hasMoved));
+}
+
+function canPlayerMove(string $color, array $board, array $hasMoved): bool
+{
     for ($i = 0; $i < 8; $i++) {
         for ($j = 0; $j < 8; $j++) {
-            if ($player === "white") {
-                if ($board[$i][$j] !== "" && strtoupper($board[$i][$j]) !== $board[$i][$j]) {
-                    $reversedBoard = array_reverse(array_map(function ($row) {
-                        return array_slice($row, 0);
-                    }, $board));
-                    if (validate(strtoupper($board[$i][$j]), 7 - $i, $j, 7 - $kingRow, $kingCol, $reversedBoard)) {
-                        return true;
-                    }
-                }
-            } else {
-                if ($board[$i][$j] !== "" && strtolower($board[$i][$j]) !== $board[$i][$j]) {
-                    if ($board[$i][$j] === "P") {
-                        $reversedBoard = array_reverse(array_map(function ($row) {
-                            return array_slice($row, 0);
-                        }, $board));
-                        if (validate($board[$i][$j], 7 - $i, $j, 7 - $kingRow, $kingCol, $reversedBoard)) {
-                            return true;
-                        }
-                    }
-
-                    if (validate($board[$i][$j], $i, $j, $kingRow, $kingCol, $board)) {
-                        return true;
-                    }
-                }
+            $from = [
+                "row" => $i,
+                "col" => $j
+            ];
+            if (pieceColor($board[$i][$j]) === $color && !empty(getValidMoves($board, $from, $hasMoved))) {
+                $b = getValidMoves($board, $from, $hasMoved);
+                return true;
             }
         }
     }
