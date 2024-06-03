@@ -1,15 +1,16 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { selectPromotionPiece } from "../model/select-promotion-piece";
-import styles from '../styles/select-new-piece.module.scss'
-import blackQueen from "../../../entities/chess-figures/styles/icons/bq.png"
-import blackRook from "../../../entities/chess-figures/styles/icons/br.png"
-import blackBishop from "../../../entities/chess-figures/styles/icons/bb.png"
-import blackKnight from "../../../entities/chess-figures/styles/icons/bn.png"
-import whiteQueen from "../../../entities/chess-figures/styles/icons/wq.png"
-import whiteRook from "../../../entities/chess-figures/styles/icons/wr.png"
-import whiteBishop from "../../../entities/chess-figures/styles/icons/wb.png"
-import whiteKnight from "../../../entities/chess-figures/styles/icons/wn.png"
+import styles from "../styles/select-new-piece.module.scss";
+import blackQueen from "../../../entities/chess-figures/styles/icons/bq.png";
+import blackRook from "../../../entities/chess-figures/styles/icons/br.png";
+import blackBishop from "../../../entities/chess-figures/styles/icons/bb.png";
+import blackKnight from "../../../entities/chess-figures/styles/icons/bn.png";
+import whiteQueen from "../../../entities/chess-figures/styles/icons/wq.png";
+import whiteRook from "../../../entities/chess-figures/styles/icons/wr.png";
+import whiteBishop from "../../../entities/chess-figures/styles/icons/wb.png";
+import whiteKnight from "../../../entities/chess-figures/styles/icons/wn.png";
+import { BannerLayout } from "../../../layouts/banner-layout";
 
 export const PromotionDialog = () => {
   const dispatch = useDispatch();
@@ -38,13 +39,13 @@ export const PromotionDialog = () => {
   };
 
   return (
-    <div  className={styles.container}>
+    <BannerLayout>
       <div className={styles.wrapper}>
         <button onClick={() => handleSelect('Q')}><img src={figures.q} alt="Queen"/></button>
         <button onClick={() => handleSelect('R')}><img src={figures.r} alt="Rook"/></button>
         <button onClick={() => handleSelect('B')}><img src={figures.b} alt="Bishop"/></button>
         <button onClick={() => handleSelect('N')}><img src={figures.n} alt="Knight"/></button>
       </div>
-    </div>
+    </BannerLayout>
   );
 };

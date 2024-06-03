@@ -59,9 +59,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param int|null $id
-     * @return Game
+     * @return self
      */
-    public function setId(?int $id): Game
+    public function setId(?int $id): self
     {
         $this->id = $id;
         return $this;
@@ -77,9 +77,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param int|null $time
-     * @return Game
+     * @return self
      */
-    public function setTime(?int $time): Game
+    public function setTime(?int $time): self
     {
         $this->time = $time;
         return $this;
@@ -95,9 +95,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param bool|null $rated
-     * @return Game
+     * @return self
      */
-    public function setRated(?bool $rated): Game
+    public function setRated(?bool $rated): self
     {
         $this->rated = $rated;
         return $this;
@@ -113,9 +113,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $winner
-     * @return Game
+     * @return self
      */
-    public function setWinner(?string $winner): Game
+    public function setWinner(?string $winner): self
     {
         $this->winner = $winner;
         return $this;
@@ -131,9 +131,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param int|null $black_rating
-     * @return Game
+     * @return self
      */
-    public function setBlackRating(?int $black_rating): Game
+    public function setBlackRating(?int $black_rating): self
     {
         $this->black_rating = $black_rating;
         return $this;
@@ -149,9 +149,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param int|null $white_rating
-     * @return Game
+     * @return self
      */
-    public function setWhiteRating(?int $white_rating): Game
+    public function setWhiteRating(?int $white_rating): self
     {
         $this->white_rating = $white_rating;
         return $this;
@@ -167,9 +167,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param int|null $black_id
-     * @return Game
+     * @return self
      */
-    public function setBlackId(?int $black_id): Game
+    public function setBlackId(?int $black_id): self
     {
         $this->black_id = $black_id;
         return $this;
@@ -185,9 +185,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param int|null $white_id
-     * @return Game
+     * @return self
      */
-    public function setWhiteId(?int $white_id): Game
+    public function setWhiteId(?int $white_id): self
     {
         $this->white_id = $white_id;
         return $this;
@@ -203,9 +203,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $history
-     * @return Game
+     * @return self
      */
-    public function setHistory(?string $history): Game
+    public function setHistory(?string $history): self
     {
         $this->history = $history;
         return $this;
@@ -221,9 +221,9 @@ class Game extends BaseEntity implements JsonSerializable
 
     /**
      * @param string|null $playedDate
-     * @return Game
+     * @return self
      */
-    public function setPlayedDate(?string $playedDate): Game
+    public function setPlayedDate(?string $playedDate): self
     {
         $this->playedDate = $playedDate;
         return $this;

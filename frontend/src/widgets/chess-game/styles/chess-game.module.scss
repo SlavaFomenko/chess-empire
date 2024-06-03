@@ -7,9 +7,26 @@
   gap: 1.5rem;
 }
 
-h1 {
-  color: #576667;
-  font-size: 2rem;
+
+.playersBar {
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+
+  h1 {
+    color: #576667;
+    font-size: 2rem;
+  }
+
+  img {
+    aspect-ratio: 1;
+    height: 4rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
 
   .playerNameSpan {
     color: #D2D4D4;

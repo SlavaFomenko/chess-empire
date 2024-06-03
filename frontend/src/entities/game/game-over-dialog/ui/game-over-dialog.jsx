@@ -3,6 +3,7 @@ import styles from "../styles/game-over-dialog.module.scss";
 import { s } from "../../../../shared/socket/";
 import { useDispatch } from "react-redux";
 import classNames from "classnames";
+import { BannerLayout } from "../../../../layouts/banner-layout";
 
 export function GameOverDialog ({ gameState }) {
   const gameOverState = gameState.gameOver;
@@ -19,12 +20,12 @@ export function GameOverDialog ({ gameState }) {
   };
 
   const rating = {
-    b: gameState.gameOver.black_rating,
-    w: gameState.gameOver.white_rating
+    black: gameState.gameOver.black_rating,
+    white: gameState.gameOver.white_rating
   };
 
   return (
-    <div className={styles.container}>
+    <BannerLayout>
       <div className={styles.gameOverDialog}>
         <h1>{endTitle}</h1>
         <p>{reasonMessage[gameOverState.reason]}</p>
@@ -34,11 +35,11 @@ export function GameOverDialog ({ gameState }) {
             <td>
               <span
                 className={classNames({
-                  [styles.ratingRed]: rating.b < 0,
-                  [styles.ratingGreen]: rating.b > 0
+                  [styles.ratingRed]: rating.black < 0,
+                  [styles.ratingGreen]: rating.black > 0
                 })}
               >
-                {`${rating.b > 0 ? "+" : ""}${rating.b}`}
+                {`${rating.black > 0 ? "+" : ""}${rating.black}`}
               </span>
             </td>
           </tr>
@@ -47,17 +48,17 @@ export function GameOverDialog ({ gameState }) {
             <td>
               <span
                 className={classNames({
-                  [styles.ratingRed]: rating.w < 0,
-                  [styles.ratingGreen]: rating.w > 0
+                  [styles.ratingRed]: rating.white < 0,
+                  [styles.ratingGreen]: rating.white > 0
                 })}
               >
-                {`${rating.w > 0 ? "+" : ""}${rating.w}`}
+                {`${rating.white > 0 ? "+" : ""}${rating.white}`}
               </span>
             </td>
           </tr>
         </table>
         <button onClick={() => {dispatch(s.closeEndGame());}}>Got it</button>
       </div>
-    </div>
+    </BannerLayout>
   );
 }

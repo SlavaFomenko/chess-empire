@@ -4,12 +4,8 @@ import styles from "../styles/notification-layout.module.scss";
 import { useDispatch } from "react-redux";
 import { hideNotification } from "../../../shared/notification";
 
-export function NotificationLayout ({ children, buttons }) {
+export function NotificationLayout ({ children }) {
   const dispatch = useDispatch();
-
-  const btnHandler = () => {
-    dispatch(hideNotification());
-  };
 
   return createPortal(
     <div className={styles.wrapper} onClick={()=>{dispatch(hideNotification())}}>
