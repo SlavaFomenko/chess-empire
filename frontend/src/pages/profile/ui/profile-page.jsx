@@ -36,7 +36,7 @@ export function ProfilePage () {
           page: games.page + 1,
           lastPage: response.data.length < 20
         });
-      });
+      }).catch(error => dispatch(showNotification("Error fetching your games")));
     } catch (error) {
       dispatch(showNotification("Error fetching your games"));
     }

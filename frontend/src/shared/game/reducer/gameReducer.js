@@ -140,7 +140,6 @@ export const gameSlice = createSlice({
       };
     },
     updateState: (state, action) => {
-      debugger
       const { id, turn, history, black, white, myColor } = action.payload;
       const newHistory = history === "" ? [] : history.split(" ").map(turn => turnToCords(turn));
       const { board, hasMoved } = applyTurns([...newHistory]);

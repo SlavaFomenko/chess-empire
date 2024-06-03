@@ -30,26 +30,44 @@ class GameController extends BaseController
             return new JsonResponse(["message" => "User not found"], 404);
         }
 
-        [$limit, $offset] = $this->pagination();
+        [
+            $limit,
+            $offset
+        ] = $this->pagination();
 
         /** @var GameRepository $gameRepo */
         $gameRepo = $this->em->getRepository(Game::class);
 
-        if(Context::$security->getRole() === User::ROLE_ADMIN){
+        if (Context::$security->getRole() === User::ROLE_ADMIN) {
             $query = $this->request->getQuery();
-            if(isset($query["userId"])){
+            if (isset($query["userId"])) {
                 $games = $gameRepo->findBy([
                     "black_id" => $query["userId"],
                     "white_id" => $query["userId"]
-                ], true, $limit, $offset, [["played_date","DESC"]]);
+                ], true, $limit, $offset, [
+                    [
+                        "played_date",
+                        "DESC"
+                    ]
+                ]);
             } else {
-                $games = $gameRepo->findByUserName(@$query["name"] ?? "", $limit, $offset, [["played_date","DESC"]]);
+                $games = $gameRepo->findByUserName(@$query["name"] ?? "", $limit, $offset, [
+                    [
+                        "played_date",
+                        "DESC"
+                    ]
+                ]);
             }
         } else {
             $games = $gameRepo->findBy([
                 "black_id" => $user->getId(),
                 "white_id" => $user->getId()
-            ], true, $limit, $offset, [["played_date","DESC"]]);
+            ], true, $limit, $offset, [
+                [
+                    "played_date",
+                    "DESC"
+                ]
+            ]);
         }
 
         $result = [];
@@ -57,17 +75,53 @@ class GameController extends BaseController
         $opponents = [];
         /** @var Game $game */
         foreach ($games as $game) {
-            $blackUser = $userRepo->findOneBy(["id" => $game->getBlackId()]);
-            $whiteUser = $userRepo->findOneBy(["id" => $game->getWhiteId()]);
+            $blackUser = $userRepo->find($game->getBlackId());
+            $whiteUser = $userRepo->find($game->getWhiteId());
 
             $result[] = [
                 ...$game->jsonSerialize(),
-                "black_username" => $blackUser->getUserName() ?? "UnknownUser",
-                "white_username" => $whiteUser->getUserName() ?? "UnknownUser",
+                "black_username" => $blackUser?->getUserName() ?? "UnknownUser",
+                "white_username" => $whiteUser?->getUserName() ?? "UnknownUser",
             ];
         }
 
         return new JsonResponse($result, 200);
     }
 
+    #[Route(name: "get_game_by_id", path: "/games/{id}", methods: [Request::METHOD_GET])]
+    public function getById(int $id): Response
+    {
+        $sec = Context::$security;
+        if ($sec->getRole() === Security::ROLE_UNAUTHORIZED) {
+            return new JsonResponse(["message" => "Unauthorized"], 401);
+        }
+
+        $gameRepo = $this->em->getRepository(Game::class);
+
+        /** @var Game $game */
+        $game = $gameRepo->find($id);
+        if (empty($game)) {
+            return new JsonResponse(["message" => "Game not found"], 404);
+        }
+
+        $playerIds = [
+            $game->getWhiteId(),
+            $game->getBlackId()
+        ];
+        if ($sec->getRole() === User::ROLE_ADMIN || in_array($sec->getData()->id,$playerIds)) {
+            $userRepo = $this->em->getRepository(User::class);
+            $black = $userRepo->find($game->getBlackId());
+            $white = $userRepo->find($game->getWhiteId());
+            $gameData = [
+                ...$game->jsonSerialize(),
+                "black_username" => $black?->getUserName() ?? "UnknownUser",
+                "white_username" => $white?->getUserName() ?? "UnknownUser",
+                "black_profilePic" => $black?->getProfilePic() ?? "",
+                "white_profilePic" => $white?->getProfilePic() ?? "",
+            ];
+            return new JsonResponse($gameData, 200);
+        }
+
+        return new JsonResponse(["message" => "You do not have access to this game"], 403);
+    }
 }

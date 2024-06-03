@@ -83,6 +83,8 @@ export const applyTurns = (turns, board = DEFAULT_BOARD, currentColor = "white",
   board = copyBoard(board);
   hasMoved = JSON.parse(JSON.stringify(hasMoved));
 
+  turns = turns.map(turn => turn);
+
   const turn = turns.shift();
 
   const { from, to, rookCol, newPiece } = turn;
@@ -149,7 +151,7 @@ const possibleMovesFns = {
       possibleMoves.push(turn);
     }
 
-    if (board[row - 1][col] === "-") {
+    if (row > 0 && board[row - 1][col] === "-") {
       possibleMoves.push({ row: row - 1, col: col });
       if (row === 6 && board[4][col] === "-") {
         possibleMoves.push({ row: 4, col: col });

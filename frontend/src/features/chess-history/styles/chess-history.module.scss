@@ -1,0 +1,67 @@
+.historyContainer {
+  width: 100%;
+  height: 15rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.historyContainer::-webkit-scrollbar {
+  all: unset;
+  width: 0.5rem;
+}
+
+.historyContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.historyContainer::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+.turnDiv {
+  width: 100%;
+  height: 2rem;
+  flex-shrink: 0;
+  padding: 0 0.5rem;
+  background-color: #3F4E4F;
+  color: #949C9C;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .idxSpan {
+    color: #617074;
+    font-size: 1.3rem;
+    font-weight: 500;
+    transition: 200ms ease-in-out;
+  }
+
+  .turnSpan {
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  transition: 200ms ease-in-out;
+}
+
+.turnDiv:nth-of-type(even) {
+  background-color: #364444;
+}
+
+.turnDiv.current, .turnDiv:nth-of-type(even).current {
+  background-color: #242D30;
+}
+
+.turnDiv:hover, .turnDiv:nth-of-type(even):hover {
+  color: #D2D4D4;
+  background-color: #576667;
+
+  .idxSpan {
+    color: #949C9C;
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+}

@@ -1,0 +1,1 @@
+export { GameReviewPage }  from "./ui/game-review";
