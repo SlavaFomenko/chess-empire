@@ -2,17 +2,19 @@
 
 namespace Handy\Routing;
 
+use Exception;
 use Handy\Context;
 use Handy\Controller\BaseController;
 use Handy\Exception\DirectoryNotFoundException;
 use Handy\Http\Response;
 use Handy\Routing\Attribute\Route as RouteAttribute;
 use Handy\Routing\Attribute\RouteFamily;
-use Handy\Routing\Exception\DuplicateParamNameException;
 use Handy\Routing\Exception\DuplicateRouteNameException;
 use Handy\Routing\Exception\InvalidMethodArgumentsException;
 use Handy\Routing\Exception\InvalidResponseReturnedException;
+use Handy\Security\Exception\UnauthorizedException;
 use Handy\Routing\Exception\UnsupportedParamTypeException;
+use Handy\Security\Security;
 use Handy\Utils\Resolver;
 use ReflectionException;
 use ReflectionMethod;
@@ -21,7 +23,7 @@ class Router
 {
 
     /**
-     * @throws DuplicateParamNameException
+     * @throws UnauthorizedException
      * @throws DuplicateRouteNameException
      * @throws InvalidMethodArgumentsException
      * @throws UnsupportedParamTypeException
@@ -46,7 +48,7 @@ class Router
         $routes["handy-not-found"] = $notFoundRoute;
 
         foreach ($routes as $route) {
-            if (preg_match($route->getPathRegex(), Context::$request->getPath()) === 1 && in_array(Context::$request->getMethod(), $route->getMethods())) {
+            if (preg_match($route->getPathRegex(), Context::$request->getPath()) === 1 && in_array(Context::$request->getMethod(), $route->getMethods()) && self::haveAccess($route)) {
                 $response = $route->execute();
                 if (!is_a($response, Response::class, true)) {
                     throw new InvalidResponseReturnedException("Invalid response type returned: " . $response::class);
@@ -57,10 +59,44 @@ class Router
         }
     }
 
+    public static function handleException(): void
+    {
+        try {
+            $exceptionConfig = Context::$config->controllers["Exception"];
+            $exceptionRoute = new Route();
+            $exceptionRoute->setName("handy-exception")
+                ->setController($exceptionConfig["controller"])
+                ->setMethod($exceptionConfig["method"])
+                ->setPath("")
+                ->setPathRegex("/.*/");
+
+            Context::$response = $exceptionRoute->execute();
+        } catch (Exception $newE){
+            Context::$response = new Response($newE, 500);
+        }
+    }
+
+    public static function haveAccess($route): bool
+    {
+        if (empty($route->getRoles())) {
+            return true;
+        }
+
+        $sec = Context::$security;
+        if ($sec->getRole() === Security::ROLE_UNAUTHORIZED) {
+            throw new UnauthorizedException("Unauthorized", 401);
+        }
+        if (!in_array($sec->getRole(), $route->getRoles())) {
+            throw new UnauthorizedException("Forbidden", 403);
+        }
+
+        return true;
+    }
+
     /**
      * @param $namespaces
      * @return array
-     * @throws DuplicateParamNameException
+     * @throws UnauthorizedException
      * @throws DuplicateRouteNameException
      * @throws InvalidMethodArgumentsException
      * @throws ReflectionException
@@ -94,7 +130,7 @@ class Router
     /**
      * @param ReflectionMethod $method
      * @return array
-     * @throws DuplicateParamNameException
+     * @throws UnauthorizedException
      * @throws DuplicateRouteNameException
      * @throws InvalidMethodArgumentsException
      * @throws UnsupportedParamTypeException
@@ -133,7 +169,7 @@ class Router
             $pathRegex = "/^" . preg_quote($path, '/') . "$/";
             foreach ($matches[1] as $param) {
                 if ($paramsCount[$param] > 1) {
-                    throw new DuplicateParamNameException("Duplicate entry for param \"" . $param . "\" in path \"" . $path . "\"");
+                    throw new UnauthorizedException("Duplicate entry for param \"" . $param . "\" in path \"" . $path . "\"");
                 }
 
                 $args = array_values(array_filter($method->getParameters(), fn($p) => $p->getName() === $param));
@@ -168,6 +204,7 @@ class Router
                 ->setPathRegex($pathRegex)
                 ->setParams($params)
                 ->setMethods($routeData->getMethods())
+                ->setRoles($routeData->getRoles())
                 ->setController($controller->getName())
                 ->setMethod($method->getName());
 

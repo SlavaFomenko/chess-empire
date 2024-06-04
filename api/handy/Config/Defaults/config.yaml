@@ -2,7 +2,9 @@ controllers:
   NotFound:
     controller: Handy\Controller\NotFoundController
     method: index
-
+  Exception:
+    controller: Handy\Controller\ExceptionController
+    method: index
 
 supported_content_types: ["application/json"]
 

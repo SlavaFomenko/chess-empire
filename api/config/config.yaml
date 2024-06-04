@@ -1,3 +1,11 @@
+controllers:
+  NotFound:
+    controller: Handy\Controller\NotFoundController
+    method: index
+  Exception:
+    controller: App\Controller\ExceptionController
+    method: index
+
 global_path_prefix: "/api"
 
 security_provider: App\Security\SecurityProvider

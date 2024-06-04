@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use Handy\Context;
 use Handy\Controller\BaseController;
 use Handy\Http\JsonResponse;
 use Handy\Http\Request;
 use Handy\Http\Response;
 use Handy\Routing\Attribute\Route;
+use Handy\Security\Exception\ForbiddenException;
 
 class UserController extends BaseController
 {
@@ -71,17 +73,6 @@ class UserController extends BaseController
         return new JsonResponse($user, 201);
     }
 
-    #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
-    public function getByID(int $id): Response
-    {
-        $repo = $this->em->getRepository(User::class);
-        $user = $repo->findOneBy(["id" => $id]);
-        if (empty($user)) {
-            return new JsonResponse(["message" => "User not found"], 404);
-        }
-        return new JsonResponse(['user' => $user], 200);
-    }
-
     #[Route(name: "get_all_users", path: "/users", methods: [Request::METHOD_GET])]
     public function getAll(): Response
     {
@@ -105,9 +96,66 @@ class UserController extends BaseController
         return new JsonResponse($users, 200);
     }
 
-    #[Route(name: "patch_user_pic", path: "/users/{id}/pic", methods: [Request::METHOD_POST])]
+    #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
+    public function getByID(int $id): Response
+    {
+        $repo = $this->em->getRepository(User::class);
+        $user = $repo->findOneBy(["id" => $id]);
+        if (empty($user)) {
+            return new JsonResponse(["message" => "User not found"], 404);
+        }
+        return new JsonResponse(['user' => $user], 200);
+    }
+
+    #[Route(name: "patch_user", path: "/users/{id}", methods: [Request::METHOD_PATCH], roles: User::ROLE_USER_OR_ADMIN)]
+    public function patchUser(int $id): Response
+    {
+        if (Context::$security->getData()->id !== $id) {
+            return new JsonResponse(["message" => "Only profile owner can change it"], 403);
+        }
+
+        $repo = $this->em->getRepository(User::class);
+        /** @var User $user */
+        $user = $repo->findOneBy(["id" => $id]);
+        if (empty($user)) {
+            return new JsonResponse(["message" => "User not found"], 404);
+        }
+
+        $data = $this->request->getContent() ?? [];
+
+        if(isset($data["oldPassword"], $data["newPassword"])){
+            $oldHashedPassword = hash_hmac('sha256', $data["oldPassword"], $_ENV["PASSWORD_HASH_KEY"]);
+            if($oldHashedPassword !== $user->getPassword()){
+                return new JsonResponse(["message" => "Invalid password"], 400);
+            }
+            if(!$this->validatePassword($data["newPassword"])){
+                return new JsonResponse(["message" => "Invalid new password"], 400);
+            }
+            $user->setPassword(hash_hmac('sha256', $data["newPassword"], $_ENV["PASSWORD_HASH_KEY"]));
+        }
+
+        if (isset($data["profilePic"]) && $data["profilePic"] === "REMOVE") {
+            if(is_file($_SERVER['DOCUMENT_ROOT'] . "/" . $user->getProfilePic())){
+                unlink($_SERVER['DOCUMENT_ROOT'] . "/" . $user->getProfilePic());
+            }
+            $user->setProfilePic(null);
+        }
+
+        unset($data["id"], $data["hashedPassword"], $data["rating"], $data["role"], $data["profilePic"]);
+        $user->fromArray($data);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return new JsonResponse($user, 201);
+    }
+
+    #[Route(name: "patch_user_pic", path: "/users/{id}/pic", methods: [Request::METHOD_POST], roles: User::ROLE_USER_OR_ADMIN)]
     public function patchUserPic(int $id): Response
     {
+        if (Context::$security->getData()->id !== $id) {
+            throw new ForbiddenException("Only profile owner can change it");
+        }
+
         $files = $this->request->getFiles();
         if (!$files || !isset($files["pic"])) {
             return new JsonResponse(["message" => "File is not provided"], 400);
@@ -136,7 +184,7 @@ class UserController extends BaseController
 
         $fileName = "profile-pic-" . $id . ".png";
 
-        if(!is_dir($_SERVER['DOCUMENT_ROOT'] . "/img/")){
+        if (!is_dir($_SERVER['DOCUMENT_ROOT'] . "/img/")) {
             mkdir($_SERVER['DOCUMENT_ROOT'] . "/img/", 0777, true);
         }
 
@@ -158,7 +206,10 @@ class UserController extends BaseController
         $width = 512;
         $height = 512;
 
-        [$originalWidth, $originalHeight] = getimagesize($file);
+        [
+            $originalWidth,
+            $originalHeight
+        ] = getimagesize($file);
 
         $src = null;
 

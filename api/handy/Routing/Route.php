@@ -53,6 +53,12 @@ class Route
     public array $methods;
 
     /**
+     * Roles that have access to the route
+     * @var array
+     */
+    public array $roles;
+
+    /**
      * Route controller
      * @var string
      */
@@ -67,6 +73,7 @@ class Route
     public function __construct()
     {
         $this->params = [];
+        $this->roles = [];
         $this->methods = Request::METHODS;
     }
 
@@ -175,6 +182,24 @@ class Route
     public function setMethods(array $methods): self
     {
         $this->methods = $methods;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    /**
+     * @param array $roles
+     * @return self
+     */
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
         return $this;
     }
 
