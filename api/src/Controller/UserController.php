@@ -135,6 +135,11 @@ class UserController extends BaseController
         }
 
         $fileName = "profile-pic-" . $id . ".png";
+
+        if(!is_dir($_SERVER['DOCUMENT_ROOT'] . "/img/")){
+            mkdir($_SERVER['DOCUMENT_ROOT'] . "/img/", 0777, true);
+        }
+
         $uploadName = "img/" . strtolower($fileName);
         $uploadName = preg_replace('/\s+/', '-', $uploadName);
 
