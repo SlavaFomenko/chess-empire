@@ -12,7 +12,7 @@ export function ChangePicDialog ({ state, setState, onSubmit, onDelete }) {
           <input accept=".png,.jpeg,.jpg" id="fileInput" type="file" onChange={(e) => {
             setState({...state, selectedFile: e.target.files[0]})}
           }/>
-          <button disabled={true} onClick={onDelete}>Remove Pic</button>
+          <button onClick={onDelete}>Remove Pic</button>
           <label htmlFor="fileInput" className={styles.buttonLabel}>Choose File</label>
           <button disabled={state.selectedFile === null} onClick={onSubmit}>Submit</button>
         </div>

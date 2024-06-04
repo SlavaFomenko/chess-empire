@@ -236,7 +236,7 @@ class User extends BaseEntity implements JsonSerializable, ArrayMappable
     {
         isset($arr["role"]) && $this->setRole($arr["role"]);
         isset($arr["email"]) && $this->setEmail($arr["email"]);
-        isset($arr["userName"]) && $this->setUserName($arr["userName"]);
+        isset($arr["username"]) && $this->setUserName($arr["username"]);
         isset($arr["firstName"]) && $this->setFirstName($arr["firstName"]);
         isset($arr["lastName"]) && $this->setLastName($arr["lastName"]);
         isset($arr["hashedPassword"]) && $this->setPassword($arr["hashedPassword"]);

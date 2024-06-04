@@ -48,6 +48,23 @@
     padding: 0.5rem;
   }
 
+  .usernameBar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .editProfileButton {
+    aspect-ratio: 1;
+    height: 1.5rem;
+    opacity: 0.5;
+    transition: 150ms ease-in-out;
+  }
+
+  .editProfileButton:hover {
+    opacity: 1;
+  }
+
   h1 {
     color: #FDFDFD;
     font-size: 2.5rem;

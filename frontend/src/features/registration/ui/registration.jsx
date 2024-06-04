@@ -9,15 +9,15 @@ export function Registration ({notification, navigate}) {
   const initialValues = {
     email: "",
     username: "",
-    first_name: "",
-    last_name: "",
+    firstName: "",
+    lastName: "",
     password: "",
     password_confirm: ""
   };
 
   const validateForm = (values) => {
     const errors = {};
-    const requiredFields = ["email", "username", "first_name", "last_name", "password", "password_confirm"];
+    const requiredFields = ["email", "username", "firstName", "lastName", "password", "password_confirm"];
     requiredFields.forEach(field => {
       const error = validate[field](values[field]);
       if (error) {
@@ -49,7 +49,7 @@ export function Registration ({notification, navigate}) {
       }
       return error;
     },
-    first_name: (value) => {
+    firstName: (value) => {
       let error;
       if (!value) {
         error = "Required";
@@ -58,7 +58,7 @@ export function Registration ({notification, navigate}) {
       }
       return error;
     },
-    last_name: (value) => {
+    lastName: (value) => {
       let error;
       if (!value) {
         error = "Required";
@@ -88,8 +88,8 @@ export function Registration ({notification, navigate}) {
   };
 
   const onSubmitRegistration = (values) => {
-    const { email, username, first_name, last_name, password } = values;
-    registerUser({ email, username, first_name, last_name, password }).then(data => {
+    const { email, username, firstName, lastName, password } = values;
+    registerUser({ email, username, firstName, lastName, password }).then(data => {
       navigate("/login");
     }).catch(error => {
       notification(error);
@@ -129,23 +129,23 @@ export function Registration ({notification, navigate}) {
 
             <Field
               type="text"
-              name="first_name"
+              name="firstName"
               placeholder="First name"
               onChange={handleChange}
               onBlur={handleBlur}
-              value={values.first_name}
-              validate={validate.first_name}
+              value={values.firstName}
+              validate={validate.firstName}
             />
-            {errors.first_name && touched.first_name && <p className={styles.error}>{errors.first_name}</p>}
+            {errors.firstName && touched.firstName && <p className={styles.error}>{errors.firstName}</p>}
 
             <Field
               type="text"
-              name="last_name"
+              name="lastName"
               placeholder="Last name"
               onChange={handleChange}
               onBlur={handleBlur}
-              value={values.last_name}
-              validate={validate.last_name}
+              value={values.lastName}
+              validate={validate.lastName}
             />
             {errors.last_name && touched.last_name && <p className={styles.error}>{errors.last_name}</p>}
 
