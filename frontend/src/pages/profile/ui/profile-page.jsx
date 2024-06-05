@@ -114,7 +114,7 @@ export function ProfilePage () {
               </div>
               <p className={styles.aka}>Also known as {user.firstName} {user.lastName}</p>
               <p>Email: {user.email}</p>
-              <p>Rating: {user.rating}</p>
+              <p>Rating: {user.rating} {user.ratingTitle && `(${user.ratingTitle})`}</p>
             </div>
           </div>
         ) : (

@@ -2,13 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\RatingRange;
 use App\Entity\User;
 use Handy\Context;
 use Handy\Controller\BaseController;
 use Handy\Http\JsonResponse;
 use Handy\Http\Request;
 use Handy\Http\Response;
-use Handy\ORM\QueryBuilder;
 use Handy\Routing\Attribute\Route;
 use Handy\Security\Exception\ForbiddenException;
 
@@ -86,26 +86,44 @@ class UserController extends BaseController
 
         if (isset($query["name"])) {
             $criteria = [
-                "username"   => "LIKE " . $query["name"],
-                "first_name" => "LIKE " . $query["name"],
-                "last_name"  => "LIKE " . $query["name"]
+                "username" => "LIKE " . $query["name"] . "%",
+                "first_name" => "LIKE " . $query["name"] . "%",
+                "last_name" => "LIKE " . $query["name"] . "%"
             ];
         }
 
         $repo = $this->em->getRepository(User::class);
         $users = $repo->findBy($criteria, true, $limit, $offset);
+
+        $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
+        $users = array_map(function($user) use ($ratingRangeRepo) {
+            $ratingRanges = $ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [["min_rating", "DESC"]]);
+            $ratingRange = current($ratingRanges);
+            return [
+                ...$user->jsonSerialize(),
+                "ratingTitle" => $ratingRange ? $ratingRange->getTitle() : null
+            ];
+        }, $users);
         return new JsonResponse($users, 200);
     }
 
     #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
     public function getByID(int $id): Response
     {
-        $repo = $this->em->getRepository(User::class);
-        $user = $repo->findOneBy(["id" => $id]);
+        $userRepo = $this->em->getRepository(User::class);
+        $user = $userRepo->findOneBy(["id" => $id]);
         if (empty($user)) {
             return new JsonResponse(["message" => "User not found"], 404);
         }
-        return new JsonResponse(['user' => $user], 200);
+        $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
+        $ratingRanges = $ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [["min_rating", "DESC"]]);
+        $ratingRange = current($ratingRanges);
+        return new JsonResponse([
+            'user' => [
+                ...$user->jsonSerialize(),
+                "ratingTitle" => $ratingRange ? $ratingRange->getTitle() : null
+            ]
+        ], 200);
     }
 
     #[Route(name: "patch_user", path: "/users/{id}", methods: [Request::METHOD_PATCH], roles: User::ROLE_USER_OR_ADMIN)]

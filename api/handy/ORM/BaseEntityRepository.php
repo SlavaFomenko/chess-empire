@@ -60,10 +60,14 @@ class BaseEntityRepository
     {
         foreach ($criteria as $key => $value) {
             $operator = "=";
-            if(str_starts_with($value, "LIKE")){
-                $operator = "LIKE";
-                $value = str_replace("LIKE ", "", $value) . "%";
+            $specialOperators = ["LIKE", ">", ">=", "<", "<=", "<>"];
+            foreach($specialOperators as $specialOperator){
+                if(str_starts_with($value, $specialOperator)){
+                    $operator = $specialOperator;
+                    $value = str_replace("$specialOperator ", "", $value);
+                }
             }
+
             $condition = $key . " " . $operator . " :" . $key;
             if($or){
                 $qb->orWhere($condition);
