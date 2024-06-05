@@ -33,6 +33,12 @@ class Game extends BaseEntity implements JsonSerializable
     #[Column(type: ColumnType::INT, column: "white_rating")]
     private ?int $white_rating = null;
 
+    #[Column(type: ColumnType::INT, column: "black_rating_change")]
+    private ?int $black_rating_change = null;
+
+    #[Column(type: ColumnType::INT, column: "white_rating_change")]
+    private ?int $white_rating_change = null;
+
     #[Column(type: ColumnType::INT, column: "black_id")]
     private ?int $black_id = null;
 
@@ -160,6 +166,42 @@ class Game extends BaseEntity implements JsonSerializable
     /**
      * @return int|null
      */
+    public function getBlackRatingChange(): ?int
+    {
+        return $this->black_rating_change;
+    }
+
+    /**
+     * @param int|null $black_rating_change
+     * @return self
+     */
+    public function setBlackRatingChange(?int $black_rating_change): self
+    {
+        $this->black_rating_change = $black_rating_change;
+        return $this;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getWhiteRatingChange(): ?int
+    {
+        return $this->white_rating_change;
+    }
+
+    /**
+     * @param int|null $white_rating_change
+     * @return self
+     */
+    public function setWhiteRatingChange(?int $white_rating_change): self
+    {
+        $this->white_rating_change = $white_rating_change;
+        return $this;
+    }
+
+    /**
+     * @return int|null
+     */
     public function getBlackId(): ?int
     {
         return $this->black_id;
@@ -238,6 +280,8 @@ class Game extends BaseEntity implements JsonSerializable
             "winner"=>$this->getWinner(),
             "black_rating"=>$this->getBlackRating(),
             "white_rating"=>$this->getWhiteRating(),
+            "black_rating_change"=>$this->getBlackRatingChange(),
+            "white_rating_change"=>$this->getWhiteRatingChange(),
             "black_id"=>$this->getBlackId(),
             "white_id"=>$this->getWhiteId(),
             "history"=>$this->getHistory(),

@@ -24,14 +24,27 @@ export function GameCard ({ gameData }) {
   const result = gameData.winner === "t" ? "Tie" : color === gameData.winner ? "Won" : "Lost";
   const formattedDate = formatDate(new Date(gameData.playedDate * 1000));
 
+  const rating = {
+    white: gameData.white_rating,
+    white_change: gameData.white_rating_change,
+    white_class: gameData.white_rating_change > 0 ? styles.resultGreen : styles.resultRed,
+    black: gameData.black_rating,
+    black_change: gameData.black_rating_change,
+    black_class: gameData.black_rating_change > 0 ? styles.resultGreen : styles.resultRed
+  }
+
   return (
-    <div className={styles.card} onClick={()=>{navigate(`/game-review/${gameData.id}`)}}>
+    <div className={styles.card} onClick={() => {navigate(`/game-review/${gameData.id}`);}}>
       <table>
         <tr className={styles.players}>
           <td colSpan="3">
-            <span className={styles.username}>{gameData.white_username} ({gameData.white_rating})</span>
+            <span className={styles.username}>
+              {gameData.white_username} ({rating.white}{rating.white_change !== 0 && <span className={rating.white_class}>{` ${rating.white_change > 0 ? "+" : ""}${rating.white_change}`}</span>})
+            </span>
             {" vs "}
-            <span className={styles.username}>{gameData.black_username} ({gameData.black_rating})</span>
+            <span className={styles.username}>
+              {gameData.black_username} ({rating.black}{rating.black_change !== 0 && <span className={rating.black_class}>{` ${rating.black_change > 0 ? "+" : ""}${rating.black_change}`}</span>})
+            </span>
           </td>
         </tr>
         <tr>
@@ -43,11 +56,13 @@ export function GameCard ({ gameData }) {
               {formattedDate}
             </p>
           </td>
-          <td className={classNames({
-            [styles.result]: color !== "-",
-            [styles.resultRed]: color !== gameData.winner && gameData.winner !== "t",
-            [styles.resultGreen]: color === gameData.winner && gameData.winner !== "t",
-          })}>{color !== "-" && result}</td>
+          <td
+            className={classNames({
+              [styles.result]: color !== "-",
+              [styles.resultRed]: color !== gameData.winner && gameData.winner !== "t",
+              [styles.resultGreen]: color === gameData.winner && gameData.winner !== "t"
+            })}
+          >{color !== "-" && result}</td>
         </tr>
       </table>
     </div>

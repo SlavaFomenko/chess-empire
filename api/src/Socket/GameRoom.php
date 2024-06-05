@@ -3,10 +3,10 @@
 namespace App\Socket;
 
 use App\Entity\Game;
+use App\Entity\RatingRange;
 use App\Entity\User;
 use App\Socket\States\DefaultState;
 use App\Socket\States\InGameState;
-use Handy\Context;
 use Handy\Socket\SocketClient;
 use Handy\Socket\SocketRoom;
 use Handy\Socket\SocketServer;
@@ -69,8 +69,6 @@ class GameRoom extends SocketRoom
             /** @var array $cords */
             $cords = turnToCords($data);
             $apply = applyTurns($this->history, hasMoved: $this->hasMoved);
-
-            $possibleMoves = getPossibleMoves($apply["board"], $cords["from"], $apply["hasMoved"]);
 
             if (!validateMove($apply["board"], $cords["from"], $cords["to"], $this->hasMoved)) {
                 return;
@@ -138,13 +136,44 @@ class GameRoom extends SocketRoom
         }
     }
 
+    public function mapRanges($value, $fromMin, $fromMax, $toMin, $toMax): float
+    {
+        $fromRange = $fromMax - $fromMin;
+        $toRange = $toMax - $toMin;
+        $scale = $toRange / $fromRange;
+        return $toMin + ($value - $fromMin) * $scale;
+    }
+
     public function endGame($winner, $reason): void
     {
         $this->winner = $winner;
         $this->removeAllListeners("turn");
-        $white_rating = $winner === "white" ? 10 : -10;
-        $white_rating = $winner === "tie" ? 0 : $white_rating;
-        $white_rating = $this->rated ? $white_rating : 0;
+
+        $rating = [
+            "black" => $this->players["black"]["client"]->user->getRating(),
+            "white" => $this->players["white"]["client"]->user->getRating()
+        ];
+
+        $white_coef = [
+            "win" => 0,
+            "loss" => 0
+        ];
+
+        if($winner !== "tie" && $this->rated){
+            $white_coef["win"] = $this->mapRanges($rating["black"] - $rating["white"], -max($rating["black"], $rating["white"]), max($rating["black"], $rating["white"]), 0.5, 1.5);
+            $white_coef["loss"] = 2 - $white_coef["win"];
+        }
+
+        $ratingRangeRepo = $this->server->em?->getRepository(RatingRange::class);
+        /** @var RatingRange $blackRatingRange */
+        $blackRatingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $rating["black"]], orderBy: [["min_rating", "DESC"]]));
+        /** @var RatingRange $whiteRatingRange */
+        $whiteRatingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $rating["white"]], orderBy: [["min_rating", "DESC"]]));
+
+        $rating_change = [
+            "black" => (int)round($winner === "black" ? $blackRatingRange->getWin() * $white_coef["loss"] : $blackRatingRange->getLoss() * $white_coef["win"], 0),
+            "white" => (int)round($winner === "white" ? $whiteRatingRange->getWin() * $white_coef["win"] : $whiteRatingRange->getLoss() * $white_coef["loss"], 0)
+        ];
 
         $gameRecord = new Game();
         $gameRecord->setTime($this->time)
@@ -152,6 +181,8 @@ class GameRoom extends SocketRoom
             ->setWinner($winner[0])
             ->setBlackRating($this->players["black"]["client"]->user->getRating())
             ->setWhiteRating($this->players["white"]["client"]->user->getRating())
+            ->setBlackRatingChange($rating_change["black"])
+            ->setWhiteRatingChange($rating_change["white"])
             ->setBlackId($this->players["black"]["client"]->user->getId())
             ->setWhiteId($this->players["white"]["client"]->user->getId())
             ->setHistory(implode(" ", array_map(fn($cords) => cordsToTurn($cords), $this->history)))
@@ -161,18 +192,20 @@ class GameRoom extends SocketRoom
 
         foreach ($this->players as $color => $player) {
             $player["client"]->emit("game_end", [
-                "winner"   => $winner,
-                "reason"   => $reason,
-                "white_rating" => $white_rating,
-                "black_rating" => -$white_rating
+                "winner"       => $winner,
+                "reason"       => $reason,
+                "white_rating" => $rating["white"],
+                "black_rating" => $rating["black"],
+                "white_rating_change" => $rating_change["white"],
+                "black_rating_change" => $rating_change["black"]
             ]);
             $player["client"]->setState(DefaultState::class);
             $this->kick($player["client"]);
-            if($this->rated){
+            if ($this->rated) {
                 $repo = $this->server->em->getRepository(User::class);
                 $user = $repo->find($player["client"]->user->getId());
                 $player["client"]->user = $user;
-                $newRating = $user->getRating() + ($color === "white" ? $white_rating : -$white_rating);
+                $newRating = $user->getRating() + $rating_change[$color];
                 $user->setRating(max($newRating, 0));
                 $this->server->em?->persist($user);
             }
@@ -217,16 +250,16 @@ class GameRoom extends SocketRoom
             "turn"     => $this->currentTurn,
             "history"  => implode(" ", array_map(fn($cords) => cordsToTurn($cords), $this->history)),
             "black"    => [
-                "id"       => @$b["client"]->user?->getId(),
-                "username" => @$b["client"]->user?->getUserName(),
+                "id"         => @$b["client"]->user?->getId(),
+                "username"   => @$b["client"]->user?->getUserName(),
                 "profilePic" => @$b["client"]->user?->getProfilePic(),
-                "time"     => @$b["time"]
+                "time"       => @$b["time"]
             ],
             "white"    => [
-                "id"       => @$w["client"]->user?->getId(),
-                "username" => @$w["client"]->user?->getUserName(),
+                "id"         => @$w["client"]->user?->getId(),
+                "username"   => @$w["client"]->user?->getUserName(),
                 "profilePic" => @$w["client"]->user?->getProfilePic(),
-                "time"     => @$w["time"]
+                "time"       => @$w["time"]
             ],
             "hasMoved" => $this->hasMoved
         ];

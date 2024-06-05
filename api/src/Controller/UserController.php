@@ -97,8 +97,7 @@ class UserController extends BaseController
 
         $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
         $users = array_map(function($user) use ($ratingRangeRepo) {
-            $ratingRanges = $ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [["min_rating", "DESC"]]);
-            $ratingRange = current($ratingRanges);
+            $ratingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [["min_rating", "DESC"]]));
             return [
                 ...$user->jsonSerialize(),
                 "ratingTitle" => $ratingRange ? $ratingRange->getTitle() : null
@@ -116,8 +115,7 @@ class UserController extends BaseController
             return new JsonResponse(["message" => "User not found"], 404);
         }
         $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
-        $ratingRanges = $ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [["min_rating", "DESC"]]);
-        $ratingRange = current($ratingRanges);
+        $ratingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [["min_rating", "DESC"]]));
         return new JsonResponse([
             'user' => [
                 ...$user->jsonSerialize(),
