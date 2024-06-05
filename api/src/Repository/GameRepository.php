@@ -29,8 +29,7 @@ class GameRepository extends BaseEntityRepository
                 "name3" => $name . "%"
             ]);
 
-        $limit !== null && $qb->limit($limit);
-        $offset !== null && $qb->offset($offset);
+        $this->limitAndOffset($qb, $limit, $offset);
 
         $qb->orderBy($orderBy);
 

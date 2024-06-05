@@ -43,12 +43,21 @@ class BaseEntityRepository
         return $this->findBy([], false, $limit, $offset, $orderBy);
     }
 
-    public function findBy(array $criteria, bool $or = false, ?int $limit = null, ?int $offset = null, array $orderBy = []): array
+    public function countBy(array $criteria, bool $or = false): int
     {
+        $idColumn = (new $this->entityClass())->getIdColumn()["column"];
+
         $qb = new QueryBuilder();
-        $qb->select()
+        $qb->select(["COUNT($idColumn)"])
             ->from($this->entityTable);
 
+        $this->addCriteria($qb, $criteria, $or);
+
+        return (int)Context::$connection->execute($qb->getQuery())[0][0];
+    }
+
+    public function addCriteria(QueryBuilder $qb, array $criteria = [], bool $or = false): void
+    {
         foreach ($criteria as $key => $value) {
             $operator = "=";
             if(str_starts_with($value, "LIKE")){
@@ -63,9 +72,23 @@ class BaseEntityRepository
             }
             $qb->setParam([$key => $value]);
         }
+    }
 
+    public function limitAndOffset(QueryBuilder $qb, ?int $limit = null, ?int $offset = null): void
+    {
         $limit !== null && $qb->limit($limit);
         $offset !== null && $qb->offset($offset);
+    }
+
+    public function findBy(array $criteria, bool $or = false, ?int $limit = null, ?int $offset = null, array $orderBy = []): array
+    {
+        $qb = new QueryBuilder();
+        $qb->select()
+            ->from($this->entityTable);
+
+        $this->addCriteria($qb, $criteria, $or);
+
+        $this->limitAndOffset($qb, $limit, $offset);
 
         $qb->orderBy($orderBy);
 
