@@ -16,6 +16,15 @@
     text-align: left;
     transition: 200ms ease-in-out;
   }
+  .closeSideBarBtn{
+    background-color: transparent;
+    border:none;
+    cursor: pointer;
+    img{
+      height: 1rem;
+      width: 1rem;
+    }
+  }
 
   .current {
     color: #FDFDFD;

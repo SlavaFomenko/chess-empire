@@ -1,1 +1,1 @@
-export { ChessPlayersBar } from "./ui/chess-players-bar";
+export { ChessPlayerBar } from "./ui/chess-players-bar";

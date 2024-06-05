@@ -3,4 +3,26 @@
   width: 100%;
   display: flex;
   position: relative;
+
+  .openSideBarBtn{
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background-color: transparent;
+    border:none;
+    cursor: pointer;
+    img{
+      height: 1.5rem;
+      width: 1.5rem;
+    }
+  }
+
+  section{
+    padding-top: 1rem;
+  }
+  .mobile{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 }

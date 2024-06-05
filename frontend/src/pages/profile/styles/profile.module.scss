@@ -1,5 +1,6 @@
 .profilePage{
   height: 100%;
+  width: auto;
   flex-grow: 1;
   padding: 1rem;
 
@@ -125,4 +126,15 @@
     background-color: #617074;
   }
 
+}
+
+@media screen and (max-width: 768px){
+  .profilePage{
+    align-items: center;
+
+    .profileData{
+      flex-direction: column;
+      align-items: center;
+    }
+  }
 }

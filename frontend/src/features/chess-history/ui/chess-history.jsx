@@ -6,7 +6,7 @@ export function ChessHistory ({gameHistory, step, setStep}) {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    containerRef.current?.lastElementChild?.scrollIntoView();
+    window.innerWidth >= 768 && containerRef.current?.lastElementChild?.scrollIntoView()
   }, [gameHistory]);
 
   return (
