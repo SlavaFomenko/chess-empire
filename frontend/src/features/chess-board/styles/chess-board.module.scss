@@ -1,8 +1,19 @@
+:root {
+  --widthChessBoard: 90vw;
+}
+
 .chessBoard{
+
   width: 45rem;
   height: 45rem;
 
   display: grid;
   grid-template-columns: repeat(8,1fr);
   grid-template-rows: repeat(8,1fr);
+}
+@media screen and (max-width: 768px){
+  .chessBoard{
+    width: var(--widthChessBoard);
+    height: var(--widthChessBoard);
+  }
 }

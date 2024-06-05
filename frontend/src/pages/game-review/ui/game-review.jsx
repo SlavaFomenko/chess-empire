@@ -4,7 +4,7 @@ import { LayoutPage } from "../../../layouts/page-layout";
 import axios from "axios";
 import { GET_GAME_BY_ID } from "../../../shared/config";
 import { useDispatch, useSelector } from "react-redux";
-import { ChessPlayersBar } from "../../../features/chess-players-bar";
+import { ChessPlayerBar } from "../../../features/chess-players-bar";
 import { ChessBoard } from "../../../features/chess-board";
 import { ChessHistory } from "../../../features/chess-history";
 import { applyTurns, enemyColor, turnToCords } from "../../../shared/game/lib";
@@ -15,6 +15,7 @@ export const GameReviewPage = () => {
   const [error, setError] = useState(null);
   const [gameState, setGameState] = useState(null);
 
+  console.log(gameState);
   useEffect(() => {
     setError(null);
     if (!userStore.user?.token) {
@@ -71,7 +72,7 @@ export const GameReviewPage = () => {
       board: board,
       hasMoved: hasMoved,
       currentStep: step
-    })
+    });
   };
 
   return (
@@ -80,18 +81,23 @@ export const GameReviewPage = () => {
         {error && <h1 className={styles.errorMessage}>{error}</h1>}
         {gameState && <>
           <div className={styles.wrapper}>
-            <ChessPlayersBar players={{ black: gameState.black, white: gameState.white }} />
-            <div className={styles.horizontal}>
+            <div className={styles.game}>
+              <ChessPlayerBar player={gameState.myColor !== 'white' ? gameState.white: gameState.black} />
               <ChessBoard gameState={gameState} event={() => {}} />
+              <ChessPlayerBar player={gameState.myColor === 'white' ? gameState.white: gameState.black} />
+            </div>
+            <div className={styles.horizontal}>
               <div className={styles.rightPanel}>
                 <div>
-                  <button onClick={()=>{setGameState({...gameState, myColor: enemyColor(gameState.myColor)})}}>Flip Board</button>
+                  <button onClick={() => {setGameState({ ...gameState, myColor: enemyColor(gameState.myColor) });}}>Flip
+                                                                                                                    Board
+                  </button>
+                </div>
+                <div className={styles.historyButtons}>
+                  <button disabled={gameState.currentStep <= 1} onClick={() => {goToStep(gameState.currentStep - 1);}}>Back</button>
+                  <button disabled={gameState.currentStep >= gameState.history.length} onClick={() => {goToStep(gameState.currentStep + 1);}}>Next</button>
                 </div>
                 <ChessHistory gameHistory={gameState.history} step={gameState.currentStep} setStep={step => goToStep(step)} />
-                <div className={styles.historyButtons}>
-                  <button disabled={gameState.currentStep <= 1} onClick={()=>{goToStep(gameState.currentStep - 1)}}>Back</button>
-                  <button disabled={gameState.currentStep >= gameState.history.length} onClick={()=>{goToStep(gameState.currentStep + 1)}}>Next</button>
-                </div>
               </div>
             </div>
           </div>

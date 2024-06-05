@@ -2,19 +2,20 @@ import React from "react";
 import styles from "../styles/chess-players-bar.module.scss";
 import defaultProfilePic from "../../../shared/images/icons/defaultProfilePic.png";
 import { HOST_URL } from "../../../shared/config";
+import { ChessTimer } from "../../chess-timers";
 
-export function ChessPlayersBar ({players: {white, black}}) {
+export function ChessPlayerBar ({ player, timer=false  }) {
   return (
     <div className={styles.playersBar}>
-      {!white ? <span className={styles.playerNameSpan}>Pending...</span> : <>
-        <img src={white.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${white.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic" />
-        <span className={styles.playerNameSpan}>{white?.username}</span>
-      </>}
-      <h1>vs</h1>
-      {!black ? <span className={styles.playerNameSpan}>Pending...</span> : <>
-        <span className={styles.playerNameSpan}>{black?.username}</span>
-        <img src={black.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${black.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic" />
-      </>}
+      {!player ?
+        <span className={styles.playerNameSpan}>Pending...</span> :
+        <>
+          <div className={styles.profile}>
+            <img src={player.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${player.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic" />
+            <span className={styles.playerNameSpan}>{player?.username}</span>
+          </div>
+          {timer && <ChessTimer player={player} />}
+        </>}
     </div>
   );
 }
