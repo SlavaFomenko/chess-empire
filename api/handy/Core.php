@@ -9,6 +9,7 @@ use Handy\Handling\OrmHandler;
 use Handy\Handling\RequestParserHandler;
 use Handy\Handling\RouterHandler;
 use Handy\Handling\SecurityHandler;
+use Handy\Routing\Router;
 
 
 class Core
@@ -37,6 +38,12 @@ class Core
         }
     }
 
+    public function handleException(Exception $e): void
+    {
+        Context::$request->setException($e);
+        Router::handleException();
+    }
+
     /**
      * @return string
      */
@@ -44,10 +51,10 @@ class Core
     {
         try {
             $this->handlers[0]->handle();
-            return Context::$response;
         } catch (Exception $e) {
-            return $e;
+            $this->handleException($e);
         }
+        return (string)Context::$response;
     }
 
 }

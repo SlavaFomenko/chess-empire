@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Handy\ORM\ArrayMappable;
 use Handy\ORM\Attribute\Column;
 use Handy\ORM\Attribute\Entity;
 use Handy\ORM\Attribute\Id;
@@ -11,11 +12,15 @@ use Handy\ORM\ColumnType;
 use Handy\Utils\JsonSerializable;
 
 #[Entity(repository: UserRepository::class, table: "user")]
-class User extends BaseEntity implements JsonSerializable
+class User extends BaseEntity implements JsonSerializable, ArrayMappable
 {
 
     public const ROLE_USER = "ROLE_USER";
     public const ROLE_ADMIN = "ROLE_ADMIN";
+    public const ROLE_USER_OR_ADMIN = [
+        self::ROLE_USER,
+        self::ROLE_ADMIN
+    ];
 
     #[Id]
     #[Column(type: ColumnType::INT, column: "id")]
@@ -225,6 +230,19 @@ class User extends BaseEntity implements JsonSerializable
             "profilePic"=>$this->getProfilePic(),
             "rating"=>$this->getRating()
         ];
+    }
+
+    public function fromArray(array $arr): self
+    {
+        isset($arr["role"]) && $this->setRole($arr["role"]);
+        isset($arr["email"]) && $this->setEmail($arr["email"]);
+        isset($arr["username"]) && $this->setUserName($arr["username"]);
+        isset($arr["firstName"]) && $this->setFirstName($arr["firstName"]);
+        isset($arr["lastName"]) && $this->setLastName($arr["lastName"]);
+        isset($arr["hashedPassword"]) && $this->setPassword($arr["hashedPassword"]);
+        isset($arr["profilePic"]) && $this->setProfilePic($arr["profilePic"]);
+        isset($arr["rating"]) && $this->setRating($arr["rating"]);
+        return $this;
     }
 
 }

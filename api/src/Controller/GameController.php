@@ -16,13 +16,9 @@ use Handy\Security\Security;
 class GameController extends BaseController
 {
 
-    #[Route(name: "get_games", path: "/games", methods: [Request::METHOD_GET])]
+    #[Route(name: "get_games", path: "/games", methods: [Request::METHOD_GET], roles: User::ROLE_USER_OR_ADMIN)]
     public function getForCurrentUser(): Response
     {
-        if (Context::$security->getRole() === Security::ROLE_UNAUTHORIZED) {
-            return new JsonResponse(["message" => "Unauthorized"], 401);
-        }
-
         $userRepo = $this->em->getRepository(User::class);
         $user = $userRepo->find(Context::$security->getData()->id);
 
@@ -88,14 +84,9 @@ class GameController extends BaseController
         return new JsonResponse($result, 200);
     }
 
-    #[Route(name: "get_game_by_id", path: "/games/{id}", methods: [Request::METHOD_GET])]
+    #[Route(name: "get_game_by_id", path: "/games/{id}", methods: [Request::METHOD_GET], roles: User::ROLE_USER_OR_ADMIN)]
     public function getById(int $id): Response
     {
-        $sec = Context::$security;
-        if ($sec->getRole() === Security::ROLE_UNAUTHORIZED) {
-            return new JsonResponse(["message" => "Unauthorized"], 401);
-        }
-
         $gameRepo = $this->em->getRepository(Game::class);
 
         /** @var Game $game */
@@ -108,6 +99,7 @@ class GameController extends BaseController
             $game->getWhiteId(),
             $game->getBlackId()
         ];
+        $sec = Context::$security;
         if ($sec->getRole() === User::ROLE_ADMIN || in_array($sec->getData()->id,$playerIds)) {
             $userRepo = $this->em->getRepository(User::class);
             $black = $userRepo->find($game->getBlackId());

@@ -2,6 +2,8 @@
 
 namespace Handy\Http;
 
+use Exception;
+
 class Request
 {
 
@@ -54,6 +56,11 @@ class Request
      * @var string
      */
     protected string $path;
+
+    /**
+     * @var Exception
+     */
+    protected Exception $exception;
 
     public function __construct()
     {
@@ -190,5 +197,21 @@ class Request
         return $this;
     }
 
+    /**
+     * @return Exception
+     */
+    public function getException(): Exception
+    {
+        return $this->exception;
+    }
 
+    /**
+     * @param Exception $exception
+     * @return self
+     */
+    public function setException(Exception $exception): self
+    {
+        $this->exception = $exception;
+        return $this;
+    }
 }

@@ -20,9 +20,14 @@ class Route
     private string $path;
 
     /**
-     * @var array|string[]
+     * @var array
      */
     private array $methods;
+
+    /**
+     * @var array
+     */
+    private array $roles;
 
     /**
      * @var bool
@@ -34,12 +39,14 @@ class Route
      * @param string $path
      * @param array $methods
      * @param bool $inFamily
+     * @param array $roles
      */
-    public function __construct(string $name, string $path, array $methods = Request::METHODS, bool $inFamily = true)
+    public function __construct(string $name, string $path, array $methods = Request::METHODS, bool $inFamily = true, array $roles = [])
     {
         $this->name = $name;
         $this->path = $path;
         $this->methods = $methods;
+        $this->roles = $roles;
         $this->inFamily = $inFamily;
     }
 
@@ -65,6 +72,14 @@ class Route
     public function getMethods(): array
     {
         return $this->methods;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles(): array
+    {
+        return $this->roles;
     }
 
     /**

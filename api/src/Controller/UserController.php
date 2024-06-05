@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use Handy\Context;
 use Handy\Controller\BaseController;
 use Handy\Http\JsonResponse;
 use Handy\Http\Request;
 use Handy\Http\Response;
 use Handy\Routing\Attribute\Route;
+use Handy\Security\Exception\ForbiddenException;
 
 class UserController extends BaseController
 {
@@ -18,8 +20,8 @@ class UserController extends BaseController
         $body = $this->request->getContent();
 
         if (!isset($body["username"],
-            $body["first_name"],
-            $body["last_name"],
+            $body["firstName"],
+            $body["lastName"],
             $body["email"],
             $body["password"])) {
             return new JsonResponse(["message" => "Missing fields in request body"], 400);
@@ -28,8 +30,8 @@ class UserController extends BaseController
         $username = trim($body["username"]);
         $email = trim($body["email"]);
         $password = trim($body["password"]);
-        $firstName = trim($body["first_name"]);
-        $lastName = trim($body["last_name"]);
+        $firstName = trim($body["firstName"]);
+        $lastName = trim($body["lastName"]);
 
         if (!$this->validateEmail($email) ||
             !$this->validateName($firstName) ||
@@ -71,17 +73,6 @@ class UserController extends BaseController
         return new JsonResponse($user, 201);
     }
 
-    #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
-    public function getByID(int $id): Response
-    {
-        $repo = $this->em->getRepository(User::class);
-        $user = $repo->findOneBy(["id" => $id]);
-        if (empty($user)) {
-            return new JsonResponse(["message" => "User not found"], 404);
-        }
-        return new JsonResponse(['user' => $user], 200);
-    }
-
     #[Route(name: "get_all_users", path: "/users", methods: [Request::METHOD_GET])]
     public function getAll(): Response
     {
@@ -105,9 +96,89 @@ class UserController extends BaseController
         return new JsonResponse($users, 200);
     }
 
-    #[Route(name: "patch_user_pic", path: "/users/{id}/pic", methods: [Request::METHOD_POST])]
+    #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
+    public function getByID(int $id): Response
+    {
+        $repo = $this->em->getRepository(User::class);
+        $user = $repo->findOneBy(["id" => $id]);
+        if (empty($user)) {
+            return new JsonResponse(["message" => "User not found"], 404);
+        }
+        return new JsonResponse(['user' => $user], 200);
+    }
+
+    #[Route(name: "patch_user", path: "/users/{id}", methods: [Request::METHOD_PATCH], roles: User::ROLE_USER_OR_ADMIN)]
+    public function patchUser(int $id): Response
+    {
+        if (Context::$security->getData()->id !== $id) {
+            return new JsonResponse(["message" => "Only profile owner can change it"], 403);
+        }
+
+        $repo = $this->em->getRepository(User::class);
+        /** @var User $user */
+        $user = $repo->findOneBy(["id" => $id]);
+        if (empty($user)) {
+            return new JsonResponse(["message" => "User not found"], 404);
+        }
+
+        $data = $this->request->getContent() ?? [];
+
+        $error = null;
+        if (isset($data["oldPassword"], $data["newPassword"])) {
+            $oldHashedPassword = hash_hmac('sha256', $data["oldPassword"], $_ENV["PASSWORD_HASH_KEY"]);
+            if ($oldHashedPassword !== $user->getPassword()) {
+                $error = "Invalid password";
+            } else if (!$this->validatePassword($data["newPassword"])) {
+                $error = "Invalid new password";
+            } else {
+                $user->setPassword(hash_hmac('sha256', $data["newPassword"], $_ENV["PASSWORD_HASH_KEY"]));
+            }
+        } else if (isset($data["username"])) {
+            if (!empty($repo->findBy(["username" => $data["username"]]))) {
+                $error = "The user with this username already exists";
+            } else if (!$this->validateUsername($data["username"])) {
+                $error = "Invalid username";
+            }
+        } else if (isset($data["email"])) {
+            if (!empty($repo->findBy(["email" => $data["email"]]))) {
+                $error = "The user with this email already exists";
+            } else if (!$this->validateEmail($data["email"])) {
+                $error = "Invalid email";
+            }
+        } else if (isset($data["firstName"]) && !$this->validateName($data["firstName"])) {
+            $error = "Invalid first name";
+        } else if (isset($data["lastName"]) && !$this->validateName($data["lastName"])) {
+            $error = "Invalid last name";
+        }
+
+        if ($error !== null) {
+            return new JsonResponse([
+                "message" => $error
+            ], 400);
+        }
+
+        if (isset($data["profilePic"]) && $data["profilePic"] === "REMOVE") {
+            if (is_file($_SERVER['DOCUMENT_ROOT'] . "/" . $user->getProfilePic())) {
+                unlink($_SERVER['DOCUMENT_ROOT'] . "/" . $user->getProfilePic());
+            }
+            $user->setProfilePic(null);
+        }
+
+        unset($data["id"], $data["hashedPassword"], $data["rating"], $data["role"], $data["profilePic"]);
+        $user->fromArray($data);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return new JsonResponse($user, 201);
+    }
+
+    #[Route(name: "patch_user_pic", path: "/users/{id}/pic", methods: [Request::METHOD_POST], roles: User::ROLE_USER_OR_ADMIN)]
     public function patchUserPic(int $id): Response
     {
+        if (Context::$security->getData()->id !== $id) {
+            throw new ForbiddenException("Only profile owner can change it");
+        }
+
         $files = $this->request->getFiles();
         if (!$files || !isset($files["pic"])) {
             return new JsonResponse(["message" => "File is not provided"], 400);
@@ -136,7 +207,7 @@ class UserController extends BaseController
 
         $fileName = "profile-pic-" . $id . ".png";
 
-        if(!is_dir($_SERVER['DOCUMENT_ROOT'] . "/img/")){
+        if (!is_dir($_SERVER['DOCUMENT_ROOT'] . "/img/")) {
             mkdir($_SERVER['DOCUMENT_ROOT'] . "/img/", 0777, true);
         }
 
@@ -158,7 +229,10 @@ class UserController extends BaseController
         $width = 512;
         $height = 512;
 
-        [$originalWidth, $originalHeight] = getimagesize($file);
+        [
+            $originalWidth,
+            $originalHeight
+        ] = getimagesize($file);
 
         $src = null;
 
