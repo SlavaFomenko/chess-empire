@@ -6,16 +6,15 @@ import { hideNotification, showNotification } from "../../../shared/notification
 import { s } from "../../../shared/socket";
 import { goToStep, movePiece, selectPiece } from "../../../shared/game";
 import { pieceColor } from "../../../shared/game/lib";
-import { ChessTimers } from "../../../features/chess-timers";
 import { ChessHistory } from "../../../features/chess-history";
-import { ChessPlayersBar } from "../../../features/chess-players-bar";
+import { ChessPlayerBar } from "../../../features/chess-players-bar";
 
 export function ChessGame () {
   const dispatch = useDispatch();
 
   const gameState = useSelector(state => state.game);
   const { selectedPiece, currentColor, board, hasMadeTurn, gameHistory } = gameState;
-  const { currentStep, black, white } = gameState;
+  const { currentStep, black, white, myColor } = gameState;
 
   const submitResign = () => {
     dispatch(showNotification(
@@ -63,15 +62,17 @@ export function ChessGame () {
 
   return (
     <div className={styles.wrapper}>
-      <ChessPlayersBar players={{black, white}}/>
-      <div className={styles.horizontal}>
+      <div className={styles.game}>
+        <ChessPlayerBar player={myColor !== 'white' ?white:black} timer={true}/>
         <ChessBoard gameState={gameState} event={handleSquareClick} />
+        <ChessPlayerBar player={myColor === 'white' ? white:black} timer={true}/>
+      </div>
+      <div className={styles.horizontal}>
         <div className={styles.rightPanel}>
-          <ChessTimers players={{ black, white }} />
-          <ChessHistory gameHistory={gameHistory} step={currentStep} setStep={(step) => dispatch((goToStep(step)))} />
           <div>
             <button onClick={submitResign}>Resign</button>
           </div>
+          <ChessHistory gameHistory={gameHistory} step={currentStep} setStep={(step) => dispatch((goToStep(step)))} />
         </div>
       </div>
     </div>

@@ -21,3 +21,11 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
+@media screen and (max-width: 768px){
+
+  .gamePage{
+    display: flex;
+    flex-direction: column;
+  }
+}

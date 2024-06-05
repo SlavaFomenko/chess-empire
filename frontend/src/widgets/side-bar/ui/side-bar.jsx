@@ -3,8 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../styles/side-bar.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { s } from "../../../shared/socket";
+import closeIcon from "../../../shared/images/icons/closeIcon.png";
 
-export function SideBar () {
+export function SideBar ({ isMobile, closeSideBar }) {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -24,6 +25,9 @@ export function SideBar () {
 
   return (
     <div className={styles.side_bar}>
+
+
+      {isMobile && <button className={styles.closeSideBarBtn} onClick={closeSideBar}><img src={closeIcon} alt={"close icon"} /></button>}
       <button
         className={location.pathname === "/" ? styles.current : ""}
         onClick={() => redirect("/")}

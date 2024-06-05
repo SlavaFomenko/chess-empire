@@ -1,1 +1,1 @@
-export { ChessTimers } from "./ui/chess-timers";
+export { ChessTimer } from "./ui/chess-timers";

@@ -1,10 +1,23 @@
+.wrapper{
+  display: flex;
+  justify-content: space-between;
+}
+.profile{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:0.7em;
+}
+
 .playersBar {
   width: 100%;
   height: 4rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 0.7rem;
   font-weight: 600;
 }
 
@@ -16,8 +29,6 @@ h1 {
 .playersBar img {
   aspect-ratio: 1;
   height: 4rem;
-  margin-left: 1rem;
-  margin-right: 1rem;
 }
 
 .playerNameSpan {

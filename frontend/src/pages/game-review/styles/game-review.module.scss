@@ -18,10 +18,17 @@
 .wrapper{
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: 1.5rem;
+  .game{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7em;
+  }
 }
 
 .horizontal {
@@ -66,5 +73,15 @@
       display: flex;
       gap: 0.5rem;
     }
+  }
+}
+
+@media screen and (max-width: 768px){
+  .game{
+    align-items:start;
+  }
+  .wrapper{
+    flex-direction: column;
+    align-items: center;
   }
 }
