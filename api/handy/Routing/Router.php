@@ -12,6 +12,7 @@ use Handy\Routing\Attribute\RouteFamily;
 use Handy\Routing\Exception\DuplicateRouteNameException;
 use Handy\Routing\Exception\InvalidMethodArgumentsException;
 use Handy\Routing\Exception\InvalidResponseReturnedException;
+use Handy\Security\Exception\ForbiddenException;
 use Handy\Security\Exception\UnauthorizedException;
 use Handy\Routing\Exception\UnsupportedParamTypeException;
 use Handy\Security\Security;
@@ -87,7 +88,7 @@ class Router
             throw new UnauthorizedException("Unauthorized", 401);
         }
         if (!in_array($sec->getRole(), $route->getRoles())) {
-            throw new UnauthorizedException("Forbidden", 403);
+            throw new ForbiddenException("Forbidden", 403);
         }
 
         return true;

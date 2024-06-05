@@ -8,6 +8,7 @@ use Handy\Controller\BaseController;
 use Handy\Http\JsonResponse;
 use Handy\Http\Request;
 use Handy\Http\Response;
+use Handy\ORM\QueryBuilder;
 use Handy\Routing\Attribute\Route;
 use Handy\Security\Exception\ForbiddenException;
 
