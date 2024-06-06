@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import styles from "../styles/ratings-page.module.scss";
-import { DELETE_RATING_RANGE, GET_RATING_RANGES, PATCH_RATING_RANGE } from "../../../../../shared/config";
+import {
+  DELETE_RATING_RANGE,
+  GET_RATING_RANGES,
+  PATCH_RATING_RANGE,
+  POST_RATING_RANGE
+} from "../../../../../shared/config";
 import { hideNotification, showNotification } from "../../../../../shared/notification";
 import { useDispatch, useSelector } from "react-redux";
-import editIcon from "../../../../../shared/images/icons/edit-icon.png";
-import saveIcon from "../../../../../shared/images/icons/save-icon.png";
-import deleteIcon from "../../../../../shared/images/icons/delete-icon.png";
-import cancelIcon from "../../../../../shared/images/icons/cancel-icon.png";
+import { RatingRangeEditRow } from "../../../../../entities/admin-panel/rating-range-edit-row";
+import { RatingRangeRow } from "../../../../../entities/admin-panel/rating-range-row";
 
 export function RatingsPage (props) {
   const dispatch = useDispatch();
@@ -33,6 +36,21 @@ export function RatingsPage (props) {
     }
   };
 
+  const createRange = () => {
+    try {
+      axios.post(POST_RATING_RANGE, newRange, {
+        headers: {
+          Authorization: `Bearer ${userStore.user.token}`
+        }
+      }).then(response => {
+        setNewRange(null);
+        fetchRatingRanges();
+      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error creating new rating range"));});
+    } catch (error) {
+      dispatch(showNotification("Error creating new rating range"));
+    }
+  };
+
   const editRange = () => {
     if (editState.id === null || ratingRanges.length === 0) {
       return;
@@ -50,7 +68,8 @@ export function RatingsPage (props) {
           Authorization: `Bearer ${userStore.user.token}`
         }
       }).then(response => {
-        window.location.reload();
+        setEditState({ id: null, data: {} });
+        fetchRatingRanges();
       }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error patching rating range"));});
     } catch (error) {
       dispatch(showNotification("Error patching rating range"));
@@ -64,7 +83,7 @@ export function RatingsPage (props) {
           Authorization: `Bearer ${userStore.user.token}`
         }
       }).then(response => {
-        window.location.reload();
+        fetchRatingRanges();
       }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error deleting rating range"));});
     } catch (error) {
       dispatch(showNotification("Error deleting rating range"));
@@ -100,14 +119,6 @@ export function RatingsPage (props) {
     ));
   };
 
-  // {
-  //   "id": 1,
-  //   "minRating": 0,
-  //   "win": 30,
-  //   "loss": 0,
-  //   "title": "Novice"
-  // }
-
   return (
     <div className={styles.rangesListDiv}>
       <table className={styles.rangesTable}>
@@ -118,73 +129,40 @@ export function RatingsPage (props) {
           <td>Loss</td>
         </tr>
         {ratingRanges.map(range => <tr>
-          {editState.id === range.id ? <>
-            <td>
-              <input
-                value={editState.data.title} onChange={e => setEditState({
+          {editState.id === range.id ?
+            <RatingRangeEditRow
+              editState={editState.data}
+              setEditState={(data) => setEditState({
                 ...editState,
-                data: { ...editState.data, title: e.target.value }
+                data: data
               })}
-              />
-            </td>
-            <td>
-              <input
-                value={editState.data.minRating} type="number" min="0" onChange={e => setEditState({
-                ...editState,
-                data: { ...editState.data, minRating: e.target.value }
-              })}
-              />
-            </td>
-            <td>
-              <input
-                value={editState.data.win} type="number" min="1" onChange={e => setEditState({
-                ...editState,
-                data: { ...editState.data, win: e.target.value }
-              })}
-              />
-            </td>
-            <td>
-              <input
-                value={editState.data.loss} type="number" max="0" onChange={e => setEditState({
-                ...editState,
-                data: { ...editState.data, loss: e.target.value }
-              })}
-              />
-            </td>
-            <td>
-              <img className={styles.editButton} src={saveIcon} alt="Save" onClick={editRange} />
-            </td>
-            <td><img
-              className={styles.deleteButton} src={cancelIcon} alt="Cancel" onClick={e => setEditState({
-              ...editState,
-              id: null,
-              data: null
-            })}
-            /></td>
-          </> : <>
-            <td>{range.title}</td>
-            <td>{range.minRating}</td>
-            <td className={styles.rangeWin}>{range.win}</td>
-            <td className={styles.rangeLoss}>{range.loss}</td>
-            <td>
-              <img
-                className={styles.editButton} src={editIcon} alt="Edit" onClick={() => setEditState({
+              onSubmit={editRange}
+              onCancel={() => {setEditState({ id: null, data: null });}}
+            />
+            : <RatingRangeRow
+              range={range}
+              onEdit={() => setEditState({
                 ...editState,
                 id: range.id,
                 data: range
               })}
-              />
-            </td>
-            {range.minRating !== 0 && <td>
-              <img className={styles.deleteButton} src={deleteIcon} alt="Delete" onClick={() => submitDelete(range.id)} />
-            </td>}
-          </>
+              onDelete={submitDelete}
+            />
           }
         </tr>)}
+        {newRange &&
+          <RatingRangeEditRow editState={newRange} setEditState={setNewRange} onSubmit={createRange} onCancel={() => setNewRange(null)} />}
       </table>
-      {/*<button className={styles.newRangeButton} onClick={e=>setNewRange({minRating: 0, win: 10, loss: -10, title: "New Rating"})}>*/}
-      {/*  Add new rating range*/}
-      {/*</button>*/}
+      {!newRange && <button
+        className={styles.newRangeButton} onClick={e => setNewRange({
+        minRating: 0,
+        win: 10,
+        loss: -10,
+        title: "New Rating"
+      })}
+      >
+        Add new rating range
+      </button>}
     </div>
   );
 }

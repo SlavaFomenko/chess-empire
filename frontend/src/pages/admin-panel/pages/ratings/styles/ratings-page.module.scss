@@ -2,8 +2,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.5rem;
 }
-
 
 .rangesTable {
   border-collapse: collapse;
@@ -30,26 +30,6 @@
   font-weight: 800;
 }
 
-.rangesTable .rangeWin {
-  color: #4CD04C;
-}
-
-.rangesTable .rangeLoss {
-  color: #FF4545;
-}
-
-.rangesTable td .editButton, .rangesTable td .deleteButton {
-  height: 1.7rem;
-  margin-top: 0.2rem;
-  aspect-ratio: 1;
-  opacity: 0.5;
-  transition: 200ms ease-in-out;
-}
-
-.rangesTable td .editButton:hover, .rangesTable td .deleteButton:hover {
-  opacity: 1;
-}
-
 .rangesTable td input {
   -moz-appearance: textfield;
   width: 10rem;
@@ -68,15 +48,11 @@
   margin: 0;
 }
 
-.newRangeButton {
-}
-
 .deleteSubmit {
   display: flex;
   font-size: 1.3rem;
   gap: 1rem;
   flex-direction: column;
-
 
   div {
     display: flex;

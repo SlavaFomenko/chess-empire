@@ -8,5 +8,6 @@ export const GET_GAME_BY_ID = (id) => API_URL + `/games/${id}`;
 export const UPLOAD_USER_PIC = (id) => API_URL + `/users/${id}/pic`;
 export const PATCH_USER = (id) => API_URL + `/users/${id}`;
 export const GET_RATING_RANGES = API_URL + '/rating-ranges';
+export const POST_RATING_RANGE = API_URL + '/rating-ranges';
 export const PATCH_RATING_RANGE = (id) => API_URL + `/rating-ranges/${id}`;
 export const DELETE_RATING_RANGE = (id) => API_URL + `/rating-ranges/${id}`;
