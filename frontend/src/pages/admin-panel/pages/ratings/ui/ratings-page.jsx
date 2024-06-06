@@ -11,6 +11,7 @@ import { hideNotification, showNotification } from "../../../../../shared/notifi
 import { useDispatch, useSelector } from "react-redux";
 import { RatingRangeEditRow } from "../../../../../entities/admin-panel/rating-range-edit-row";
 import { RatingRangeRow } from "../../../../../entities/admin-panel/rating-range-row";
+import { Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 export function RatingsPage (props) {
   const dispatch = useDispatch();
@@ -119,50 +120,86 @@ export function RatingsPage (props) {
     ));
   };
 
+  const ratingCurve = ratingRanges.map(range => ({
+    ...range,
+    loss: -range.loss
+  }));
+
   return (
-    <div className={styles.rangesListDiv}>
-      <table className={styles.rangesTable}>
-        <tr className={styles.headersRow}>
-          <td>Title</td>
-          <td>Min Rating</td>
-          <td>Win</td>
-          <td>Loss</td>
-        </tr>
-        {ratingRanges.map(range => <tr>
-          {editState.id === range.id ?
-            <RatingRangeEditRow
-              editState={editState.data}
-              setEditState={(data) => setEditState({
-                ...editState,
-                data: data
-              })}
-              onSubmit={editRange}
-              onCancel={() => {setEditState({ id: null, data: null });}}
+    <div className={styles.rangesPageContainer}>
+      <div className={styles.rangesListDiv}>
+        <table className={styles.rangesTable}>
+          <tr className={styles.headersRow}>
+            <td>Title</td>
+            <td>Min Rating</td>
+            <td>Win</td>
+            <td>Loss</td>
+          </tr>
+          {ratingRanges.map(range => <tr>
+            {editState.id === range.id ?
+              <RatingRangeEditRow
+                editState={editState.data}
+                setEditState={(data) => setEditState({
+                  ...editState,
+                  data: data
+                })}
+                onSubmit={editRange}
+                onCancel={() => {setEditState({ id: null, data: null });}}
+              />
+              : <RatingRangeRow
+                range={range}
+                onEdit={() => setEditState({
+                  ...editState,
+                  id: range.id,
+                  data: range
+                })}
+                onDelete={submitDelete}
+              />
+            }
+          </tr>)}
+          {newRange &&
+            <RatingRangeEditRow editState={newRange} setEditState={setNewRange} onSubmit={createRange} onCancel={() => setNewRange(null)} />}
+        </table>
+        {!newRange && <button
+          className={styles.newRangeButton} onClick={e => setNewRange({
+          minRating: 0,
+          win: 10,
+          loss: -10,
+          title: "New Rating"
+        })}
+        >
+          Add new rating range
+        </button>}
+      </div>
+      <div className={styles.ratingCurveChartDiv}>
+        {ratingRanges.length > 0 && <ResponsiveContainer width="100%" height="100%">
+          <LineChart width={600} height={300} data={ratingCurve}>
+            <Line
+              type="monotone"
+              dataKey="win"
+              stroke="#4CD04C"
+              strokeWidth={3}
+              isAnimationActive={true}
+              animationBegin={0}
+              animationDuration={1000}
+              animationEasing="ease"
             />
-            : <RatingRangeRow
-              range={range}
-              onEdit={() => setEditState({
-                ...editState,
-                id: range.id,
-                data: range
-              })}
-              onDelete={submitDelete}
+            <Line
+              type="monotone"
+              dataKey="loss"
+              stroke="#FF4545"
+              strokeWidth={3}
+              isAnimationActive={true}
+              animationBegin={200}
+              animationDuration={1000}
+              animationEasing="ease"
             />
-          }
-        </tr>)}
-        {newRange &&
-          <RatingRangeEditRow editState={newRange} setEditState={setNewRange} onSubmit={createRange} onCancel={() => setNewRange(null)} />}
-      </table>
-      {!newRange && <button
-        className={styles.newRangeButton} onClick={e => setNewRange({
-        minRating: 0,
-        win: 10,
-        loss: -10,
-        title: "New Rating"
-      })}
-      >
-        Add new rating range
-      </button>}
+            <XAxis dataKey="minRating" color="#D2D4D4" />
+            <YAxis color="#D2D4D4" />
+            <Legend />
+          </LineChart>
+        </ResponsiveContainer>}
+      </div>
     </div>
   );
 }

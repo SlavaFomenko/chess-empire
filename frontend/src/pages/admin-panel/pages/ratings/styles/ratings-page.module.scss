@@ -1,8 +1,23 @@
+.rangesPageContainer {
+  padding-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
 .rangesListDiv {
+  width: 47rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+}
+
+.ratingCurveChartDiv {
+  width: 47rem;
+  height: 30rem;
+  padding: 0;
+  margin: 0;
 }
 
 .rangesTable {
