@@ -22,9 +22,6 @@ export function LayoutPage({ children }) {
     };
   }, []);
 
-  console.log(isMobile);
-  console.log(sideBarIsOpen);
-
   const openSideBar = ()=>{
     setSideBarIsOpen(true)
   }

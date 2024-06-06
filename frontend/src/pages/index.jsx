@@ -9,13 +9,15 @@ import { ProfilePage } from "./profile";
 import { GameReviewPage } from "./game-review";
 import { AdminPanelPage } from "./admin-panel";
 import { PrivateRouteWrapper } from "../shared/routing";
+import { UsersPage } from "./admin-panel/pages/users";
+import { GamesPage } from "./admin-panel/pages/games";
 
 export class Routing extends React.Component {
-  shouldComponentUpdate() {
+  shouldComponentUpdate () {
     return false;
   }
 
-  render() {
+  render () {
     return (
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -25,8 +27,12 @@ export class Routing extends React.Component {
         <Route path="/register" element={<RegistrationPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="*" element={<NotFoundPage />} />
-        <Route path="/admin_panel" element={<PrivateRouteWrapper />}>
-          <Route path="" element={<AdminPanelPage />} />
+        <Route path="/admin_panel/*" element={<PrivateRouteWrapper />}>
+          <Route element={<AdminPanelPage />}>
+            <Route path="" element={<></>} />
+            <Route path="users" element={<UsersPage/>} />
+            <Route path="games" element={<GamesPage/>} />
+          </Route>
         </Route>
       </Routes>
     );
