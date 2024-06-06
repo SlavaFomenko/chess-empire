@@ -50,6 +50,7 @@ export function ProfilePage () {
       const response = await axios.get(GET_USER_BY_ID_URL + "/" + userStore.user.id);
       setUser(response.data.user);
     } catch (error) {
+      console.log(error);
       dispatch(showNotification("Error fetching your profile"));
     }
   };
