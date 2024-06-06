@@ -83,11 +83,15 @@ class RatingRangeController extends BaseController
 
         $body = $this->request->getContent();
 
-        $error = $error ?? isset($body["minRating"]) ? $this->validateMinRating($body["minRating"]) : null;
-        $error = $error ?? isset($body["win"]) ? $this->validateWin($body["win"]) : null;
-        $error = $error ?? isset($body["loss"]) ? $this->validateLoss($body["loss"]) : null;
-        $error = $error ?? isset($body["title"]) ? $this->validateTitle($body["title"]) : null;
+        $error = $error ?? (isset($body["minRating"]) ? $this->validateMinRating($body["minRating"]) : null);
+        $error = $error ?? (isset($body["win"]) ? $this->validateWin($body["win"]) : null);
+        $error = $error ?? (isset($body["loss"]) ? $this->validateLoss($body["loss"]) : null);
+        $error = $error ?? (isset($body["title"]) ? $this->validateTitle($body["title"]) : null);
         if ($error !== null) return new JsonResponse(["message" => $error], 400);
+
+        if (isset($body["minRating"]) && $body["minRating"] !== 0 && $ratingRange->getMinRating() === 0) {
+            return new JsonResponse(["message" => "You cannot remove 0-rating range"], 400);
+        }
 
         $data = [];
         isset($body["minRating"]) && $data["minRating"] = filter_var($body["minRating"], FILTER_VALIDATE_INT);
@@ -110,6 +114,9 @@ class RatingRangeController extends BaseController
         $ratingRange = $repo->find($id);
         if ($ratingRange === null) {
             return new JsonResponse(["message" => "Rating range with id $id not found"], 404);
+        }
+        if ($ratingRange->getMinRating() === 0) {
+            return new JsonResponse(["message" => "You cannot remove 0-rating range"], 400);
         }
         $this->em->remove($ratingRange);
         $this->em->flush();

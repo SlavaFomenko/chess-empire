@@ -11,6 +11,7 @@ import { AdminPanelPage } from "./admin-panel";
 import { PrivateRouteWrapper } from "../shared/routing";
 import { UsersPage } from "./admin-panel/pages/users";
 import { GamesPage } from "./admin-panel/pages/games";
+import { RatingsPage } from "./admin-panel/pages/ratings";
 
 export class Routing extends React.Component {
   shouldComponentUpdate () {
@@ -32,6 +33,7 @@ export class Routing extends React.Component {
             <Route path="" element={<></>} />
             <Route path="users" element={<UsersPage/>} />
             <Route path="games" element={<GamesPage/>} />
+            <Route path="ratings" element={<RatingsPage/>} />
           </Route>
         </Route>
       </Routes>

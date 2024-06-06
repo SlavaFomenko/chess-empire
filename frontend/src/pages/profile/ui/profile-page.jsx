@@ -7,7 +7,7 @@ import styles from "../styles/profile.module.scss";
 import { ChangePicDialog, GamesList } from "../../../entities/profile";
 import { showNotification } from "../../../shared/notification";
 import defaultProfilePic from "../../../shared/images/icons/defaultProfilePic.png";
-import editIcon from "../styles/icons/edit-icon.png"
+import editIcon from "../../../shared/images/icons/edit-icon.png";
 import { EditProfileDialog } from "../../../entities/profile/edit-profile-dialog/ui/edit-profile-dialog";
 
 export function ProfilePage () {
