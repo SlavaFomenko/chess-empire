@@ -1,0 +1,27 @@
+.wrapper {
+  display: flex;
+  overflow-x: auto;
+  gap: 2px;
+  width: 100%;
+  border-bottom: 2px solid #555;
+
+
+  button {
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px;
+    color: #d2d4d4;
+    outline: none;
+    background-color: #2b3a3f;
+  }
+
+  button:hover {
+    color: #555;
+  }
+
+  .active {
+    border-bottom: 3px solid #d2d4d4;
+  }
+}
