@@ -77,22 +77,27 @@ class UserController extends BaseController
     #[Route(name: "get_all_users", path: "/users", methods: [Request::METHOD_GET])]
     public function getAll(): Response
     {
+
+
         $query = $this->request->getQuery();
+
         $criteria = [];
         [
             $limit,
             $offset
-        ] = $this->pagination();
+        ] = $this->pagination(10);
+
 
         if (isset($query["name"])) {
             $criteria = [
-                "username" => "LIKE " . $query["name"] . "%",
-                "first_name" => "LIKE " . $query["name"] . "%",
-                "last_name" => "LIKE " . $query["name"] . "%"
+                "username" => "LIKE %" . $query["name"] . "%",
+                "first_name" => "LIKE %" . $query["name"] . "%",
+                "last_name" => "LIKE %" . $query["name"] . "%"
             ];
         }
 
         $repo = $this->em->getRepository(User::class);
+        $count = $repo->countBy($criteria);
         $users = $repo->findBy($criteria, true, $limit, $offset);
 
         $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
@@ -103,7 +108,7 @@ class UserController extends BaseController
                 "ratingTitle" => $ratingRange ? $ratingRange->getTitle() : null
             ];
         }, $users);
-        return new JsonResponse($users, 200);
+        return new JsonResponse(['pagesCount'=>ceil($count/ 10),"users"=>$users], 200);
     }
 
     #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]

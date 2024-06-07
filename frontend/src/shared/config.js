@@ -12,3 +12,4 @@ export const POST_RATING_RANGE = API_URL + '/rating-ranges';
 export const PATCH_RATING_RANGE = (id) => API_URL + `/rating-ranges/${id}`;
 export const DELETE_RATING_RANGE = (id) => API_URL + `/rating-ranges/${id}`;
 export const GET_ALL_USERS_URL = API_URL + '/users'
+export const GET_ALL_GAMES_URL = API_URL + '/games'

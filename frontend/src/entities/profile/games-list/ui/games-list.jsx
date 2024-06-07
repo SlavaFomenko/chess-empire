@@ -5,7 +5,7 @@ import { GameCard } from "../../game-card/ui/game-card";
 export function GamesList ({ games }) {
   return (
     <div className={styles.container}>
-      {games && games.map(game=><GameCard gameData={game}/>)}
+      {games && games.map((game,index)=><GameCard key={index} gameData={game}/>)}
     </div>
   );
 }

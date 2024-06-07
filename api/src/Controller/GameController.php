@@ -21,6 +21,12 @@ class GameController extends BaseController
     {
         $userRepo = $this->em->getRepository(User::class);
         $user = $userRepo->find(Context::$security->getData()->id);
+        $query =$this->request->getQuery();
+        $criteria = [];
+
+        if(isset($query['name'])){
+            $criteria['username'] = "LIKE '%" . $query["name"] . "%'";
+        }
 
         if (!$user) {
             return new JsonResponse(["message" => "User not found"], 404);
@@ -29,13 +35,14 @@ class GameController extends BaseController
         [
             $limit,
             $offset
-        ] = $this->pagination();
+        ] = $this->pagination(10);
 
         /** @var GameRepository $gameRepo */
         $gameRepo = $this->em->getRepository(Game::class);
 
         if (Context::$security->getRole() === User::ROLE_ADMIN) {
             $query = $this->request->getQuery();
+
             if (isset($query["userId"])) {
                 $games = $gameRepo->findBy([
                     "black_id" => $query["userId"],
@@ -81,7 +88,9 @@ class GameController extends BaseController
             ];
         }
 
-        return new JsonResponse($result, 200);
+        $count = $gameRepo->countBy($criteria);
+
+        return new JsonResponse(['games'=>$result,'pagesCount'=>ceil($count / 10)], 200);
     }
 
     #[Route(name: "get_game_by_id", path: "/games/{id}", methods: [Request::METHOD_GET], roles: User::ROLE_USER_OR_ADMIN)]

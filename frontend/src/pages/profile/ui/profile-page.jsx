@@ -35,7 +35,7 @@ export function ProfilePage () {
       }).then(response => {
         setGames({
           loading: false,
-          list: [...games.list, ...response.data],
+          list: [...games.list, ...response.data.games],
           page: games.page + 1,
           lastPage: response.data.length < 20
         });
