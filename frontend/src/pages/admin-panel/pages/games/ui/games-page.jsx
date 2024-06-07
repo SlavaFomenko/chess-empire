@@ -2,30 +2,31 @@ import React, { useEffect, useState } from "react";
 import { getAllGames } from "../../../../../shared/game";
 import { GamesList } from "../../../../../entities/profile";
 import styles from '../styles/games-page.module.scss';
+import { Pagination } from "../../../../../entities/pagination";
 
 export function GamesPage(props) {
   const [games, setGames] = useState([]);
-  const [pages, setPages] = useState(null);
+  const [pagination, setPagination] = useState({ currentPage: 1, pagesCount: 0 });
   const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
 
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, search]);
+  }, [pagination.currentPage, search]);
 
   const fetchData = async () => {
-    const data = await getAllGames({ page: currentPage, search });
+    const data = await getAllGames({ page: pagination.currentPage, search });
     setGames(data.games);
-    setPages(data.pagesCount);
+    setPagination({...pagination, pagesCount: data.pagesCount});
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPagination({...pagination, currentPage: page});
   };
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
+    setPagination({...pagination, currentPage: 1});
   };
 
   return (
@@ -39,17 +40,7 @@ export function GamesPage(props) {
         />
       </div>
       <GamesList games={games} />
-      <div className={styles.pagination}>
-        {Array.from({ length: pages }, (_, i) => i + 1).map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            disabled={page === currentPage}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
+      <Pagination currentPage={pagination.currentPage} pagesCount={pagination.pagesCount} onClick={(page) => handlePageChange(page)}/>
     </div>
   );
 }

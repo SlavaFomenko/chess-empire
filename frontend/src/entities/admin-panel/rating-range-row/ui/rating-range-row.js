@@ -16,9 +16,9 @@ export function RatingRangeRow ({ range, onEdit, onDelete }) {
           className={styles.editButton} src={editIcon} alt="Edit" onClick={onEdit}
         />
       </td>
-      {range.minRating !== 0 && <td>
-        <img className={styles.deleteButton} src={deleteIcon} alt="Delete" onClick={() => onDelete(range.id)} />
-      </td>}
+      <td>
+        {range.minRating !== 0 && <img className={styles.deleteButton} src={deleteIcon} alt="Delete" onClick={() => onDelete(range.id)} />}
+      </td>
     </>
   );
 }

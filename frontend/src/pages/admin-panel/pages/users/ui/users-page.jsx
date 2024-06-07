@@ -1,30 +1,39 @@
 import React, { useEffect, useState } from "react";
-import styles from '../styles/users-page.module.scss';
-import { UserItem } from "../../../../../entities/user-item";
+import styles from "../styles/users-page.module.scss";
+import { UserItem } from "../../../../../entities/admin-panel/user-item";
 import { getAllUsers } from "../../../../../shared/user";
+import { Pagination } from "../../../../../entities/pagination";
+import ascOrderIcon from "../../../../../shared/images/icons/asc-order-icon.png";
+import descOrderIcon from "../../../../../shared/images/icons/desc-order-icon.png";
 
-export function UsersPage() {
+export function UsersPage () {
   const [users, setUsers] = useState(null);
-  const [pages, setPages] = useState(null);
+  const [pagination, setPagination] = useState({ currentPage: 1, pagesCount: 0 });
+  const [order, setOrder] = useState({ by: null, desc: false });
   const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [rating, setRating] = useState({ min: null, max: null });
 
   useEffect(() => {
-    async function fetchData() {
-      const data = await getAllUsers({ name: search, page: currentPage });
+    async function fetchData () {
+      const data = await getAllUsers({ name: search, page: pagination.currentPage, order, rating });
       setUsers(data.users);
-      setPages(data.pagesCount);
+      setPagination({ ...pagination, pagesCount: data.pagesCount });
     }
+
     fetchData();
-  }, [search, currentPage]);
+  }, [search, pagination.currentPage, order, rating.min, rating.max]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
-    setCurrentPage(1);
+    setPagination({ ...pagination, currentPage: 1 });
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setPagination({ ...pagination, currentPage: page });
+  };
+
+  const handleOrderChange = (by) => {
+    setOrder({ by: by, desc: by === order.by ? !order.desc : false });
   };
 
   return (
@@ -37,42 +46,66 @@ export function UsersPage() {
           placeholder="Search by username"
         />
       </div>
+      <div className={styles.filtersDiv}>
+        <button>Reset</button>
+        <span>Rating: </span>
+        <input
+          type="number"
+          value={rating.min}
+          onChange={(e)=>setRating({...rating, min: +e.target.value ?? null})}
+          placeholder="Min"
+        />
+        <span>to</span>
+        <input
+          type="number"
+          value={rating.max}
+          onChange={(e)=>setRating({...rating, max: +e.target.value ?? null})}
+          placeholder="Max"
+        />
+      </div>
       <div>
         <table className={styles.usersTable}>
-          <thead>
-          <tr>
-            <td>ID</td>
-            <td>Username</td>
-            <td>First name</td>
-            <td>Last name</td>
-            <td>Rating</td>
-            <td>Role</td>
-            <td>Email</td>
+          <tr className={styles.headersRow}>
+            <td onClick={() => handleOrderChange("id")}>
+              {order.by === "id" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
+              ID
+            </td>
+            <td onClick={() => handleOrderChange("username")}>
+              {order.by === "username" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
+              Username
+            </td>
+            <td onClick={() => handleOrderChange("first_name")}>
+              {order.by === "first_name" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
+              First name
+            </td>
+            <td onClick={() => handleOrderChange("last_name")}>
+              {order.by === "last_name" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
+              Last name
+            </td>
+            <td onClick={() => handleOrderChange("rating")}>
+              {order.by === "rating" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
+              Rating
+            </td>
+            <td onClick={() => handleOrderChange("role")}>
+              {order.by === "role" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
+              Role
+            </td>
+            <td onClick={() => handleOrderChange("email")}>
+              {order.by === "email" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
+              Email
+            </td>
           </tr>
-          </thead>
           <tbody>
           {users && users.map(user => (
-            <tr key={user.id}>
-              <UserItem
-                  user={user}
-                />
-            </tr>
+            <UserItem
+              user={user}
+            />
           ))}
           </tbody>
         </table>
 
       </div>
-      <div className={styles.pagination}>
-        {Array.from({ length: pages }, (_, i) => i + 1).map(page => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            disabled={page === currentPage}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
+      <Pagination currentPage={pagination.currentPage} pagesCount={pagination.pagesCount} onClick={(page) => handlePageChange(page)} />
     </div>
   );
 }

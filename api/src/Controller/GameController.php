@@ -22,20 +22,11 @@ class GameController extends BaseController
         $userRepo = $this->em->getRepository(User::class);
         $user = $userRepo->find(Context::$security->getData()->id);
         $query =$this->request->getQuery();
-        $criteria = [];
-
-        if(isset($query['name'])){
-            $criteria['username'] = "LIKE '%" . $query["name"] . "%'";
-        }
-
-        if (!$user) {
-            return new JsonResponse(["message" => "User not found"], 404);
-        }
 
         [
             $limit,
             $offset
-        ] = $this->pagination(10);
+        ] = $this->pagination();
 
         /** @var GameRepository $gameRepo */
         $gameRepo = $this->em->getRepository(Game::class);
@@ -88,7 +79,11 @@ class GameController extends BaseController
             ];
         }
 
-        $count = $gameRepo->countBy($criteria);
+        $count = $gameRepo->countBy([]);
+
+        if(isset($query['name'])){
+            $count = $gameRepo->countByUserName($query['name']);
+        }
 
         return new JsonResponse(['games'=>$result,'pagesCount'=>ceil($count / 10)], 200);
     }

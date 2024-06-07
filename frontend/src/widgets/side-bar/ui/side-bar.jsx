@@ -77,8 +77,8 @@ export function SideBar({ isMobile, closeSideBar }) {
           </button>
           {role === "ROLE_ADMIN" && (
             <button
-              className={location.pathname === "/admin_panel" ? styles.current : ""}
-              onClick={() => redirect("/admin_panel")}
+              className={location.pathname.startsWith("/admin_panel") ? styles.current : ""}
+              onClick={() => redirect("/admin_panel/users")}
             >
               Admin
             </button>

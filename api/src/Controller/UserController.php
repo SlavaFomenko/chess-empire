@@ -77,15 +77,13 @@ class UserController extends BaseController
     #[Route(name: "get_all_users", path: "/users", methods: [Request::METHOD_GET])]
     public function getAll(): Response
     {
-
-
         $query = $this->request->getQuery();
 
         $criteria = [];
         [
             $limit,
             $offset
-        ] = $this->pagination(10);
+        ] = $this->pagination();
 
 
         if (isset($query["name"])) {
@@ -96,9 +94,16 @@ class UserController extends BaseController
             ];
         }
 
+        $orderBy = [];
+
+        if(isset($query["orderBy"]) && in_array($query["orderBy"], ["id", "role", "email", "username", "first_name", "last_name", "rating"])){
+            $order = @$query["order"] === "desc" ? "DESC" : "ASC";
+            $orderBy = [[$query["orderBy"], $order]];
+        }
+
         $repo = $this->em->getRepository(User::class);
         $count = $repo->countBy($criteria);
-        $users = $repo->findBy($criteria, true, $limit, $offset);
+        $users = $repo->findBy($criteria, true, $limit, $offset, $orderBy);
 
         $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
         $users = array_map(function($user) use ($ratingRangeRepo) {

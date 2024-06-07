@@ -44,4 +44,27 @@ class GameRepository extends BaseEntityRepository
         return $entities;
     }
 
+    public function countByUserName(string $name): int
+    {
+        $idColumn = (new $this->entityClass())->getIdColumn()["column"];
+        $qb = new QueryBuilder();
+        $qb->select(["COUNT(game.$idColumn)"])
+            ->from("game")
+            ->join("user", "u")
+            ->on("game.black_id = u.id")
+            ->orOn("game.white_id = u.id")
+            ->where("u.username LIKE :name1")
+            ->orWhere("u.first_name LIKE :name2")
+            ->orWhere("u.last_name LIKE :name3")
+            ->setParam([
+                "name1" => $name . "%",
+                "name2" => $name . "%",
+                "name3" => $name . "%"
+            ]);
+
+        $q = $qb->getQuery();
+
+        return (int)Context::$connection->execute($qb->getQuery())[0][0];
+    }
+
 }
