@@ -4,7 +4,7 @@ import { GamesList } from "../../../../../entities/profile";
 import styles from '../styles/games-page.module.scss';
 import { Pagination } from "../../../../../entities/pagination";
 
-export function GamesPage(props) {
+export function GamesPage() {
   const [games, setGames] = useState([]);
   const [pagination, setPagination] = useState({ currentPage: 1, pagesCount: 0 });
   const [search, setSearch] = useState("");
@@ -31,7 +31,7 @@ export function GamesPage(props) {
 
   return (
     <div>
-      <div>
+      <div className={styles.searchLine}>
         <input
           type="text"
           value={search}
@@ -40,7 +40,8 @@ export function GamesPage(props) {
         />
       </div>
       <GamesList games={games} />
-      <Pagination currentPage={pagination.currentPage} pagesCount={pagination.pagesCount} onClick={(page) => handlePageChange(page)}/>
+      {pagination.pagesCount !== 1 &&
+        <Pagination currentPage={pagination.currentPage} pagesCount={pagination.pagesCount} onClick={(page) => handlePageChange(page)} />}
     </div>
   );
 }

@@ -21,12 +21,12 @@ class GameController extends BaseController
     {
         $userRepo = $this->em->getRepository(User::class);
         $user = $userRepo->find(Context::$security->getData()->id);
-        $query =$this->request->getQuery();
+        $query = $this->request->getQuery();
 
         [
             $limit,
             $offset
-        ] = $this->pagination();
+        ] = $this->pagination(10);
 
         /** @var GameRepository $gameRepo */
         $gameRepo = $this->em->getRepository(Game::class);

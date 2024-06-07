@@ -12,7 +12,6 @@ export function UsersPage () {
   const [order, setOrder] = useState({ by: null, desc: false });
   const [search, setSearch] = useState("");
   const [rating, setRating] = useState({ min: null, max: null });
-
   useEffect(() => {
     async function fetchData () {
       const data = await getAllUsers({ name: search, page: pagination.currentPage, order, rating });
@@ -105,7 +104,8 @@ export function UsersPage () {
         </table>
 
       </div>
-      <Pagination currentPage={pagination.currentPage} pagesCount={pagination.pagesCount} onClick={(page) => handlePageChange(page)} />
+      {pagination.pagesCount !==1 && <Pagination currentPage={pagination.currentPage} pagesCount={pagination.pagesCount} onClick={(page) => handlePageChange(page)} />}
+
     </div>
   );
 }
