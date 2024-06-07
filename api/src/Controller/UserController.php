@@ -9,6 +9,7 @@ use Handy\Controller\BaseController;
 use Handy\Http\JsonResponse;
 use Handy\Http\Request;
 use Handy\Http\Response;
+use Handy\ORM\QueryBuilder;
 use Handy\Routing\Attribute\Route;
 use Handy\Security\Exception\ForbiddenException;
 
@@ -79,41 +80,77 @@ class UserController extends BaseController
     {
         $query = $this->request->getQuery();
 
-        $criteria = [];
         [
             $limit,
             $offset
         ] = $this->pagination();
 
+        $qb = new QueryBuilder();
+        $qb->from("user");
 
         if (isset($query["name"])) {
-            $criteria = [
-                "username" => "LIKE %" . $query["name"] . "%",
-                "first_name" => "LIKE %" . $query["name"] . "%",
-                "last_name" => "LIKE %" . $query["name"] . "%"
-            ];
+            $qb->andWhere("(username LIKE :name1 OR first_name LIKE :name2 OR last_name LIKE :name3)")
+                ->setParam([
+                    "name1" => "%" . $query["name"] . "%",
+                    "name2" => "%" . $query["name"] . "%",
+                    "name3" => "%" . $query["name"] . "%"
+                ]);
+        }
+
+        if (isset($query["ratingMin"])) {
+            $qb->andWhere("rating >= :ratingMin")->setParam([
+                "ratingMin" => $query["ratingMin"]
+            ]);
+        }
+
+        if (isset($query["ratingMax"])) {
+            $qb->andWhere("rating <= :ratingMax")->setParam([
+                "ratingMax" => $query["ratingMax"]
+            ]);
         }
 
         $orderBy = [];
 
-        if(isset($query["orderBy"]) && in_array($query["orderBy"], ["id", "role", "email", "username", "first_name", "last_name", "rating"])){
+        if (isset($query["orderBy"]) && in_array($query["orderBy"], [
+                "id",
+                "role",
+                "email",
+                "username",
+                "first_name",
+                "last_name",
+                "rating"
+            ])) {
             $order = @$query["order"] === "desc" ? "DESC" : "ASC";
-            $orderBy = [[$query["orderBy"], $order]];
+            $orderBy = [
+                [
+                    $query["orderBy"],
+                    $order
+                ]
+            ];
         }
 
-        $repo = $this->em->getRepository(User::class);
-        $count = $repo->countBy($criteria);
-        $users = $repo->findBy($criteria, true, $limit, $offset, $orderBy);
+        $qb->orderBy($orderBy);
+
+        $count = @(int)Context::$connection->execute($qb->select(["COUNT(id)"])->getQuery())[0][0];
+        $users = Context::$connection->execute($qb->select(User::class)->limit($limit)->offset($offset)->getQuery(), User::class);
 
         $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
-        $users = array_map(function($user) use ($ratingRangeRepo) {
-            $ratingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [["min_rating", "DESC"]]));
+        $users = array_map(function ($user) use ($ratingRangeRepo) {
+            $ratingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [
+                [
+                    "min_rating",
+                    "DESC"
+                ]
+            ]));
             return [
                 ...$user->jsonSerialize(),
                 "ratingTitle" => $ratingRange ? $ratingRange->getTitle() : null
             ];
         }, $users);
-        return new JsonResponse(['pagesCount'=>ceil($count/ 10),"users"=>$users], 200);
+        return new JsonResponse([
+            'pagesCount' => ceil($count / 20),
+            "users"      => $users
+        ], 200);
     }
 
     #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
@@ -125,7 +162,12 @@ class UserController extends BaseController
             return new JsonResponse(["message" => "User not found"], 404);
         }
         $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
-        $ratingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [["min_rating", "DESC"]]));
+        $ratingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [
+            [
+                "min_rating",
+                "DESC"
+            ]
+        ]));
         return new JsonResponse([
             'user' => [
                 ...$user->jsonSerialize(),

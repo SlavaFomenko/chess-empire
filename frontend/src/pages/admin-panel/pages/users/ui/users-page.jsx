@@ -35,6 +35,11 @@ export function UsersPage () {
     setOrder({ by: by, desc: by === order.by ? !order.desc : false });
   };
 
+  const handleRatingChange = (rating) => {
+    setRating(rating);
+    setPagination({ ...pagination, currentPage: 1 });
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.searchLine}>
@@ -46,19 +51,19 @@ export function UsersPage () {
         />
       </div>
       <div className={styles.filtersDiv}>
-        <button>Reset</button>
+        <button onClick={()=>setRating({ min: null, max: null })}>Reset</button>
         <span>Rating: </span>
         <input
           type="number"
-          value={rating.min}
-          onChange={(e)=>setRating({...rating, min: +e.target.value ?? null})}
+          value={rating.min ?? ""}
+          onChange={(e)=>handleRatingChange({...rating, min: +e.target.value ?? null})}
           placeholder="Min"
         />
         <span>to</span>
         <input
           type="number"
-          value={rating.max}
-          onChange={(e)=>setRating({...rating, max: +e.target.value ?? null})}
+          value={rating.max ?? ""}
+          onChange={(e)=>handleRatingChange({...rating, max: +e.target.value ?? null})}
           placeholder="Max"
         />
       </div>
