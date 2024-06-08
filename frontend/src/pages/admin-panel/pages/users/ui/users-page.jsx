@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/users-page.module.scss";
-import { getAllUsers } from "../../../../../shared/user";
+import { DELETE_RATING_RANGE, DELETE_USER, getAllUsers } from "../../../../../shared/user";
 import { Pagination } from "../../../../../entities/pagination";
 import { UsersList } from "../../../../../entities/profile";
 import deleteIcon from "../../../../../shared/images/icons/delete-icon.png";
+import { hideNotification, showNotification } from "../../../../../shared/notification";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 
 export function UsersPage () {
+  const dispatch = useDispatch();
+  const userStore = useSelector(state => state.user);
   const [users, setUsers] = useState(null);
   const [pagination, setPagination] = useState({ currentPage: 1, pagesCount: 0 });
   const [order, setOrder] = useState({ by: "id", desc: false });
   const [search, setSearch] = useState("");
   const [rating, setRating] = useState({ min: null, max: null });
+  const [deleteTrigger, setDeleteTrigger] = useState(false);
+
   useEffect(() => {
     async function fetchData () {
       const data = await getAllUsers({ name: search, page: pagination.currentPage, order, rating });
@@ -19,7 +26,7 @@ export function UsersPage () {
     }
 
     fetchData();
-  }, [search, pagination.currentPage, order, rating.min, rating.max]);
+  }, [search, pagination.currentPage, order, rating.min, rating.max, deleteTrigger]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -35,7 +42,49 @@ export function UsersPage () {
     setPagination({ ...pagination, currentPage: 1 });
   };
 
-  console.log(order)
+  const submitDelete = (user) => {
+    dispatch(showNotification(
+      <div className={styles.deleteSubmit}>
+        Are you sure you want to delete user {user.username}?
+        <div>
+          <button
+            onClick={() => {
+              deleteUser(user.id);
+              dispatch(hideNotification());
+            }
+            }
+          >Yes
+          </button>
+          <button
+            onClick={() => {
+              dispatch(hideNotification());
+            }
+            }
+          >No
+          </button>
+        </div>
+      </div>
+    ));
+  };
+
+  const deleteUser = (id) => {
+    try {
+      axios.delete(DELETE_USER(id), {
+        headers: {
+          Authorization: `Bearer ${userStore.user.token}`
+        }
+      }).then(response => {
+        setDeleteTrigger(!deleteTrigger);
+      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error deleting user"));});
+    } catch (error) {
+      dispatch(showNotification("Error deleting user"));
+    }
+  };
+
+  const handleReset = () => {
+    setOrder({ by: "id", desc: false });
+    setRating({ min: null, max: null });
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -49,10 +98,7 @@ export function UsersPage () {
       </div>
       <div className={styles.filtersDiv}>
         <button
-          onClick={() => {
-            setOrder({ by: "id", desc: false });
-            setRating({ min: null, max: null });
-          }}
+          onClick={handleReset}
         >
           Reset
         </button>
@@ -104,7 +150,7 @@ export function UsersPage () {
       <UsersList
         classNames={styles.usersList}
         users={users} childrenCallback={(user) => user.role !== "ROLE_ADMIN" && <>
-        <button onClick={() => console.log(`delete ${user.id}`)}>
+        <button onClick={() => submitDelete(user)}>
           <img src={deleteIcon} alt="Delete User" />
         </button>
       </>}

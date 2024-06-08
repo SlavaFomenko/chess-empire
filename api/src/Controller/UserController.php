@@ -329,6 +329,22 @@ class UserController extends BaseController
         return false;
     }
 
+    #[Route(name: "delete_user", path: "/users/{id}", methods: [Request::METHOD_DELETE], roles: [User::ROLE_ADMIN])]
+    public function delete(int $id): Response
+    {
+        $repo = $this->em->getRepository(User::class);
+        $user = $repo->find($id);
+        if ($user === null) {
+            return new JsonResponse(["message" => "User with id $id not found"], 404);
+        }
+        if ($user->getRole() === User::ROLE_ADMIN) {
+            return new JsonResponse(["message" => "You cannot delete admin"], 400);
+        }
+        $this->em->remove($user);
+        $this->em->flush();
+        return new JsonResponse(null, 204);
+    }
+
     function validateEmail($email): bool
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL);
