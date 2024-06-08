@@ -11,14 +11,14 @@ export const userSlice = createSlice({
   reducers: {
     restoreToken: (state, action) => {
       const decoded = jwtDecode(action.payload);
-      state.user = { ...state.user, token: action.payload, id: decoded.id };
+      state.user = { ...state.user, token: action.payload, id: decoded.id, role: decoded.role };
     }
   },
   extraReducers: (builder) => {
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.error = null;
       const decoded = jwtDecode(action.payload.token);
-      state.user = { ...state.user, token: action.payload.token, id: decoded.id };
+      state.user = { ...state.user, token: action.payload.token, id: decoded.id, role: decoded.role };
       localStorage.setItem("token", action.payload.token);
     }).addCase(loginUser.rejected, (state, action) => {
       state.user = null;

@@ -103,21 +103,6 @@ export function ProfilePage () {
     <LayoutPage>
       <div className={styles.profilePage}>
         {user ? (
-          // <div className={styles.profileData}>
-          //   <div className={styles.profilePicDiv}>
-          //     <img src={user.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${user.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic"/>
-          //     <button onClick={}>Change</button>
-          //   </div>
-          //   <div>
-          //     <div className={styles.usernameBar}>
-          //       <h1>Hi, {user.username}!</h1>
-          //       <img className={styles.editProfileButton} src={editIcon} alt="Edit profile" onClick={()=>setEditForm({...editForm, opened: true, data: user})}/>
-          //     </div>
-          //     <p className={styles.aka}>Also known as {user.firstName} {user.lastName}</p>
-          //     <p>Email: {user.email}</p>
-          //     <p>Rating: {user.rating} {user.ratingTitle && `(${user.ratingTitle})`}</p>
-          //   </div>
-          // </div>
           <ProfileData
             user={user} greetingMessage={(username) => `Hi, ${username}!`} onImageEdit={() => setPicForm({
             ...picForm,
