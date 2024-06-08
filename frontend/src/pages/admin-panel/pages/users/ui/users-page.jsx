@@ -150,6 +150,7 @@ export function UsersPage () {
         </div>
       </div>
       <UsersList
+        displayRoles={true}
         onClick={(user) => navigate(`/user/${user.id}`)}
         classNames={styles.usersList}
         users={users} childrenCallback={(user) => user.role !== "ROLE_ADMIN" && <>

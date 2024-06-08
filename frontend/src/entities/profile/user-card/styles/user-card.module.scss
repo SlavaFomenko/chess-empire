@@ -26,6 +26,7 @@
       width: 5rem;
 
       img {
+        all: unset;
         display: block;
         opacity: 1;
         height: 5rem;
@@ -82,6 +83,11 @@
         height: 1.5rem;
         aspect-ratio: 1;
       }
+    }
+
+    button:disabled {
+      background-color: #314348;
+      color: #949C9C;
     }
   }
 }
