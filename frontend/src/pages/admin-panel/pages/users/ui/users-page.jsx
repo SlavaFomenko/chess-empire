@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/users-page.module.scss";
-import { UserItem } from "../../../../../entities/admin-panel/user-item";
 import { getAllUsers } from "../../../../../shared/user";
 import { Pagination } from "../../../../../entities/pagination";
-import ascOrderIcon from "../../../../../shared/images/icons/asc-order-icon.png";
-import descOrderIcon from "../../../../../shared/images/icons/desc-order-icon.png";
+import { UsersList } from "../../../../../entities/profile";
+import deleteIcon from "../../../../../shared/images/icons/delete-icon.png";
 
 export function UsersPage () {
   const [users, setUsers] = useState(null);
   const [pagination, setPagination] = useState({ currentPage: 1, pagesCount: 0 });
-  const [order, setOrder] = useState({ by: null, desc: false });
+  const [order, setOrder] = useState({ by: "id", desc: false });
   const [search, setSearch] = useState("");
   const [rating, setRating] = useState({ min: null, max: null });
   useEffect(() => {
@@ -31,14 +30,12 @@ export function UsersPage () {
     setPagination({ ...pagination, currentPage: page });
   };
 
-  const handleOrderChange = (by) => {
-    setOrder({ by: by, desc: by === order.by ? !order.desc : false });
-  };
-
   const handleRatingChange = (rating) => {
     setRating(rating);
     setPagination({ ...pagination, currentPage: 1 });
   };
+
+  console.log(order)
 
   return (
     <div className={styles.wrapper}>
@@ -51,65 +48,69 @@ export function UsersPage () {
         />
       </div>
       <div className={styles.filtersDiv}>
-        <button onClick={()=>setRating({ min: null, max: null })}>Reset</button>
-        <span>Rating: </span>
-        <input
-          type="number"
-          value={rating.min ?? ""}
-          onChange={(e)=>handleRatingChange({...rating, min: +e.target.value ?? null})}
-          placeholder="Min"
-        />
-        <span>to</span>
-        <input
-          type="number"
-          value={rating.max ?? ""}
-          onChange={(e)=>handleRatingChange({...rating, max: +e.target.value ?? null})}
-          placeholder="Max"
-        />
+        <button
+          onClick={() => {
+            setOrder({ by: "id", desc: false });
+            setRating({ min: null, max: null });
+          }}
+        >
+          Reset
+        </button>
+        <div>
+          <span>Rating: </span>
+          <input
+            type="number"
+            value={rating.min ?? ""}
+            onChange={(e) => handleRatingChange({ ...rating, min: +e.target.value ?? null })}
+            placeholder="Min"
+          />
+          <span>to</span>
+          <input
+            type="number"
+            value={rating.max ?? ""}
+            onChange={(e) => handleRatingChange({ ...rating, max: +e.target.value ?? null })}
+            placeholder="Max"
+          />
+        </div>
+        <div>
+          <span>Sort by:</span>
+          <select
+            value={order.by} onChange={e => {
+            setOrder({ by: e.target.value, desc: false });
+          }}
+          >
+            <option value="id">ID</option>
+            <option value="username">Username</option>
+            <option value="first_name">First name</option>
+            <option value="last_name">Last name</option>
+            <option value="rating">Rating</option>
+            <option value="role">Role</option>
+            <option value="email">Email</option>
+          </select>
+          <select
+            value={order.desc ? "desc" : "asc"} onChange={e => {
+            console.log(e);
+            setOrder({
+              by: order.by,
+              desc: e.target.value === "desc"
+            });
+          }}
+          >
+            <option value="asc">ASC</option>
+            <option value="desc">DESC</option>
+          </select>
+        </div>
       </div>
-      <div>
-        <table className={styles.usersTable}>
-          <tr className={styles.headersRow}>
-            <td onClick={() => handleOrderChange("id")}>
-              {order.by === "id" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
-              ID
-            </td>
-            <td onClick={() => handleOrderChange("username")}>
-              {order.by === "username" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
-              Username
-            </td>
-            <td onClick={() => handleOrderChange("first_name")}>
-              {order.by === "first_name" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
-              First name
-            </td>
-            <td onClick={() => handleOrderChange("last_name")}>
-              {order.by === "last_name" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
-              Last name
-            </td>
-            <td onClick={() => handleOrderChange("rating")}>
-              {order.by === "rating" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
-              Rating
-            </td>
-            <td onClick={() => handleOrderChange("role")}>
-              {order.by === "role" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
-              Role
-            </td>
-            <td onClick={() => handleOrderChange("email")}>
-              {order.by === "email" && <img src={order.desc ? descOrderIcon : ascOrderIcon} alt="Order" />}
-              Email
-            </td>
-          </tr>
-          <tbody>
-          {users && users.map(user => (
-            <UserItem
-              user={user}
-            />
-          ))}
-          </tbody>
-        </table>
-
-      </div>
-      {pagination.pagesCount !==1 && <Pagination currentPage={pagination.currentPage} pagesCount={pagination.pagesCount} onClick={(page) => handlePageChange(page)} />}
+      <UsersList
+        classNames={styles.usersList}
+        users={users} childrenCallback={(user) => user.role !== "ROLE_ADMIN" && <>
+        <button onClick={() => console.log(`delete ${user.id}`)}>
+          <img src={deleteIcon} alt="Delete User" />
+        </button>
+      </>}
+      />
+      {pagination.pagesCount !== 1 &&
+        <Pagination currentPage={pagination.currentPage} pagesCount={pagination.pagesCount} onClick={(page) => handlePageChange(page)} />}
 
     </div>
   );

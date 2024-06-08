@@ -125,6 +125,7 @@ export function ProfilePage () {
         <div className={styles.gamesHistory}>
           <GamesList
             games={games.list}
+            user={user}
           />
           {!games.lastPage && !games.loading && <button onClick={fetchGames}>Load more</button>}
           {games.loading && <p>Loading...</p>}

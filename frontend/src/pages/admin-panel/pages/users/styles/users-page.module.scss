@@ -1,6 +1,6 @@
 .wrapper {
   margin-top: 1rem;
-  width: auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,28 +14,48 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
 
     span {
-      font-size: 2rem;
+      font-size: 1.5rem;
       color: #D2D4D4;
     }
 
     button {
       padding: 0.4rem 0.8rem;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 500;
     }
 
     input {
       -moz-appearance: textfield;
-      width: 7rem;
+      width: 5rem;
+      padding: 0.5rem;
+    }
+
+    select {
+      padding: 0.5rem;
+      border: none;
+      outline: none;
+      font-size: 1.5rem;
+      color: #D2D4D4;
+      background-color: #182327;
+    }
+
+    input::placeholder {
+      font-size: 1.5rem;
     }
 
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
+    }
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
   }
 
@@ -54,48 +74,7 @@
     color: #576667;
   }
 
-  .usersTable {
-    border-collapse: collapse;
-
-    tr {
-      width: auto;
-    }
-
-    .headersRow {
-      td {
-        width: max-content;
-        cursor: default;
-        transition: 200ms ease-in-out;
-
-        img {
-          height: 1.2rem;
-          display: inline;
-          aspect-ratio: 1;
-          margin-bottom: -0.1rem;
-          margin-right: 0.1rem;
-        }
-      }
-
-      td:hover {
-        background-color: #3F4E4F;
-      }
-    }
-
-    td {
-      color: #D2D4D4;
-      font-size: 1.5rem;
-      padding: 0.3rem 0.6rem;
-      vertical-align: center;
-    }
-
-    td img {
-
-      height: 1.7rem;
-      margin-top: 0.2rem;
-      margin: 0 auto;
-      aspect-ratio: 1;
-      opacity: 0.5;
-      transition: 200ms ease-in-out;
-    }
+  .usersList {
+    width: 100%;
   }
 }

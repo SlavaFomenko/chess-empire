@@ -1,0 +1,91 @@
+.card {
+  width: 100%;
+  padding: 0.5rem 0.5rem;
+  background-color: #3F4E4F;
+  transition: 150ms ease-in-out;
+
+  table {
+    width: 100%;
+  }
+
+  tr {
+    padding: 0;
+    border: 0;
+  }
+
+  td {
+    padding: 0 0.6rem;
+    border: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .usernameRow {
+    .profilePicTd {
+      padding: 0;
+      width: 5rem;
+
+      img {
+        display: block;
+        opacity: 1;
+        height: 5rem;
+        aspect-ratio: 1;
+      }
+    }
+
+    .username {
+      color: #FDFDFD;
+      text-align: left;
+    }
+
+    .role {
+      color: #ABB0B2;
+      text-align: right;
+    }
+  }
+
+  .fullName {
+    color: #DFE1E1;
+    font-weight: 500;
+  }
+
+  .email {
+    color: #ABB0B2;
+    font-weight: 500;
+  }
+
+  .buttons {
+    padding-left: 3rem;
+    text-align: right;
+    vertical-align: bottom;
+
+    button {
+      margin: 0;
+      padding: 0 0.5rem;
+      height: 2.5rem;
+      border: none;
+      color: #D2D4D4;
+      background-color: rgba(0,0,0,0);
+      font-size: 1.5rem;
+      font-weight: 500;
+      transition: 200ms ease-in-out;
+    }
+
+    button:hover {
+      color: #DFE1E1;
+      background-color: #738183;
+    }
+
+    button:has(img){
+      img {
+        margin-bottom: -0.2rem;
+        height: 1.5rem;
+        aspect-ratio: 1;
+      }
+    }
+  }
+}
+
+.card:hover {
+  background-color: #576667;
+}

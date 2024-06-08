@@ -15,6 +15,7 @@ use Handy\Security\Exception\ForbiddenException;
 
 class UserController extends BaseController
 {
+    public const USERS_PER_PAGE = 10;
 
     #[Route(name: "user_create", path: "/users", methods: [Request::METHOD_POST])]
     public function register(): Response
@@ -83,7 +84,7 @@ class UserController extends BaseController
         [
             $limit,
             $offset
-        ] = $this->pagination();
+        ] = $this->pagination(self::USERS_PER_PAGE);
 
         $qb = new QueryBuilder();
         $qb->from("user");
@@ -148,7 +149,7 @@ class UserController extends BaseController
             ];
         }, $users);
         return new JsonResponse([
-            'pagesCount' => ceil($count / 20),
+            'pagesCount' => ceil($count / self::USERS_PER_PAGE),
             "users"      => $users
         ], 200);
     }

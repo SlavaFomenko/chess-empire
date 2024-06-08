@@ -1,15 +1,10 @@
 import React from "react";
 import styles from "../styles/game-card.module.scss";
-import { useSelector } from "react-redux";
 import classNames from "classnames";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export function GameCard ({ gameData }) {
-  const user = useSelector(state => state.user.user);
+export function GameCard ({ gameData, user }) {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
-
-  const isAdminPanel = pathname.includes("admin");
 
   const formatDate = (date) => {
     const pad = (number) => number.toString().padStart(2, "0");
@@ -60,14 +55,14 @@ export function GameCard ({ gameData }) {
               {formattedDate}
             </p>
           </td>
-          {!isAdminPanel &&
+          {color !== "-" &&
             <td
               className={classNames({
-                [styles.result]: color !== "-",
+                [styles.result]: true,
                 [styles.resultRed]: color !== gameData.winner && gameData.winner !== "t",
                 [styles.resultGreen]: color === gameData.winner && gameData.winner !== "t"
               })}
-            >{color !== "-" && result}</td>
+            >{result}</td>
           }
         </tr>
         </tbody>
