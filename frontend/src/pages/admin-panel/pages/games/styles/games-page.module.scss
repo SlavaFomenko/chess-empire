@@ -1,0 +1,17 @@
+ .searchLine{
+   margin: 0.5rem 0;
+    input {
+      width: 100%;
+      height: 3rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      outline: none;
+      font-size: 1.5rem;
+      color: #D2D4D4;
+      background-color: #182327;
+    }
+
+    input::placeholder {
+      color: #576667;
+    }
+  }

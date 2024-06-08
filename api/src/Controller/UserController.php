@@ -2,17 +2,20 @@
 
 namespace App\Controller;
 
+use App\Entity\RatingRange;
 use App\Entity\User;
 use Handy\Context;
 use Handy\Controller\BaseController;
 use Handy\Http\JsonResponse;
 use Handy\Http\Request;
 use Handy\Http\Response;
+use Handy\ORM\QueryBuilder;
 use Handy\Routing\Attribute\Route;
 use Handy\Security\Exception\ForbiddenException;
 
 class UserController extends BaseController
 {
+    public const USERS_PER_PAGE = 10;
 
     #[Route(name: "user_create", path: "/users", methods: [Request::METHOD_POST])]
     public function register(): Response
@@ -77,34 +80,101 @@ class UserController extends BaseController
     public function getAll(): Response
     {
         $query = $this->request->getQuery();
-        $criteria = [];
+
         [
             $limit,
             $offset
-        ] = $this->pagination();
+        ] = $this->pagination(self::USERS_PER_PAGE);
+
+        $qb = new QueryBuilder();
+        $qb->from("user");
 
         if (isset($query["name"])) {
-            $criteria = [
-                "username"   => "LIKE " . $query["name"],
-                "first_name" => "LIKE " . $query["name"],
-                "last_name"  => "LIKE " . $query["name"]
+            $qb->andWhere("(username LIKE :name1 OR first_name LIKE :name2 OR last_name LIKE :name3)")
+                ->setParam([
+                    "name1" => "%" . $query["name"] . "%",
+                    "name2" => "%" . $query["name"] . "%",
+                    "name3" => "%" . $query["name"] . "%"
+                ]);
+        }
+
+        if (isset($query["ratingMin"])) {
+            $qb->andWhere("rating >= :ratingMin")->setParam([
+                "ratingMin" => $query["ratingMin"]
+            ]);
+        }
+
+        if (isset($query["ratingMax"])) {
+            $qb->andWhere("rating <= :ratingMax")->setParam([
+                "ratingMax" => $query["ratingMax"]
+            ]);
+        }
+
+        $orderBy = [];
+
+        if (isset($query["orderBy"]) && in_array($query["orderBy"], [
+                "id",
+                "role",
+                "email",
+                "username",
+                "first_name",
+                "last_name",
+                "rating"
+            ])) {
+            $order = @$query["order"] === "desc" ? "DESC" : "ASC";
+            $orderBy = [
+                [
+                    $query["orderBy"],
+                    $order
+                ]
             ];
         }
 
-        $repo = $this->em->getRepository(User::class);
-        $users = $repo->findBy($criteria, true, $limit, $offset);
-        return new JsonResponse($users, 200);
+        $qb->orderBy($orderBy);
+
+        $count = @(int)Context::$connection->execute($qb->select(["COUNT(id)"])->getQuery())[0][0];
+        $users = Context::$connection->execute($qb->select(User::class)->limit($limit)->offset($offset)->getQuery(), User::class);
+
+        $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
+        $users = array_map(function ($user) use ($ratingRangeRepo) {
+            $ratingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [
+                [
+                    "min_rating",
+                    "DESC"
+                ]
+            ]));
+            return [
+                ...$user->jsonSerialize(),
+                "ratingTitle" => $ratingRange ? $ratingRange->getTitle() : null
+            ];
+        }, $users);
+        return new JsonResponse([
+            'pagesCount' => ceil($count / self::USERS_PER_PAGE),
+            "users"      => $users
+        ], 200);
     }
 
     #[Route(name: "get_user_by_id", path: "/users/{id}", methods: [Request::METHOD_GET])]
     public function getByID(int $id): Response
     {
-        $repo = $this->em->getRepository(User::class);
-        $user = $repo->findOneBy(["id" => $id]);
+        $userRepo = $this->em->getRepository(User::class);
+        $user = $userRepo->findOneBy(["id" => $id]);
         if (empty($user)) {
             return new JsonResponse(["message" => "User not found"], 404);
         }
-        return new JsonResponse(['user' => $user], 200);
+        $ratingRangeRepo = $this->em->getRepository(RatingRange::class);
+        $ratingRange = current($ratingRangeRepo->findBy(["min_rating" => "<= " . $user->getRating()], orderBy: [
+            [
+                "min_rating",
+                "DESC"
+            ]
+        ]));
+        return new JsonResponse([
+            'user' => [
+                ...$user->jsonSerialize(),
+                "ratingTitle" => $ratingRange ? $ratingRange->getTitle() : null
+            ]
+        ], 200);
     }
 
     #[Route(name: "patch_user", path: "/users/{id}", methods: [Request::METHOD_PATCH], roles: User::ROLE_USER_OR_ADMIN)]
@@ -257,6 +327,22 @@ class UserController extends BaseController
         }
 
         return false;
+    }
+
+    #[Route(name: "delete_user", path: "/users/{id}", methods: [Request::METHOD_DELETE], roles: [User::ROLE_ADMIN])]
+    public function delete(int $id): Response
+    {
+        $repo = $this->em->getRepository(User::class);
+        $user = $repo->find($id);
+        if ($user === null) {
+            return new JsonResponse(["message" => "User with id $id not found"], 404);
+        }
+        if ($user->getRole() === User::ROLE_ADMIN) {
+            return new JsonResponse(["message" => "You cannot delete admin"], 400);
+        }
+        $this->em->remove($user);
+        $this->em->flush();
+        return new JsonResponse(null, 204);
     }
 
     function validateEmail($email): bool

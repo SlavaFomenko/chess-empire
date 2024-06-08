@@ -15,22 +15,35 @@ export const GamePage = () => {
 
   return (
     <LayoutPage>
-      {!userState.user?.token &&
-        <div className={styles.gameSearchPage}>
+      {userState.user?.token ?
+        <>
+          {["default", "searchingGame"].includes(socketState.state) &&
+            <div className={styles.gameSearchPage}>
+              <h1>Play with stranger</h1>
+              <SearchGame />
+            </div>
+          }
+          {
+            [null, "disconnected"].includes(socketState.state) &&
+            <div className={styles.gameSearchPage}>
+              <h1>Game server is currently unavailable :(</h1>
+            </div>
+          }
+          {socketState.state === "unauthorized" &&
+            <div className={styles.gameSearchPage}>
+              <h1>Authorization failed</h1>
+            </div>
+          }
+          {socketState.state === "inGame" &&
+            <div className={styles.gamePage}>
+              <ChessGame />
+              {isPending && <PromotionDialog />}
+              {gameState.gameOver.winner && <GameOverDialog gameState={gameState} />}
+            </div>
+          }
+        </>
+        : <div className={styles.gameSearchPage}>
           <h1>Please, sign in/up for playing</h1>
-        </div>
-      }
-      {["default", "searchingGame"].includes(socketState.state) &&
-        <div className={styles.gameSearchPage}>
-          <h1>Play with stranger</h1>
-          <SearchGame />
-        </div>
-      }
-      {socketState.state === "inGame" &&
-        <div className={styles.gamePage}>
-          <ChessGame />
-          {isPending && <PromotionDialog />}
-          {gameState.gameOver.winner && <GameOverDialog gameState={gameState} />}
         </div>
       }
     </LayoutPage>

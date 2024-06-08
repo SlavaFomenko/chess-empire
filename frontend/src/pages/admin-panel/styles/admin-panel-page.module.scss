@@ -1,0 +1,32 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0.5rem;
+
+  .tabsBar {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    border-bottom: 0.2rem solid #3F4E4F;
+  }
+
+  button {
+    border: none;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #d2d4d4;
+    outline: none;
+    background-color: #2b3a3f;
+  }
+
+  button:hover {
+    color: #617074;
+  }
+
+  .active {
+    border-bottom: 3px solid #d2d4d4;
+  }
+}

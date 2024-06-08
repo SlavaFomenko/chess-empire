@@ -4,12 +4,22 @@ import styles from "../styles/side-bar.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { s } from "../../../shared/socket";
 import closeIcon from "../../../shared/images/icons/closeIcon.png";
+import { jwtDecode } from "jwt-decode";
 
-export function SideBar ({ isMobile, closeSideBar }) {
+export function SideBar({ isMobile, closeSideBar }) {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const user = useSelector(state => state.user);
+  const user = useSelector((state) => state.user);
+
+  let role = null;
+  if (user.user && user.user.token) {
+    try {
+      role = jwtDecode(user.user.token).role;
+    } catch (error) {
+      console.error('Invalid token', error);
+    }
+  }
 
   const redirect = (page) => {
     if (location.pathname !== page) {
@@ -25,9 +35,11 @@ export function SideBar ({ isMobile, closeSideBar }) {
 
   return (
     <div className={styles.side_bar}>
-
-
-      {isMobile && <button className={styles.closeSideBarBtn} onClick={closeSideBar}><img src={closeIcon} alt={"close icon"} /></button>}
+      {isMobile && (
+        <button className={styles.closeSideBarBtn} onClick={closeSideBar}>
+          <img src={closeIcon} alt="close icon" />
+        </button>
+      )}
       <button
         className={location.pathname === "/" ? styles.current : ""}
         onClick={() => redirect("/")}
@@ -40,7 +52,8 @@ export function SideBar ({ isMobile, closeSideBar }) {
       >
         Game
       </button>
-      {!user.user?.token ? <>
+      {!user.user?.token ? (
+        <>
           <button
             className={location.pathname === "/login" ? styles.current : ""}
             onClick={() => redirect("/login")}
@@ -53,7 +66,8 @@ export function SideBar ({ isMobile, closeSideBar }) {
           >
             Sign up
           </button>
-        </> :
+        </>
+      ) : (
         <>
           <button
             className={location.pathname === "/profile" ? styles.current : ""}
@@ -61,13 +75,19 @@ export function SideBar ({ isMobile, closeSideBar }) {
           >
             Profile
           </button>
-          <button
-            onClick={logout}
-          >
+          {role === "ROLE_ADMIN" && (
+            <button
+              className={location.pathname.startsWith("/admin_panel") ? styles.current : ""}
+              onClick={() => redirect("/admin_panel/users")}
+            >
+              Admin
+            </button>
+          )}
+          <button onClick={logout}>
             Log out
           </button>
         </>
-      }
+      )}
     </div>
   );
 }

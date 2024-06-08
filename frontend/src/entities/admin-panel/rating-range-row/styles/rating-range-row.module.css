@@ -1,0 +1,19 @@
+.rangeWin {
+    color: #4CD04C !important;
+}
+
+.rangeLoss {
+    color: #FF4545 !important;
+}
+
+.editButton, .deleteButton {
+    height: 1.7rem;
+    margin-top: 0.2rem;
+    aspect-ratio: 1;
+    opacity: 0.5;
+    transition: 200ms ease-in-out;
+}
+
+.editButton:hover, .deleteButton:hover {
+    opacity: 1;
+}

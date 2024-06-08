@@ -23,7 +23,9 @@ const initialState = {
     winner: null,
     reason: null,
     white_rating: null,
-    black_rating: null
+    black_rating: null,
+    white_rating_change: null,
+    black_rating_change: null,
   },
   black: null,
   white: null
@@ -170,7 +172,9 @@ export const gameSlice = createSlice({
           winner: action.payload.winner,
           reason: action.payload.reason,
           white_rating: action.payload.white_rating,
-          black_rating: action.payload.black_rating
+          black_rating: action.payload.black_rating,
+          white_rating_change: action.payload.white_rating_change,
+          black_rating_change: action.payload.black_rating_change,
         }
       };
     },

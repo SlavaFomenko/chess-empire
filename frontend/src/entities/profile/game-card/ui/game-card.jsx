@@ -1,11 +1,9 @@
 import React from "react";
 import styles from "../styles/game-card.module.scss";
-import { useSelector } from "react-redux";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 
-export function GameCard ({ gameData }) {
-  const user = useSelector(state => state.user.user);
+export function GameCard ({ gameData, user }) {
   const navigate = useNavigate();
 
   const formatDate = (date) => {
@@ -24,14 +22,28 @@ export function GameCard ({ gameData }) {
   const result = gameData.winner === "t" ? "Tie" : color === gameData.winner ? "Won" : "Lost";
   const formattedDate = formatDate(new Date(gameData.playedDate * 1000));
 
+  const rating = {
+    white: gameData.white_rating,
+    white_change: gameData.white_rating_change,
+    white_class: gameData.white_rating_change > 0 ? styles.resultGreen : styles.resultRed,
+    black: gameData.black_rating,
+    black_change: gameData.black_rating_change,
+    black_class: gameData.black_rating_change > 0 ? styles.resultGreen : styles.resultRed
+  }
+
   return (
-    <div className={styles.card} onClick={()=>{navigate(`/game-review/${gameData.id}`)}}>
+    <div className={styles.card} onClick={() => {navigate(`/game-review/${gameData.id}`);}}>
       <table>
+        <tbody>
         <tr className={styles.players}>
           <td colSpan="3">
-            <span className={styles.username}>{gameData.white_username} ({gameData.white_rating})</span>
+              <span className={styles.username}>
+                {gameData.white_username} ({rating.white}{rating.white_change !== 0 && <span className={rating.white_class}>{` ${rating.white_change > 0 ? "+" : ""}${rating.white_change}`}</span>})
+              </span>
             {" vs "}
-            <span className={styles.username}>{gameData.black_username} ({gameData.black_rating})</span>
+            <span className={styles.username}>
+                {gameData.black_username} ({rating.black}{rating.black_change !== 0 && <span className={rating.black_class}>{` ${rating.black_change > 0 ? "+" : ""}${rating.black_change}`}</span>})
+              </span>
           </td>
         </tr>
         <tr>
@@ -43,12 +55,17 @@ export function GameCard ({ gameData }) {
               {formattedDate}
             </p>
           </td>
-          <td className={classNames({
-            [styles.result]: color !== "-",
-            [styles.resultRed]: color !== gameData.winner && gameData.winner !== "t",
-            [styles.resultGreen]: color === gameData.winner && gameData.winner !== "t",
-          })}>{color !== "-" && result}</td>
+          {color !== "-" &&
+            <td
+              className={classNames({
+                [styles.result]: true,
+                [styles.resultRed]: color !== gameData.winner && gameData.winner !== "t",
+                [styles.resultGreen]: color === gameData.winner && gameData.winner !== "t"
+              })}
+            >{result}</td>
+          }
         </tr>
+        </tbody>
       </table>
     </div>
   );

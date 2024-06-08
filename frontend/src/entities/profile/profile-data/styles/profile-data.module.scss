@@ -1,0 +1,67 @@
+.profileData {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+
+  .profilePicDiv {
+    height: 10rem;
+    width: 10rem;
+    position: relative;
+
+    img {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    button {
+      background-color: rgba(0,0,0,0.3);
+      width: 100%;
+      height: 0;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      padding: 0;
+      overflow: hidden;
+      transition: 150ms ease-in-out;
+    }
+
+    button:hover {
+      background-color: rgba(0,0,0,0.6);
+    }
+  }
+
+  .profilePicDiv:hover button {
+    height: 2.75rem;
+    padding: 0.5rem;
+  }
+
+  .usernameBar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  h1 {
+    color: #FDFDFD;
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    color: #FDFDFD;
+    font-size: 1.9rem;
+  }
+
+  .aka {
+    color: #D2D4D4;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #D2D4D4;
+    font-size: 1.5rem;
+  }
+}

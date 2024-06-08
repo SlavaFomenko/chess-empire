@@ -24,6 +24,11 @@ export function GameOverDialog ({ gameState }) {
     white: gameState.gameOver.white_rating
   };
 
+  const ratingChange = {
+    black: gameState.gameOver.black_rating_change,
+    white: gameState.gameOver.white_rating_change
+  };
+
   return (
     <BannerLayout>
       <div className={styles.gameOverDialog}>
@@ -33,26 +38,28 @@ export function GameOverDialog ({ gameState }) {
           <tr>
             <td>{gameState.black.username}</td>
             <td>
+              {`${rating.black} `}
               <span
                 className={classNames({
-                  [styles.ratingRed]: rating.black < 0,
-                  [styles.ratingGreen]: rating.black > 0
+                  [styles.ratingRed]: ratingChange.black < 0,
+                  [styles.ratingGreen]: ratingChange.black > 0
                 })}
               >
-                {`${rating.black > 0 ? "+" : ""}${rating.black}`}
+                {`(${ratingChange.black > 0 ? "+" : ""}${ratingChange.black})`}
               </span>
             </td>
           </tr>
           <tr>
             <td>{gameState.white.username}</td>
             <td>
+              {`${rating.white} `}
               <span
                 className={classNames({
-                  [styles.ratingRed]: rating.white < 0,
-                  [styles.ratingGreen]: rating.white > 0
+                  [styles.ratingRed]: ratingChange.white < 0,
+                  [styles.ratingGreen]: ratingChange.white > 0
                 })}
               >
-                {`${rating.white > 0 ? "+" : ""}${rating.white}`}
+                {`(${ratingChange.white > 0 ? "+" : ""}${ratingChange.white})`}
               </span>
             </td>
           </tr>

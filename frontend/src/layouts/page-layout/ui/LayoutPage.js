@@ -22,9 +22,6 @@ export function LayoutPage({ children }) {
     };
   }, []);
 
-  console.log(isMobile);
-  console.log(sideBarIsOpen);
-
   const openSideBar = ()=>{
     setSideBarIsOpen(true)
   }
@@ -40,7 +37,7 @@ export function LayoutPage({ children }) {
         <img src={menuIcon} alt={'menu icon'}></img>
       </button>}
       {sideBarIsOpen && <SideBar isMobile={isMobile} closeSideBar={closeSideBar}/>}
-      <section className={classNames({[`${styles.mobile}`] :isMobile})}>
+      <section className={classNames({[`${styles.mobile}`] :isMobile},)}>
         {children}
       </section>
     </main>
