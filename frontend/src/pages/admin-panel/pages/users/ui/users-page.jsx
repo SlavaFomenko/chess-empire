@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/users-page.module.scss";
-import { DELETE_RATING_RANGE, DELETE_USER, getAllUsers } from "../../../../../shared/user";
+import { DELETE_USER, getAllUsers } from "../../../../../shared/user";
 import { Pagination } from "../../../../../entities/pagination";
 import { UsersList } from "../../../../../entities/profile";
 import deleteIcon from "../../../../../shared/images/icons/delete-icon.png";
 import { hideNotification, showNotification } from "../../../../../shared/notification";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export function UsersPage () {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const userStore = useSelector(state => state.user);
   const [users, setUsers] = useState(null);
   const [pagination, setPagination] = useState({ currentPage: 1, pagesCount: 0 });
@@ -84,7 +86,7 @@ export function UsersPage () {
   const handleReset = () => {
     setOrder({ by: "id", desc: false });
     setRating({ min: null, max: null });
-  }
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -148,6 +150,7 @@ export function UsersPage () {
         </div>
       </div>
       <UsersList
+        onClick={(user) => navigate(`/user/${user.id}`)}
         classNames={styles.usersList}
         users={users} childrenCallback={(user) => user.role !== "ROLE_ADMIN" && <>
         <button onClick={() => submitDelete(user)}>

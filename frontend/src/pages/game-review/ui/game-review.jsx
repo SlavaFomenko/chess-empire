@@ -11,11 +11,9 @@ import { applyTurns, enemyColor, turnToCords } from "../../../shared/game/lib";
 
 export const GameReviewPage = () => {
   const userStore = useSelector(state => state.user);
-  const dispatch = useDispatch();
   const [error, setError] = useState(null);
   const [gameState, setGameState] = useState(null);
 
-  console.log(gameState);
   useEffect(() => {
     setError(null);
     if (!userStore.user?.token) {
@@ -43,10 +41,12 @@ export const GameReviewPage = () => {
 
       setGameState({
         black: {
+          id: state.black_id,
           profilePic: state.black_profilePic,
           username: state.black_username
         },
         white: {
+          id: state.white_id,
           profilePic: state.white_profilePic,
           username: state.white_username
         },

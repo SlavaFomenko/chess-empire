@@ -2,20 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LayoutPage } from "../../../layouts/page-layout";
 import axios from "axios";
-import { GET_GAMES_FOR_USER, GET_USER_BY_ID_URL, HOST_URL, PATCH_USER, UPLOAD_USER_PIC } from "../../../shared/config";
+import { GET_GAMES_FOR_USER, GET_USER_BY_ID, PATCH_USER, UPLOAD_USER_PIC } from "../../../shared/config";
 import styles from "../styles/profile.module.scss";
 import { ChangePicDialog, GamesList } from "../../../entities/profile";
 import { showNotification } from "../../../shared/notification";
-import defaultProfilePic from "../../../shared/images/icons/defaultProfilePic.png";
 import editIcon from "../../../shared/images/icons/edit-icon.png";
 import { EditProfileDialog } from "../../../entities/profile/edit-profile-dialog/ui/edit-profile-dialog";
+import { ProfileData } from "../../../entities/profile/profile-data/ui/profile-data";
 
 export function ProfilePage () {
   const userStore = useSelector(state => state.user);
   const [user, setUser] = useState(null);
   const [games, setGames] = useState({ loading: false, list: [], page: 0, lastPage: false });
-  const [picForm, setPicForm] = useState({opened: false, selectedFile: null})
-  const [editForm, setEditForm] = useState({opened: false, data: null})
+  const [picForm, setPicForm] = useState({ opened: false, selectedFile: null });
+  const [editForm, setEditForm] = useState({ opened: false, data: null });
   const dispatch = useDispatch();
 
   const fetchGames = () => {
@@ -47,7 +47,7 @@ export function ProfilePage () {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(GET_USER_BY_ID_URL + "/" + userStore.user.id);
+      const response = await axios.get(GET_USER_BY_ID(userStore.user.id));
       setUser(response.data.user);
     } catch (error) {
       console.log(error);
@@ -56,15 +56,15 @@ export function ProfilePage () {
   };
 
   const uploadPic = async () => {
-    if(!picForm.selectedFile){
+    if (!picForm.selectedFile) {
       return;
     }
     try {
       const formData = new FormData();
-      formData.append('pic',picForm.selectedFile)
+      formData.append("pic", picForm.selectedFile);
       axios.post(UPLOAD_USER_PIC(userStore.user.id), formData, {
         headers: {
-          'content-type': 'multipart/form-data',
+          "content-type": "multipart/form-data",
           Authorization: `Bearer ${userStore.user.token}`
         }
       }).then(response => {
@@ -73,7 +73,7 @@ export function ProfilePage () {
     } catch (error) {
       dispatch(showNotification("Error uploading new pic"));
     }
-  }
+  };
 
   const patchProfile = async (data) => {
     try {
@@ -83,11 +83,11 @@ export function ProfilePage () {
         }
       }).then(response => {
         window.location.reload();
-      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error patching your profile!"))});
+      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error patching your profile!"));});
     } catch (error) {
       dispatch(showNotification("Error patching your profile!"));
     }
-  }
+  };
 
   useEffect(() => {
     fetchGames();
@@ -103,21 +103,35 @@ export function ProfilePage () {
     <LayoutPage>
       <div className={styles.profilePage}>
         {user ? (
-          <div className={styles.profileData}>
-            <div className={styles.profilePicDiv}>
-              <img src={user.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${user.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic"/>
-              <button onClick={()=>setPicForm({...picForm, opened: true})}>Change</button>
-            </div>
-            <div>
-              <div className={styles.usernameBar}>
-                <h1>Hi, {user.username}!</h1>
-                <img className={styles.editProfileButton} src={editIcon} alt="Edit profile" onClick={()=>setEditForm({...editForm, opened: true, data: user})}/>
-              </div>
-              <p className={styles.aka}>Also known as {user.firstName} {user.lastName}</p>
-              <p>Email: {user.email}</p>
-              <p>Rating: {user.rating} {user.ratingTitle && `(${user.ratingTitle})`}</p>
-            </div>
-          </div>
+          // <div className={styles.profileData}>
+          //   <div className={styles.profilePicDiv}>
+          //     <img src={user.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${user.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic"/>
+          //     <button onClick={}>Change</button>
+          //   </div>
+          //   <div>
+          //     <div className={styles.usernameBar}>
+          //       <h1>Hi, {user.username}!</h1>
+          //       <img className={styles.editProfileButton} src={editIcon} alt="Edit profile" onClick={()=>setEditForm({...editForm, opened: true, data: user})}/>
+          //     </div>
+          //     <p className={styles.aka}>Also known as {user.firstName} {user.lastName}</p>
+          //     <p>Email: {user.email}</p>
+          //     <p>Rating: {user.rating} {user.ratingTitle && `(${user.ratingTitle})`}</p>
+          //   </div>
+          // </div>
+          <ProfileData
+            user={user} greetingMessage={(username) => `Hi, ${username}!`} onImageEdit={() => setPicForm({
+            ...picForm,
+            opened: true
+          })}
+          >
+            <img
+              className={styles.editProfileButton} src={editIcon} alt="Edit profile" onClick={() => setEditForm({
+              ...editForm,
+              opened: true,
+              data: user
+            })}
+            />
+          </ProfileData>
         ) : (
           <p>Loading...</p>
         )}
@@ -131,8 +145,10 @@ export function ProfilePage () {
           {games.loading && <p>Loading...</p>}
         </div>
       </div>
-      {picForm.opened && <ChangePicDialog state={picForm} setState={setPicForm} onSubmit={()=>{uploadPic()}} onDelete={()=>{patchProfile({profilePic: "REMOVE"})}}/>}
-      {editForm.opened && <EditProfileDialog state={editForm} setState={setEditForm} onSubmit={(data)=>{patchProfile(data)}}/>}
+      {picForm.opened &&
+        <ChangePicDialog state={picForm} setState={setPicForm} onSubmit={() => {uploadPic();}} onDelete={() => {patchProfile({ profilePic: "REMOVE" });}} />}
+      {editForm.opened &&
+        <EditProfileDialog state={editForm} setState={setEditForm} onSubmit={(data) => {patchProfile(data);}} />}
     </LayoutPage>
   );
 }

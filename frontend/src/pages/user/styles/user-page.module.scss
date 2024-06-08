@@ -1,4 +1,4 @@
-.profilePage{
+.userPage{
   height: 100%;
   width: auto;
   flex-grow: 1;
@@ -7,30 +7,6 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-
-  .gamesHistory{
-    width: max-content;
-    height: 100%;
-    padding-right: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    overflow-y: scroll;
-    overflow-x: hidden;
-  }
-
-  .gamesHistory::-webkit-scrollbar {
-    all: unset;
-  }
-
-  .gamesHistory::-webkit-scrollbar-thumb {
-    background-color: rgba(255,255,255,0.05);
-  }
-
-  .gamesHistory::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255,255,255,0.2);
-  }
 
   button {
     width: max-content;
@@ -45,17 +21,6 @@
 
   button:hover {
     background-color: #617074;
-  }
-
-  .editProfileButton {
-    aspect-ratio: 1;
-    height: 1.5rem;
-    opacity: 0.5;
-    transition: 150ms ease-in-out;
-  }
-
-  .editProfileButton:hover {
-    opacity: 1;
   }
 
   h1 {

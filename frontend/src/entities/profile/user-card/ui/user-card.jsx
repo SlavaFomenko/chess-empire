@@ -5,8 +5,6 @@ import defaultProfilePic from "../../../../shared/images/icons/defaultProfilePic
 import { HOST_URL } from "../../../../shared/config";
 
 export function UserCard ({ user, children, onClick = () => {} }) {
-  const navigate = useNavigate();
-
   const roleTitles = {
     ROLE_USER: "User",
     ROLE_ADMIN: "Admin",
