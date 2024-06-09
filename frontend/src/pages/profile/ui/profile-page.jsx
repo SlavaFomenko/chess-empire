@@ -16,12 +16,12 @@ import { showNotification } from "../../../shared/notification";
 import editIcon from "../../../shared/images/icons/edit-icon.png";
 import { EditProfileDialog } from "../../../entities/profile/edit-profile-dialog/ui/edit-profile-dialog";
 import { ProfileData } from "../../../entities/profile/profile-data/ui/profile-data";
-import deleteIcon from "../../../shared/images/icons/delete-icon.png";
 import { InviteFriendDialog } from "../../../entities/profile/invite-friend-dialog/ui/invite-friend-dialog";
 import { useNavigate } from "react-router-dom";
 import { BannerLayout } from "../../../layouts/banner-layout";
 import { SearchGame } from "../../../features/search-game";
 import { s } from "../../../shared/socket";
+import { ChangePicDialog } from "../../../entities/profile/play-dialog/ui/change-pic-dialog";
 
 export function ProfilePage () {
   const userStore = useSelector(state => state.user);
@@ -315,7 +315,7 @@ export function ProfilePage () {
         </div>
       </div>
       {picForm.opened &&
-        <PlayDialog state={picForm} setState={setPicForm} onSubmit={() => {uploadPic();}} onDelete={() => {patchProfile({ profilePic: "REMOVE" });}} />}
+        <ChangePicDialog state={picForm} setState={setPicForm} onSubmit={() => {uploadPic();}} onDelete={() => {patchProfile({ profilePic: "REMOVE" });}} />}
       {editForm.opened &&
         <EditProfileDialog state={editForm} setState={setEditForm} onSubmit={(data) => {patchProfile(data);}} />}
       {friendsTab === "invite" &&

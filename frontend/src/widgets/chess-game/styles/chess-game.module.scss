@@ -82,6 +82,12 @@
 @media screen and (max-width: 768px){
   .game{
     align-items:start;
+
+    .board {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
   }
   .wrapper{
     flex-direction: column;
