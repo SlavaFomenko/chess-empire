@@ -3,11 +3,13 @@ import styles from "../styles/game.module.scss";
 import { LayoutPage } from "../../../layouts/page-layout";
 import { ChessGame } from "../../../widgets/chess-game";
 import { GameOverDialog } from "../../../entities/game";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { SearchGame } from "../../../features/search-game";
 import { PromotionDialog } from "../../../features/select-new-piece";
+import { s } from "../../../shared/socket";
 
 export const GamePage = () => {
+  const dispatch = useDispatch();
   const userState = useSelector(state => state.user);
   const gameState = useSelector(state => state.game);
   const socketState = useSelector(store => store.socket);
@@ -20,7 +22,11 @@ export const GamePage = () => {
           {["default", "searchingGame"].includes(socketState.state) &&
             <div className={styles.gameSearchPage}>
               <h1>Play with stranger</h1>
-              <SearchGame />
+              <SearchGame onSubmit={(data) => dispatch(s.searchGame(data))}>
+                {socketState.state === "default" && <button type="submit">Search</button>}
+                {socketState.state === "searchingGame" &&
+                  <button type="button" onClick={() => {dispatch(s.cancelSearchGame());}}>Cancel</button>}
+              </SearchGame>
             </div>
           }
           {

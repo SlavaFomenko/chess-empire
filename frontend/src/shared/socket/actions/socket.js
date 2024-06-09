@@ -40,6 +40,27 @@ const cancelSearchGame = (data) => {
   };
 };
 
+const playFriend = (data) => {
+  return {
+    type: "socket/playFriend",
+    payload: data
+  };
+};
+
+const gameAccept = (data) => {
+  return {
+    type: "socket/gameAccept",
+    payload: data
+  };
+};
+
+const gameReject = (data) => {
+  return {
+    type: "socket/gameReject",
+    payload: data
+  };
+};
+
 const resign = () => {
   return {
     type: "socket/resign"
@@ -58,6 +79,9 @@ export const s = {
   on: on,
   searchGame: searchGame,
   cancelSearchGame: cancelSearchGame,
+  playFriend: playFriend,
+  gameAccept: gameAccept,
+  gameReject: gameReject,
   turn: turn,
   resign: resign,
   closeEndGame: closeEndGame

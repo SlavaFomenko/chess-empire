@@ -11,7 +11,7 @@ import {
   UPLOAD_USER_PIC
 } from "../../../shared/config";
 import styles from "../styles/profile.module.scss";
-import { ChangePicDialog, GamesList, UsersList } from "../../../entities/profile";
+import { PlayDialog, GamesList, UsersList } from "../../../entities/profile";
 import { showNotification } from "../../../shared/notification";
 import editIcon from "../../../shared/images/icons/edit-icon.png";
 import { EditProfileDialog } from "../../../entities/profile/edit-profile-dialog/ui/edit-profile-dialog";
@@ -19,6 +19,9 @@ import { ProfileData } from "../../../entities/profile/profile-data/ui/profile-d
 import deleteIcon from "../../../shared/images/icons/delete-icon.png";
 import { InviteFriendDialog } from "../../../entities/profile/invite-friend-dialog/ui/invite-friend-dialog";
 import { useNavigate } from "react-router-dom";
+import { BannerLayout } from "../../../layouts/banner-layout";
+import { SearchGame } from "../../../features/search-game";
+import { s } from "../../../shared/socket";
 
 export function ProfilePage () {
   const userStore = useSelector(state => state.user);
@@ -36,6 +39,7 @@ export function ProfilePage () {
   const [friendsTab, setFriendsTab] = useState("list");
   const [picForm, setPicForm] = useState({ opened: false, selectedFile: null });
   const [editForm, setEditForm] = useState({ opened: false, data: null });
+  const [playForm, setPlayForm] = useState({ opened: false, friendId: null });
   const dispatch = useDispatch();
   const socketState = useSelector(store => store.socket);
 
@@ -232,10 +236,10 @@ export function ProfilePage () {
         users={friends.list}
         onClick={(user)=>{navigate(`/user/${user.id}`)}}
         childrenCallback={(user) => <>
-          <button onClick={() => {}} disabled={socketState.state !== "default"}>
+          <button onClick={(e)=>{e.stopPropagation(); setPlayForm({...playForm, opened: true, friendId: user.id})}} disabled={socketState.state !== "default"}>
             Play
           </button>
-          <button onClick={() => removeFriend(user)}>
+          <button onClick={(e)=>{e.stopPropagation(); removeFriend(user)}}>
             Remove
           </button>
         </>}
@@ -311,11 +315,22 @@ export function ProfilePage () {
         </div>
       </div>
       {picForm.opened &&
-        <ChangePicDialog state={picForm} setState={setPicForm} onSubmit={() => {uploadPic();}} onDelete={() => {patchProfile({ profilePic: "REMOVE" });}} />}
+        <PlayDialog state={picForm} setState={setPicForm} onSubmit={() => {uploadPic();}} onDelete={() => {patchProfile({ profilePic: "REMOVE" });}} />}
       {editForm.opened &&
         <EditProfileDialog state={editForm} setState={setEditForm} onSubmit={(data) => {patchProfile(data);}} />}
       {friendsTab === "invite" &&
          <InviteFriendDialog onClose={e=>setFriendsTab("list")}/>}
+      {}
+      {playForm.opened && playForm.friendId && <BannerLayout onClick={()=>setPlayForm({...playForm, opened: false})}>
+        <div className={styles.playFriendForm} onClick={e=>e.stopPropagation()}>
+          <SearchGame onSubmit={(data)=>{
+            dispatch(s.playFriend({ ...data, friendId: playForm.friendId}))
+            setPlayForm({...playForm, opened: false});
+          }}>
+            {socketState.state === "default" && <button type="submit">Invite</button>}
+          </SearchGame>
+        </div>
+      </BannerLayout>}
     </LayoutPage>
   );
 }

@@ -13,6 +13,9 @@ import { LayoutPage } from "../../../layouts/page-layout";
 import { ProfileData } from "../../../entities/profile/profile-data/ui/profile-data";
 import { showNotification } from "../../../shared/notification";
 import { GamesList } from "../../../entities/profile";
+import { BannerLayout } from "../../../layouts/banner-layout";
+import { SearchGame } from "../../../features/search-game";
+import { s } from "../../../shared/socket";
 
 export function UserPage () {
   const userStore = useSelector(state => state.user);
@@ -23,6 +26,7 @@ export function UserPage () {
   const dispatch = useDispatch();
   const [friendStatus, setFriendStatus] = useState(null);
   const socketState = useSelector(store => store.socket);
+  const [playForm, setPlayForm] = useState({ opened: false, friendId: null });
 
   const sendInvite = () => {
     if (!user) {
@@ -130,7 +134,7 @@ export function UserPage () {
             {friendStatus === "friend" &&
               <button
                 disabled={socketState.state !== "default"}
-                onClick={sendInvite}
+                onClick={(e)=>{e.stopPropagation(); setPlayForm({...playForm, opened: true, friendId: user.id})}}
               >
                 Play
               </button>}
@@ -146,6 +150,16 @@ export function UserPage () {
           {games.loading && <p>Loading...</p>}
         </div>
       </div>
+      {playForm.opened && playForm.friendId && <BannerLayout onClick={()=>setPlayForm({...playForm, opened: false})}>
+        <div className={styles.playFriendForm} onClick={e=>e.stopPropagation()}>
+          <SearchGame onSubmit={(data)=>{
+            dispatch(s.playFriend({ ...data, friendId: playForm.friendId}))
+            setPlayForm({...playForm, opened: false});
+          }}>
+            {socketState.state === "default" && <button type="submit">Invite</button>}
+          </SearchGame>
+        </div>
+      </BannerLayout>}
     </LayoutPage>
   );
 }

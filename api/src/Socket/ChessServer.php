@@ -2,15 +2,12 @@
 
 namespace App\Socket;
 
-use App\Entity\User;
 use App\Socket\States\DefaultState;
 use App\Socket\States\SearchingGameState;
 use App\Socket\States\UnauthorizedState;
-use Exception;
 use Handy\Context;
 use Handy\ORM\Connection;
 use Handy\ORM\EntityManager;
-use Handy\Security\JWTSecurityProvider;
 use Handy\Socket\SocketClient;
 use Handy\Socket\SocketServer;
 
@@ -49,7 +46,7 @@ class ChessServer extends SocketServer
 
     public function closed(SocketClient $client): void
     {
-        $this->randomSearch = array_filter($this->randomSearch, fn($c)=>$c["client"] !== $client->id);
+        $this->randomSearch = array_filter($this->randomSearch, fn($c) => $c["client"] !== $client->id);
 
         /** @var ChessClient $client */
         $id = $client->user?->getId();
@@ -69,14 +66,14 @@ class ChessServer extends SocketServer
 
             $id = $client->user->getId();
 
-            foreach ($this->users[$id] as $clientId){
+            foreach ($this->users[$id] as $clientId) {
                 /** @var ChessClient $c */
                 $c = $this->getClientById($clientId);
-                if($c===null){
+                if ($c === null) {
                     $this->users[$id] = array_diff($this->users[$id], [$clientId]);
                     continue;
                 }
-                if(!is_a($c->state, DefaultState::class)){
+                if (!is_a($c->state, DefaultState::class)) {
                     $client->emit("play_random_err", null);
                     return;
                 }
@@ -107,7 +104,13 @@ class ChessServer extends SocketServer
 
             $roomId = uniqid('gr');
             $room = new GameRoom($data["rated"], $data["time"] * 60, $this, $roomId);
-            $availableColors = array_diff(["black","white"], [$secondPlayer["color"],$data["color"]]);
+            $availableColors = array_diff([
+                "black",
+                "white"
+            ], [
+                $secondPlayer["color"],
+                $data["color"]
+            ]);
             shuffle($availableColors);
             if ($data["color"] === "r") {
                 $data["color"] = $availableColors[0];
@@ -126,7 +129,86 @@ class ChessServer extends SocketServer
 
         $this->on("cancel_random", function ($data, ChessClient $client) {
             $client->setState(DefaultState::class);
-            $this->randomSearch = array_filter($this->randomSearch, fn($c)=>$c["client"] !== $client->id);
+            $this->randomSearch = array_filter($this->randomSearch, fn($c) => $c["client"] !== $client->id);
+        });
+
+        $this->on("play_friend", function ($data, ChessClient $client) {
+            if (!isset($data["time"], $data["rated"], $data["color"], $data["friendId"])) {
+                trigger_error("Incomplete game settings received");
+                return;
+            }
+
+            $id = $client->user->getId();
+
+            foreach ($this->users[$id] as $clientId) {
+                /** @var ChessClient $c */
+                $c = $this->getClientById($clientId);
+                if ($c === null) {
+                    $this->users[$id] = array_diff($this->users[$id], [$clientId]);
+                    continue;
+                }
+                if (!is_a($c->state, DefaultState::class)) {
+                    $client->emit("play_friend_err", null);
+                    return;
+                }
+            }
+
+            if (!isset($this->users[$data["friendId"]]) || !empty(array_filter($this->users[$data["friendId"]], function ($clientId) {
+                    $client = $this->getClientById($clientId);
+                    return !is_a($client?->state, DefaultState::class) && $client !== null;
+                }))) {
+                $client->emit("play_friend_err", "Friend cannot accept the invite right now");
+                return;
+            }
+
+            $roomId = uniqid('gr');
+            $room = new GameRoom($data["rated"], $data["time"] * 60, $this, $roomId);
+            $availableColors = array_diff([
+                "black",
+                "white"
+            ], [$data["color"]]);
+            shuffle($availableColors);
+            if ($data["color"] === "r") {
+                $data["color"] = $availableColors[0];
+                array_shift($availableColors);
+            }
+
+            $room->join($client, $data["color"]);
+
+            array_map(fn($clientId) => $this->getClientById($clientId)?->emit("game_invite", $room->getGameState()), $this->users[$data["friendId"]]);
+
+            $this->rooms[$roomId] = $room;
+        });
+
+        $this->on("game_accept", function ($data, ChessClient $client) {
+            $room = @$this->rooms[$data];
+
+            if (!$room) {
+                return;
+            }
+
+            /** @var GameRoom $room */
+            $color = $room->getGameState()["black"]["id"] === null ? "black" : "white";
+
+            $room->join($client, $color);
+            $room->startGame();
+        });
+
+        $this->on("game_reject", function ($data, ChessClient $client) {
+            $room = @$this->rooms[$data];
+
+            if (!$room) {
+                return;
+            }
+
+            /** @var GameRoom $room */
+            foreach ($room->clients as $clientId) {
+                $client = $this->getClientById($clientId);
+                if (!$client) return;
+                $client->emit("game_leave", "Opponent didn't accept the invite");
+                $room->kick($client);
+                $client->setState(DefaultState::class);
+            }
         });
     }
 
