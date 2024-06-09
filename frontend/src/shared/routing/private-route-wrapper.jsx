@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useMemo } from "react";
 
-export const PrivateRouteWrapper = () => {
+export const PrivateRouteWrapper = ({targetRoles}) => {
 
 
   const token = localStorage.getItem("token");
@@ -23,12 +23,12 @@ export const PrivateRouteWrapper = () => {
   }, [token]);
 
   useEffect(() => {
-    if (!user || user.role !== "ROLE_ADMIN") {
+    if (!user || !targetRoles.includes(user.role)) {
       navigate("/");
     }
   }, [navigate, user]);
 
-  if (!user || user.role !== "ROLE_ADMIN") {
+  if (!user || !targetRoles.includes(user.role)) {
     return null;
   }
 

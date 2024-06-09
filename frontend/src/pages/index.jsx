@@ -23,21 +23,22 @@ export class Routing extends React.Component {
     return (
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/game" element={<GamePage />} />
-        <Route path="/game-review/*" element={<GameReviewPage />} />
-        <Route path="/user/*" element={<UserPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegistrationPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="*" element={<NotFoundPage />} />
-        <Route path="/admin_panel/*" element={<PrivateRouteWrapper />}>
+        <Route path="/" element={<PrivateRouteWrapper targetRoles={["ROLE_ADMIN", "ROLE_USER"]} />}>
+          <Route path="/game" element={<GamePage />} />
+          <Route path="/game-review/*" element={<GameReviewPage />} />
+          <Route path="/user/*" element={<UserPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
+        <Route path="/admin_panel/*" element={<PrivateRouteWrapper targetRoles={["ROLE_ADMIN"]} />}>
           <Route element={<AdminPanelPage />}>
-            <Route path="" element={<></>} />
             <Route path="users" element={<UsersPage/>} />
             <Route path="games" element={<GamesPage/>} />
             <Route path="ratings" element={<RatingsPage/>} />
           </Route>
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     );
   }
