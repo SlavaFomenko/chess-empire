@@ -9,11 +9,13 @@ use Handy\Http\JsonResponse;
 use Handy\Http\Request;
 use Handy\Http\Response;
 use Handy\Routing\Attribute\Route;
+use Handy\Routing\Attribute\RouteFamily;
 
+#[RouteFamily(name: "rating_ranges", path: "/rating-ranges")]
 class RatingRangeController extends BaseController
 {
 
-    #[Route(name: "rating_range_create", path: "/rating-ranges", methods: [Request::METHOD_POST], roles: [User::ROLE_ADMIN])]
+    #[Route(name: "create", path: "", methods: [Request::METHOD_POST], roles: [User::ROLE_ADMIN])]
     public function post(): Response
     {
         $body = $this->request->getContent();
@@ -48,7 +50,7 @@ class RatingRangeController extends BaseController
         return new JsonResponse($repo->findOneBy(["min_rating" => $data["minRating"]]), 201);
     }
 
-    #[Route(name: "get_all_rating_ranges", path: "/rating-ranges", methods: [Request::METHOD_GET])]
+    #[Route(name: "get_all", path: "", methods: [Request::METHOD_GET])]
     public function getAll(): Response
     {
         $repo = $this->em->getRepository(RatingRange::class);
@@ -61,7 +63,7 @@ class RatingRangeController extends BaseController
         return new JsonResponse($ratingRanges, 200);
     }
 
-    #[Route(name: "get_rating_range_by_id", path: "/rating-ranges/{id}", methods: [Request::METHOD_GET])]
+    #[Route(name: "get_by_id", path: "/{id}", methods: [Request::METHOD_GET])]
     public function getById(int $id): Response
     {
         $repo = $this->em->getRepository(RatingRange::class);
@@ -72,7 +74,7 @@ class RatingRangeController extends BaseController
         return new JsonResponse($ratingRange, 200);
     }
 
-    #[Route(name: "rating_range_patch", path: "/rating-ranges/{id}", methods: [Request::METHOD_PATCH], roles: [User::ROLE_ADMIN])]
+    #[Route(name: "patch", path: "/{id}", methods: [Request::METHOD_PATCH], roles: [User::ROLE_ADMIN])]
     public function patch(int $id): Response
     {
         $repo = $this->em->getRepository(RatingRange::class);
@@ -107,7 +109,7 @@ class RatingRangeController extends BaseController
         return new JsonResponse($ratingRange, 201);
     }
 
-    #[Route(name: "delete_rating_range", path: "/rating-ranges/{id}", methods: [Request::METHOD_DELETE], roles: [User::ROLE_ADMIN])]
+    #[Route(name: "delete", path: "/{id}", methods: [Request::METHOD_DELETE], roles: [User::ROLE_ADMIN])]
     public function delete(int $id): Response
     {
         $repo = $this->em->getRepository(RatingRange::class);
