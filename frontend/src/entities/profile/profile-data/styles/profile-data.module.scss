@@ -41,7 +41,13 @@
   .usernameBar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 2rem;
+
+    button:disabled {
+      background-color: #314348;
+      color: #949C9C;
+    }
   }
 
   h1 {

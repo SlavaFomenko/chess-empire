@@ -31,8 +31,10 @@ class GameController extends BaseController
         /** @var GameRepository $gameRepo */
         $gameRepo = $this->em->getRepository(Game::class);
 
+        $count = 0;
+
         if (Context::$security->getRole() === User::ROLE_ADMIN) {
-            $query = $this->request->getQuery();
+            $count = $gameRepo->countBy([]);
 
             if (isset($query["userId"])) {
                 $games = $gameRepo->findBy([
@@ -53,6 +55,10 @@ class GameController extends BaseController
                 ]);
             }
         } else {
+            $count = $gameRepo->countBy([
+                "black_id" => $user->getId(),
+                "white_id" => $user->getId()
+            ], true);
             $games = $gameRepo->findBy([
                 "black_id" => $user->getId(),
                 "white_id" => $user->getId()
@@ -78,8 +84,6 @@ class GameController extends BaseController
                 "white_username" => $whiteUser?->getUserName() ?? "UnknownUser",
             ];
         }
-
-        $count = $gameRepo->countBy([]);
 
         if(isset($query['name'])){
             $count = $gameRepo->countByUserName($query['name']);

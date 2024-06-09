@@ -46,12 +46,6 @@ export function SideBar({ isMobile, closeSideBar }) {
       >
         Home
       </button>
-      <button
-        className={location.pathname === "/game" ? styles.current : ""}
-        onClick={() => redirect("/game")}
-      >
-        Game
-      </button>
       {!user.user?.token ? (
         <>
           <button
@@ -69,6 +63,12 @@ export function SideBar({ isMobile, closeSideBar }) {
         </>
       ) : (
         <>
+          <button
+            className={location.pathname === "/game" ? styles.current : ""}
+            onClick={() => redirect("/game")}
+          >
+            Game
+          </button>
           <button
             className={location.pathname === "/profile" ? styles.current : ""}
             onClick={() => redirect("/profile")}

@@ -14,3 +14,7 @@ export const PATCH_RATING_RANGE = (id) => API_URL + `/rating-ranges/${id}`;
 export const DELETE_RATING_RANGE = (id) => API_URL + `/rating-ranges/${id}`;
 export const GET_ALL_USERS_URL = API_URL + '/users'
 export const GET_ALL_GAMES_URL = API_URL + '/games'
+export const SEND_FRIEND_REQUEST = API_URL + `/friend-pair`;
+export const ACCEPT_FRIEND_REQUEST = (id) => API_URL + `/friend-pair/${id}`;
+export const REMOVE_FRIEND = (id) => API_URL + `/friend-pair/${id}`;
+export const GET_FRIEND_PAIR_BY_USER = (id) => API_URL + `/friend-pair/${id}`;

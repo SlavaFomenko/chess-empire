@@ -4,13 +4,12 @@ import { Field, Form, Formik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { s } from "../../../shared/socket";
 
-export function SearchGame () {
+export function SearchGame ({children, onSubmit}) {
   const socketState = useSelector(store => store.socket);
-  const dispatch = useDispatch();
   const initialSettings = { time: "5", rated: false, color: "r" };
 
   const onSubmitSearch = (values) => {
-    dispatch(s.searchGame({...values, time: +values.time}));
+    onSubmit({...values, time: +values.time});
   };
 
   return (
@@ -113,8 +112,7 @@ export function SearchGame () {
               </label>
             </div>
 
-            {socketState.state === "default" && <button type="submit">Search</button>}
-            {socketState.state === "searchingGame" && <button type="button" onClick={()=>{dispatch(s.cancelSearchGame())}}>Cancel</button>}
+            {children}
           </Form>
         )}
       </Formik>

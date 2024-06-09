@@ -1,6 +1,7 @@
 import { DELETE_RATING_RANGE, GET_ALL_USERS_URL } from "../../config";
 import axios from "axios";
 import { showNotification } from "../../notification";
+import { useSelector } from "react-redux";
 
 export const getAllUsers = async ({ name, page = 1, order = {by: null}, rating = {min: null, max: null}}) => {
   const params = {page};
@@ -18,7 +19,10 @@ export const getAllUsers = async ({ name, page = 1, order = {by: null}, rating =
     params.ratingMax = rating.max;
   }
   const response = await axios.get(GET_ALL_USERS_URL, {
-    params
+    params,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
   });
   return response?.data || [];
 };

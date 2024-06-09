@@ -76,7 +76,7 @@ class UserController extends BaseController
         return new JsonResponse($user, 201);
     }
 
-    #[Route(name: "get_all_users", path: "/users", methods: [Request::METHOD_GET])]
+    #[Route(name: "get_all_users", path: "/users", methods: [Request::METHOD_GET], roles: User::ROLE_USER_OR_ADMIN)]
     public function getAll(): Response
     {
         $query = $this->request->getQuery();
@@ -90,7 +90,7 @@ class UserController extends BaseController
         $qb->from("user");
 
         if (isset($query["name"])) {
-            $qb->andWhere("(username LIKE :name1 OR first_name LIKE :name2 OR last_name LIKE :name3)")
+            $qb->andWhere("(user.username LIKE :name1 OR user.first_name LIKE :name2 OR user.last_name LIKE :name3)")
                 ->setParam([
                     "name1" => "%" . $query["name"] . "%",
                     "name2" => "%" . $query["name"] . "%",
@@ -99,13 +99,13 @@ class UserController extends BaseController
         }
 
         if (isset($query["ratingMin"])) {
-            $qb->andWhere("rating >= :ratingMin")->setParam([
+            $qb->andWhere("user.rating >= :ratingMin")->setParam([
                 "ratingMin" => $query["ratingMin"]
             ]);
         }
 
         if (isset($query["ratingMax"])) {
-            $qb->andWhere("rating <= :ratingMax")->setParam([
+            $qb->andWhere("user.rating <= :ratingMax")->setParam([
                 "ratingMax" => $query["ratingMax"]
             ]);
         }
@@ -124,10 +124,43 @@ class UserController extends BaseController
             $order = @$query["order"] === "desc" ? "DESC" : "ASC";
             $orderBy = [
                 [
-                    $query["orderBy"],
+                    "user." . $query["orderBy"],
                     $order
                 ]
             ];
+        }
+
+        if (isset($query["friend"])){
+            $userId = Context::$security->getData()->id;
+            $selectA = "SELECT fp.sender_id FROM friend_pair AS fp WHERE fp.receiver_id = :user_id1 AND fp.accepted = TRUE";
+            $selectB = "SELECT fp.receiver_id FROM friend_pair fp WHERE fp.sender_id = :user_id2 AND fp.accepted = TRUE";
+            $qb->andWhere("user.id " . ($query["friend"] === "true" ? "" : "NOT ") . "IN ($selectA UNION $selectB)")
+                ->setParam([
+                    "user_id1" => $userId,
+                    "user_id2" => $userId
+                ]);
+        }
+
+        if (isset($query["request"])){
+            $userId = Context::$security->getData()->id;
+            $select = "SELECT fp.sender_id FROM friend_pair fp WHERE fp.receiver_id = :user_id3 AND fp.accepted = FALSE";
+            $qb->andWhere("user.id " . ($query["request"] === "true" ? "" : "NOT ") . "IN ($select)")
+                ->andWhere("user.id <> :user_id4")
+                ->setParam([
+                    "user_id3" => $userId,
+                    "user_id4" => $userId,
+                ]);
+        }
+
+        if (isset($query["pending"])){
+            $userId = Context::$security->getData()->id;
+            $select = "SELECT fp.receiver_id FROM friend_pair fp WHERE fp.sender_id = :user_id5 AND fp.accepted = FALSE";
+            $qb->andWhere("user.id " . ($query["request"] === "true" ? "" : "NOT ") . "IN ($select)")
+                ->andWhere("user.id <> :user_id6")
+                ->setParam([
+                    "user_id5" => $userId,
+                    "user_id6" => $userId,
+                ]);
         }
 
         $qb->orderBy($orderBy);
@@ -149,6 +182,7 @@ class UserController extends BaseController
             ];
         }, $users);
         return new JsonResponse([
+            'count' => $count,
             'pagesCount' => ceil($count / self::USERS_PER_PAGE),
             "users"      => $users
         ], 200);

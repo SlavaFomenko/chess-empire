@@ -64,7 +64,7 @@ export function ChessGame () {
     <div className={styles.wrapper}>
       <div className={styles.game}>
         <ChessPlayerBar player={myColor !== 'white' ?white:black} timer={true}/>
-        <ChessBoard gameState={gameState} event={handleSquareClick} />
+        <div className={styles.board}><ChessBoard gameState={gameState} event={handleSquareClick} /></div>
         <ChessPlayerBar player={myColor === 'white' ? white:black} timer={true}/>
       </div>
       <div className={styles.horizontal}>

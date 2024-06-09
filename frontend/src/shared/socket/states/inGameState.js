@@ -1,5 +1,7 @@
 import { baseState } from "./baseState";
 import { gameOver } from "../../../widgets/chess-game/model/chess-game";
+import { showNotification } from "../../notification";
+import { defaultState } from "./defaultState";
 
 export const inGameState = ({ socket, dispatch, history, getState }) => {
   window.onbeforeunload = e => e.preventDefault();
@@ -22,6 +24,11 @@ export const inGameState = ({ socket, dispatch, history, getState }) => {
     game_end: (data) => {
       dispatch(gameOver(data));
       window.onbeforeunload = null;
+    },
+    game_leave: (data) => {
+      history.push("/");
+      socket.setState(defaultState, { dispatch, history, getState });
+      dispatch(showNotification(data));
     }
   };
 };

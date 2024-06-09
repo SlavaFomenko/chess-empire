@@ -37,6 +37,15 @@ export const socketMiddleware = (params) => (next) => (action) => {
       socket.emit("cancel_random", action.payload);
       socket.setState(defaultState, { dispatch, history, getState });
       break;
+    case "playFriend":
+      socket.emit("play_friend", action.payload);
+      break;
+    case "gameAccept":
+      socket.emit("game_accept", action.payload);
+      break;
+    case "gameReject":
+      socket.emit("game_reject", action.payload);
+      break;
     case "turn":
       socket.emit("turn", action.payload);
       break;
