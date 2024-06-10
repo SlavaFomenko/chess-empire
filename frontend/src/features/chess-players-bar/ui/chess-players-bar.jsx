@@ -14,7 +14,7 @@ export function ChessPlayerBar ({ player, timer=false  }) {
         <span className={styles.playerNameSpan}>Pending...</span> :
         <>
           <div className={styles.profile} onClick={()=>{navigate(`/user/${player.id}`)}}>
-            <img src={player.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${player.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic" />
+            <img src={player.profilePic === "" ? defaultProfilePic : `https://${HOST_URL}/${player.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic" />
             <span className={styles.playerNameSpan}>{player?.username}</span>
           </div>
           {timer && <ChessTimer player={player} />}

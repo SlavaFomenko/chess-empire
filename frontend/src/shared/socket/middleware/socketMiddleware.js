@@ -4,6 +4,7 @@ import { unauthorizedState } from "../states/unauthorizedState";
 import { history } from "../../routing";
 import { searchingGameState } from "../states/searchingGameState";
 import { defaultState } from "../states/defaultState";
+import { HOST_URL } from "../../config";
 
 const getDeviceName = () => {
   const userAgent = navigator?.userAgent ?? "";
@@ -74,11 +75,9 @@ export const socketMiddleware = (params) => (next) => (action) => {
 
   switch (actionName) {
     case "connect":
-      socket.initialize("wss://" + window.location.host + "/ws-server").then(r => {
-      // socket.initialize("wss://chess-empire.ua/ws-server").then(r => {
+      socket.initialize(`wss://${HOST_URL}/ws-server`).then(r => {
         socket.setState(unauthorizedState, { dispatch, history, getState });
         socket.emit("auth", { token: localStorage.getItem("token"), deviceName: getDeviceName() });
-        console.log(navigator);
       }).catch((e) => {
         console.log(e);
         dispatch(showNotification("Cannot establish connection with server"));

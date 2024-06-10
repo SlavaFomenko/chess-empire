@@ -8,7 +8,7 @@ export function ProfileData ({ user, onImageEdit = null, children, greetingMessa
   return (
     <div className={styles.profileData}>
       <div className={styles.profilePicDiv}>
-        <img src={user.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${user.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic"/>
+        <img src={user.profilePic === "" ? defaultProfilePic : `https://${HOST_URL}/${user.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic"/>
         {onImageEdit && <button onClick={onImageEdit}>Change</button>}
       </div>
       <div>
