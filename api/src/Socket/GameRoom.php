@@ -46,6 +46,24 @@ class GameRoom extends SocketRoom
         $this->hasMoved = DEFAULT_HAS_MOVED;
         $this->history = [];
         $this->players = [];
+
+        $this->on("transfer_game", function ($data, ChessClient $client) {
+            $target = $this->server->getClientById($data);
+            if (empty($target)) {
+                return;
+            }
+
+            if ($client->user->getId() === $this->players["black"]["client"]?->user?->getId()) {
+                $color = "black";
+            } else if ($client->user->getId() === $this->players["white"]["client"]?->user?->getId()) {
+                $color = "white";
+            } else {
+                return;
+            }
+
+            $this->kick($client, true);
+            $this->join($target, $color);
+        });
     }
 
     public function startGame(): void
@@ -62,7 +80,7 @@ class GameRoom extends SocketRoom
         $this->lastTimeUpdate = $this->startedAt;
         $this->currentTurn = "white";
         foreach ($this->players as $p) {
-            $p["client"]->emit("game_update", $this->getGameState());
+            $p["client"]?->emit("game_update", $this->getGameState());
         }
 
         $this->on("turn", function ($data, ChessClient $client) {
@@ -81,7 +99,7 @@ class GameRoom extends SocketRoom
             $this->currentTurn = $this->currentTurn === "white" ? "black" : "white";
 
             foreach ($this->players as $p) {
-                $p["client"]->emit("game_update", $this->getGameState());
+                $p["client"]?->emit("game_update", $this->getGameState());
             }
 
             if (!canPlayerMove($this->currentTurn, $newApply["board"], $newApply["hasMoved"])) {
@@ -108,25 +126,41 @@ class GameRoom extends SocketRoom
             "black",
             "white"
         ])) {
-            if (isset($this->players[$color])) {
-                trigger_error("Player " . $color . " has already joined");
-                $this->kick($client);
-                return;
+            if (!isset($this->players[$color])) {
+                $this->players[$color] = [
+                    "client" => $client,
+                    "time"   => $this->time
+                ];
+            } else {
+                if (!empty($this->players[$color]["client"])) {
+                    trigger_error("Player " . $color . " has already joined");
+                    $this->kick($client);
+                    return;
+                }
+                $this->players[$color]["client"] = $client;
             }
-
-            $this->players[$color] = [
-                "client" => $client,
-                "time"   => $this->time
-            ];
         }
         $client->setState(InGameState::class);
         $client->emit("game_join", $this->getGameState());
     }
 
-    public function kick(SocketClient $client): void
+    public function kick(SocketClient $client, bool $soft = false): void
     {
         parent::kick($client);
-        if ($this->winner !== "-") {
+        $client->setState(DefaultState::class);
+        if ($this->winner !== "-"){
+            return;
+        }
+        if ($soft === true) {
+            $client->emit("game_leave", "The fame was transferred to another device");
+            if ($client->user->getId() === $this->players["black"]["client"]?->user?->getId()) {
+                $color = "black";
+            } else if ($client->user->getId() === $this->players["white"]["client"]?->user?->getId()) {
+                $color = "white";
+            } else {
+                return;
+            }
+            $this->players[$color]["client"] = null;
             return;
         }
         foreach ($this->players as $color => $p) {
@@ -207,7 +241,7 @@ class GameRoom extends SocketRoom
         $this->server->em?->persist($gameRecord);
 
         foreach ($this->players as $color => $player) {
-            $player["client"]->emit("game_end", [
+            $player["client"]?->emit("game_end", [
                 "winner"              => $winner,
                 "reason"              => $reason,
                 "white_rating"        => $rating["white"],
@@ -250,7 +284,7 @@ class GameRoom extends SocketRoom
         @$w = $this->players["white"];
 
         foreach ($this->players as $p) {
-            $p["client"]->emit("game_timer_update", [
+            $p["client"]?->emit("game_timer_update", [
                 "black" => @$b["time"],
                 "white" => @$w["time"]
             ]);

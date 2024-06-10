@@ -10,6 +10,7 @@ use Handy\ORM\Connection;
 use Handy\ORM\EntityManager;
 use Handy\Socket\SocketClient;
 use Handy\Socket\SocketServer;
+use Socket;
 
 class ChessServer extends SocketServer
 {
@@ -51,8 +52,28 @@ class ChessServer extends SocketServer
         /** @var ChessClient $client */
         $id = $client->user?->getId();
 
-        if ($id !== null && !isset($this->users[$id])) {
+        if ($id !== null && isset($this->users[$id])) {
             $this->users[$id] = array_diff($this->users[$id], [$client->id]);
+            $this->updateDeviceList($id);
+        }
+    }
+
+    public function updateDeviceList(int $userId): void
+    {
+        $clients = @$this->users[$userId] ?? [];
+
+        $devicesList = array_map(function($clientId){
+            /** @var ChessClient $client */
+            $client = $this->getClientById($clientId);
+            return [
+                "id"=>$clientId,
+                "deviceName"=>$client?->deviceName ?? "Unknown Device"
+            ];
+        }, $clients);
+
+        /** @var ChessClient $client */
+        foreach ($clients as $clientId){
+            $this->getClientById($clientId)?->emit("update_devices", $devicesList);
         }
     }
 

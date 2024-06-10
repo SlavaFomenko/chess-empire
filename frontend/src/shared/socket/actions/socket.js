@@ -73,6 +73,20 @@ const closeEndGame = () => {
   };
 };
 
+const updateDevices = (data) => {
+  return {
+    type: "socket/updateDevices",
+    payload: data
+  };
+};
+
+const transferGame = (data) => {
+  return {
+    type: "socket/transferGame",
+    payload: data
+  };
+};
+
 export const s = {
   connect: connect,
   disconnect: disconnect,
@@ -84,5 +98,7 @@ export const s = {
   gameReject: gameReject,
   turn: turn,
   resign: resign,
-  closeEndGame: closeEndGame
+  closeEndGame: closeEndGame,
+  updateDevices: updateDevices,
+  transferGame: transferGame
 }
