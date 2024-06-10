@@ -12,6 +12,40 @@ use Handy\ORM\QueryBuilder;
 class GameRepository extends BaseEntityRepository
 {
 
+    public function findGameByDate(string $userName, int $limit, int $offset, array $orderBy = [], $startDate = null, ?\DateTime $endDate = null)
+    {
+        $qb = new QueryBuilder();
+
+        $qb->select('g')
+            ->from('games', 'g')
+            ->join('users', 'b')
+            ->on('g.black_id = b.id')
+            ->join('users', 'w')
+            ->on('g.white_id = w.id')
+            ->where('(b.userName LIKE :userName OR w.userName LIKE :userName)')
+            ->setParam(['userName' => '%' . $userName . '%']);
+
+        if ($startDate) {
+            $qb->andWhere('g.played_date >= :startDate')
+                ->setParam(['startDate' => $startDate]);
+        }
+
+        if ($endDate) {
+            $qb->andWhere('g.played_date <= :endDate')
+                ->setParam(['endDate' => $endDate]);
+        }
+
+        foreach ($orderBy as [$column, $direction]) {
+            $qb->orderBy([$column => $direction]);
+        }
+
+        $qb->offset($offset)
+            ->limit($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
+
     public function findByUserName(string $name, ?int $limit = null, ?int $offset = null, array $orderBy = []): array
     {
         $qb = new QueryBuilder();

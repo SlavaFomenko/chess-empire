@@ -8,14 +8,15 @@ export function GamesPage() {
   const [games, setGames] = useState([]);
   const [pagination, setPagination] = useState({ currentPage: 1, pagesCount: 0 });
   const [search, setSearch] = useState("");
-
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     fetchData();
-  }, [pagination.currentPage, search]);
+  }, [pagination.currentPage, search, startDate, endDate]);
 
   const fetchData = async () => {
-    const data = await getAllGames({ page: pagination.currentPage, search });
+    const data = await getAllGames({ page: pagination.currentPage, search, startDate: startDate ? new Date(startDate).getTime() / 1000 : "", endDate: endDate ? new Date(endDate).getTime() / 1000 : "" });
     setGames(data.games);
     setPagination({...pagination, pagesCount: data.pagesCount});
   };
@@ -29,6 +30,16 @@ export function GamesPage() {
     setPagination({...pagination, currentPage: 1});
   };
 
+  const handleStartDateChange = (e) => {
+    setStartDate(e.target.value);
+    setPagination({...pagination, currentPage: 1});
+  };
+
+  const handleEndDateChange = (e) => {
+    setEndDate(e.target.value);
+    setPagination({...pagination, currentPage: 1});
+  };
+
   return (
     <div>
       <div className={styles.searchLine}>
@@ -37,6 +48,16 @@ export function GamesPage() {
           value={search}
           onChange={handleSearchChange}
           placeholder="Search by username"
+        />
+        <input
+          type="date"
+          value={startDate}
+          onChange={handleStartDateChange}
+        />
+        <input
+          type="date"
+          value={endDate}
+          onChange={handleEndDateChange}
         />
       </div>
       <GamesList games={games} />

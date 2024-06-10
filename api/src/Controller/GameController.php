@@ -32,9 +32,18 @@ class GameController extends BaseController
         $gameRepo = $this->em->getRepository(Game::class);
 
         $count = 0;
+        $games = [];
+
+        $startDate = isset($query['startDate']) ? (int)$query['startDate'] : null;
+        $endDate = isset($query['endDate']) ? (int)$query['endDate'] : null;
 
         if (Context::$security->getRole() === User::ROLE_ADMIN) {
             $count = $gameRepo->countBy([]);
+
+            if($startDate !== null || $endDate!== null){
+                $games = $gameRepo->findGameByDate(@$query["name"] ?? "", $limit, $offset, [$startDate,$endDate]);
+
+            }
 
             if (isset($query["userId"])) {
                 $games = $gameRepo->findBy([
@@ -67,7 +76,7 @@ class GameController extends BaseController
                     "played_date",
                     "DESC"
                 ]
-            ]);
+            ], $startDate, $endDate);
         }
 
         $result = [];
