@@ -1,8 +1,69 @@
 .homePage{
+  max-width: 100vw;
   padding: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
 
   h1 {
     font-size: 2.5rem;
     color: #FDFDFD;
+  }
+
+  h2 {
+    font-size: 2rem;
+    color: #FDFDFD;
+  }
+
+  p {
+    font-size: 1.5rem;
+    color: #FDFDFD;
+  }
+
+  .greetingsDiv {
+    margin: 0;
+    all: unset;
+    max-width: min(40rem, 100vw);
+    height: min-content;
+  }
+
+  .leaderBoard {
+    margin: 0;
+    width: max-content;
+    height: min-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+
+    .leaderBoardUnit {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .place {
+      font-size: 4rem;
+    }
+
+    .leaderBoardUnit:nth-of-type(1) .place {
+      color: #D4AF37;
+    }
+
+    .leaderBoardUnit:nth-of-type(2) .place {
+      color: #C0C0C0;
+    }
+
+    .leaderBoardUnit:nth-of-type(3) .place {
+      color: #CD7F32;
+    }
+  }
+}
+
+@media screen and (max-width: 768px){
+  .homePage{
+    flex-direction: column;
+    flex-wrap: nowrap;
   }
 }

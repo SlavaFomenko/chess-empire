@@ -379,6 +379,14 @@ class UserController extends BaseController
         return new JsonResponse(null, 204);
     }
 
+    #[Route(name: "leaderboard", path: "/leaderboard", methods: [Request::METHOD_GET])]
+    public function leaderboard(): Response
+    {
+        $repo = $this->em->getRepository(User::class);
+        $users = $repo->findAll(3, 0, [["rating", "DESC"]]);
+        return new JsonResponse($users, 200);
+    }
+
     function validateEmail($email): bool
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL);

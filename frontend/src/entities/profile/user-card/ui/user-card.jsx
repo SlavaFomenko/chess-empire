@@ -17,7 +17,7 @@ export function UserCard ({ user, children, onClick = () => {}, displayRoles = f
         <tbody>
         <tr className={styles.usernameRow}>
           <td className={styles.profilePicTd} rowSpan="3">
-            <img src={user.profilePic === "" ? defaultProfilePic : `${HOST_URL}/${user.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic" />
+            <img src={user.profilePic === "" ? defaultProfilePic : `https://${HOST_URL}/${user.profilePic}`} onError={e => e.target.src = defaultProfilePic} alt="Profile pic" />
           </td>
           <td className={styles.username}>
             {user.username} ({user.rating})
