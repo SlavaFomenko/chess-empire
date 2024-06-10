@@ -16,13 +16,13 @@ class UnauthorizedState extends ClientState
         $this->events["auth"] = function ($data, ChessClient $client) {
             $tokenData = null;
             try {
-                $tokenData = JWTSecurityProvider::parseToken($data);
+                $tokenData = JWTSecurityProvider::parseToken($data["token"]);
             } catch (Exception $e) {
                 $client->emit("auth_err", "Invalid token");
                 return;
             }
 
-            if (!JWTSecurityProvider::validateToken($data) || !isset($tokenData["id"])) {
+            if (!JWTSecurityProvider::validateToken($data["token"]) || !isset($tokenData["id"])) {
                 $client->emit("auth_err", "Invalid token");
                 return;
             }
@@ -38,6 +38,10 @@ class UnauthorizedState extends ClientState
 
             $id = $user->getId();
 
+            if(isset($data["deviceName"])){
+                $this->client->deviceName = $data["deviceName"];
+            }
+
             if (!isset($client->server->users[$id])) {
                 $client->server->users[$id] = [];
             }
@@ -45,6 +49,7 @@ class UnauthorizedState extends ClientState
             $client->user = $user;
             $client->setState(DefaultState::class);
             $client->emit("auth_ok", $client->id);
+            $this->client->server->updateDeviceList($id);
         };
     }
 

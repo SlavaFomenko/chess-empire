@@ -14,11 +14,14 @@ class ChessClient extends SocketClient
 
     public ?ClientState $state;
 
-    public function __construct(SocketServer $server, Socket $socket, string $id)
+    public string $deviceName;
+
+    public function __construct(SocketServer $server, Socket $socket, string $id, string $deviceName = "Unknown Device")
     {
         parent::__construct($server, $socket, $id);
         $this->user = null;
         $this->state = null;
+        $this->deviceName = $deviceName;
     }
 
     public function notifyListeners(string $event, mixed $data, ?SocketClient $client = null): void
