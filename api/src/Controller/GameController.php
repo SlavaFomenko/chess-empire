@@ -11,7 +11,6 @@ use Handy\Http\JsonResponse;
 use Handy\Http\Request;
 use Handy\Http\Response;
 use Handy\Routing\Attribute\Route;
-use Handy\Security\Security;
 
 class GameController extends BaseController
 {
@@ -40,12 +39,15 @@ class GameController extends BaseController
         if (Context::$security->getRole() === User::ROLE_ADMIN) {
             $count = $gameRepo->countBy([]);
 
-            if($startDate !== null || $endDate!== null){
-                $games = $gameRepo->findGameByDate(@$query["name"] ?? "", $limit, $offset, [$startDate,$endDate]);
-
-            }
-
-            if (isset($query["userId"])) {
+            if ($startDate !== null || $endDate !== null) {
+                $count = $gameRepo->countByNameAndDate(@$query["name"] ?? "", $startDate, $endDate);
+                $games = $gameRepo->findByNameAndDate(@$query["name"] ?? "", $limit, $offset, [
+                    [
+                        "played_date",
+                        "DESC"
+                    ]
+                ], $startDate, $endDate);
+            } else if (isset($query["userId"])) {
                 $games = $gameRepo->findBy([
                     "black_id" => $query["userId"],
                     "white_id" => $query["userId"]
@@ -94,11 +96,13 @@ class GameController extends BaseController
             ];
         }
 
-        if(isset($query['name'])){
+        if (isset($query['name'])) {
             $count = $gameRepo->countByUserName($query['name']);
         }
 
-        return new JsonResponse(['games'=>$result,'pagesCount'=>ceil($count / 10)], 200);
+        return new JsonResponse(['games'      => $result,
+                                 'pagesCount' => ceil($count / 10)
+        ], 200);
     }
 
     #[Route(name: "get_game_by_id", path: "/games/{id}", methods: [Request::METHOD_GET], roles: User::ROLE_USER_OR_ADMIN)]
@@ -117,14 +121,14 @@ class GameController extends BaseController
             $game->getBlackId()
         ];
         $sec = Context::$security;
-        if ($sec->getRole() === User::ROLE_ADMIN || in_array($sec->getData()->id,$playerIds)) {
+        if ($sec->getRole() === User::ROLE_ADMIN || in_array($sec->getData()->id, $playerIds)) {
             $userRepo = $this->em->getRepository(User::class);
             $black = $userRepo->find($game->getBlackId());
             $white = $userRepo->find($game->getWhiteId());
             $gameData = [
                 ...$game->jsonSerialize(),
-                "black_username" => $black?->getUserName() ?? "UnknownUser",
-                "white_username" => $white?->getUserName() ?? "UnknownUser",
+                "black_username"   => $black?->getUserName() ?? "UnknownUser",
+                "white_username"   => $white?->getUserName() ?? "UnknownUser",
                 "black_profilePic" => $black?->getProfilePic() ?? "",
                 "white_profilePic" => $white?->getProfilePic() ?? "",
             ];
@@ -133,4 +137,5 @@ class GameController extends BaseController
 
         return new JsonResponse(["message" => "You do not have access to this game"], 403);
     }
+
 }

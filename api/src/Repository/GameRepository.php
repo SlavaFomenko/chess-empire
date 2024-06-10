@@ -12,39 +12,77 @@ use Handy\ORM\QueryBuilder;
 class GameRepository extends BaseEntityRepository
 {
 
-    public function findGameByDate(string $userName, int $limit, int $offset, array $orderBy = [], $startDate = null, ?\DateTime $endDate = null)
+    public function findByNameAndDate(string $name, int $limit, int $offset, array $orderBy = [], ?int $startDate = null, ?int $endDate = null)
     {
         $qb = new QueryBuilder();
 
-        $qb->select('g')
-            ->from('games', 'g')
-            ->join('users', 'b')
-            ->on('g.black_id = b.id')
-            ->join('users', 'w')
-            ->on('g.white_id = w.id')
-            ->where('(b.userName LIKE :userName OR w.userName LIKE :userName)')
-            ->setParam(['userName' => '%' . $userName . '%']);
+        $qb->select($this->entityClass)
+            ->from("game")
+            ->join("user", "u")
+            ->on("game.black_id = u.id")
+            ->orOn("game.white_id = u.id")
+            ->where("(u.username LIKE :name1 OR u.first_name LIKE :name2 OR u.last_name LIKE :name3)")
+            ->setParam([
+                "name1" => $name . "%",
+                "name2" => $name . "%",
+                "name3" => $name . "%"
+            ]);
 
         if ($startDate) {
-            $qb->andWhere('g.played_date >= :startDate')
+            $qb->andWhere('game.played_date >= :startDate')
                 ->setParam(['startDate' => $startDate]);
         }
 
         if ($endDate) {
-            $qb->andWhere('g.played_date <= :endDate')
+            $qb->andWhere('game.played_date <= :endDate')
                 ->setParam(['endDate' => $endDate]);
         }
 
-        foreach ($orderBy as [$column, $direction]) {
-            $qb->orderBy([$column => $direction]);
-        }
+        $qb->orderBy($orderBy);
 
         $qb->offset($offset)
             ->limit($limit);
 
-        return $qb->getQuery()->getResult();
+        $entities = Context::$connection->execute($qb->getQuery(), $this->entityClass);
+
+        foreach ($entities as $entity) {
+            $this->entityManager->track($entity);
+        }
+
+        return $entities;
     }
 
+    public function countByNameAndDate(string $name, ?int $startDate = null, ?int $endDate = null)
+    {
+        $idColumn = (new $this->entityClass())->getIdColumn()["column"];
+        $qb = new QueryBuilder();
+
+        $qb->select(["COUNT(game.$idColumn)"])
+            ->from("game")
+            ->join("user", "u")
+            ->on("game.black_id = u.id")
+            ->orOn("game.white_id = u.id")
+            ->where("(u.username LIKE :name1 OR u.first_name LIKE :name2 OR u.last_name LIKE :name3)")
+            ->setParam([
+                "name1" => $name . "%",
+                "name2" => $name . "%",
+                "name3" => $name . "%"
+            ]);
+
+        if ($startDate) {
+            $qb->andWhere('game.played_date >= :startDate')
+                ->setParam(['startDate' => $startDate]);
+        }
+
+        if ($endDate) {
+            $qb->andWhere('game.played_date <= :endDate')
+                ->setParam(['endDate' => $endDate]);
+        }
+
+        $q = $qb->getQuery();
+
+        return (int)Context::$connection->execute($qb->getQuery())[0][0];
+    }
 
     public function findByUserName(string $name, ?int $limit = null, ?int $offset = null, array $orderBy = []): array
     {

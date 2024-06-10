@@ -16,7 +16,16 @@ export function GamesPage() {
   }, [pagination.currentPage, search, startDate, endDate]);
 
   const fetchData = async () => {
-    const data = await getAllGames({ page: pagination.currentPage, search, startDate: startDate ? new Date(startDate).getTime() / 1000 : "", endDate: endDate ? new Date(endDate).getTime() / 1000 : "" });
+    const params = { page: pagination.currentPage, search};
+    if(startDate){
+      params.startDate = new Date(startDate).getTime() / 1000;
+    }
+    if(endDate){
+      const date = new Date(endDate);
+      date.setDate(date.getDate() + 1)
+      params.endDate = date.getTime() / 1000;
+    }
+    const data = await getAllGames(params);
     setGames(data.games);
     setPagination({...pagination, pagesCount: data.pagesCount});
   };
