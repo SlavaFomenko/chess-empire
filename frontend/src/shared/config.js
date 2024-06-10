@@ -1,4 +1,4 @@
-export const HOST_URL = process.env.REACT_APP_BASE_URL;
+export const HOST_URL = 'https://' + window.location.host;
 export const API_URL = HOST_URL + '/api';
 export const LOGIN_URL = API_URL + '/login-check';
 export const REGISTRATION_URL = API_URL + '/users';

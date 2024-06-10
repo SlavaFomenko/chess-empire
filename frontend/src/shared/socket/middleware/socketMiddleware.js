@@ -16,7 +16,7 @@ export const socketMiddleware = (params) => (next) => (action) => {
 
   switch (actionName) {
     case "connect":
-      socket.initialize(process.env.REACT_APP_SOCKET_HOST).then(r => {
+      socket.initialize("wss://" + window.location.host + "/ws-server").then(r => {
         socket.setState(unauthorizedState, { dispatch, history, getState });
         socket.emit("auth", localStorage.getItem("token"));
       }).catch(() => {
