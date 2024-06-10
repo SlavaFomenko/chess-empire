@@ -7,7 +7,7 @@ export const turnToCords = (turn) => {
   };
 
   if (["b00", "b000", "w00", "w000"].includes(turn)) {
-    const row = turn[0] === "b" ? 0 : 7;
+    const row = turn[0] === "b" ? 7 : 0;
     const long = turn.length === 4;
     cords.from = { row: row, col: 4 };
     cords.to = { row: row, col: long ? 2 : 6 };
@@ -35,7 +35,7 @@ export const turnToCords = (turn) => {
 
 export const cordsToTurn = (cords) => {
   if (cords.rookCol !== null) {
-    const color = cords.from.row === 0 ? "b" : "w";
+    const color = cords.from.row === 0 ? "w" : "b";
     const zeros = cords.rookCol === 0 ? "000" : "00";
     return color + zeros;
   }
@@ -108,7 +108,7 @@ export const applyTurns = (turns, board = DEFAULT_BOARD, currentColor = "white",
   }
 
   if ("rR".includes(piece)) {
-    if (from.row === (color === "white" ? 7 : 0)) {
+    if (from.row === (color === "white" ? 0 : 7)) {
       if (from.col === 0) {
         hasMoved[color].rookLeft = true;
       } else if (from.col === 7) {
@@ -118,7 +118,7 @@ export const applyTurns = (turns, board = DEFAULT_BOARD, currentColor = "white",
   }
 
   if ("rR".includes(board[to.row][to.col])) {
-    if (to.row === (enemyColor(color) === "white" ? 7 : 0)) {
+    if (to.row === (enemyColor(color) === "white" ? 0 : 7)) {
       if (to.col === 0) {
         hasMoved[enemyColor(color)].rookLeft = true;
       } else if (to.col === 7) {
@@ -272,7 +272,7 @@ const possibleMovesFns = {
 export const getPossibleMoves = (board, cords) => {
   const piece = board[cords.row][cords.col];
 
-  if (piece === "p" || piece === "k") {
+  if (piece === "P" || piece === "K") {
     return possibleMovesFns[piece.toUpperCase()]({
       ...cords,
       row: 7 - cords.row
@@ -354,7 +354,7 @@ export const canCastle = (board, color, rookCol, hasMoved) => {
     return false;
   }
 
-  const row = color === "white" ? 7 : 0;
+  const row = color === "white" ? 0 : 7;
   const colsToCheck = rookCol === 0 ? [1, 2, 3] : [5, 6];
   for (const col of colsToCheck) {
     if (board[row][col] !== "-") {

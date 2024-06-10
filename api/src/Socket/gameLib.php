@@ -1,64 +1,14 @@
 <?php
 const DEFAULT_BOARD = [
     [
-        "r",
-        "n",
-        "b",
-        "q",
-        "k",
-        "b",
-        "n",
-        "r"
-    ],
-    [
-        "p",
-        "p",
-        "p",
-        "p",
-        "p",
-        "p",
-        "p",
-        "p"
-    ],
-    [
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-"
-    ],
-    [
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-"
-    ],
-    [
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-"
-    ],
-    [
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-",
-        "-"
+        "R",
+        "N",
+        "B",
+        "Q",
+        "K",
+        "B",
+        "N",
+        "R"
     ],
     [
         "P",
@@ -71,15 +21,65 @@ const DEFAULT_BOARD = [
         "P"
     ],
     [
-        "R",
-        "N",
-        "B",
-        "Q",
-        "K",
-        "B",
-        "N",
-        "R"
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
     ],
+    [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+    ],
+    [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+    ],
+    [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+    ],
+    [
+        "p",
+        "p",
+        "p",
+        "p",
+        "p",
+        "p",
+        "p",
+        "p"
+    ],
+    [
+        "r",
+        "n",
+        "b",
+        "q",
+        "k",
+        "b",
+        "n",
+        "r"
+    ]
 ];
 
 const DEFAULT_HAS_MOVED = [
@@ -112,7 +112,7 @@ function turnToCords(string $turn): array
         "w00",
         "w000"
     ])) {
-        $row = $turn[0] === "b" ? 0 : 7;
+        $row = $turn[0] === "b" ? 7 : 0;
         $long = strlen($turn) === 4;
         $cords["from"] = [
             "row" => $row,
@@ -151,7 +151,7 @@ function turnToCords(string $turn): array
 function cordsToTurn(array $cords): string
 {
     if ($cords["rookCol"] !== null) {
-        $color = $cords["from"]["row"] === 0 ? "b" : "w";
+        $color = $cords["from"]["row"] === 0 ? "w" : "b";
         $zeros = $cords["rookCol"] === 0 ? "000" : "00";
         return $color . $zeros;
     }
@@ -236,7 +236,7 @@ function applyTurns(array $turns, array $board = DEFAULT_BOARD, string $currentP
     }
 
     if (str_contains("rR", $piece)) {
-        if ($from["row"] === ($color === "white" ? 7 : 0)) {
+        if ($from["row"] === ($color === "white" ? 0 : 7)) {
             if ($from["col"] === 0) {
                 $hasMoved[$color]["rookLeft"] = true;
             } else if ($from["col"] === 7) {
@@ -246,7 +246,7 @@ function applyTurns(array $turns, array $board = DEFAULT_BOARD, string $currentP
     }
 
     if (str_contains("rR", $board[$to["row"]][$to["col"]])) {
-        if ($to["row"] === (enemyColor($color) === "white" ? 7 : 0)) {
+        if ($to["row"] === (enemyColor($color) === "white" ? 0 : 7)) {
             if ($to["col"] === 0) {
                 $hasMoved[enemyColor($color)]["rookLeft"] = true;
             } else if ($to["col"] === 7) {
@@ -288,7 +288,7 @@ function getPossibleMoves(array $board, array $cords): array
         "K" => "getPossibleMovesK"
     ];
 
-    if ($piece === "p" || $piece === "k") {
+    if ($piece === "P" || $piece === "K") {
         $cords["row"] = 7 - $cords["row"];
         return array_map(fn($c) => [
             "row" => 7 - $c["row"],
@@ -620,7 +620,7 @@ function canCastle(array $board, string $color, int $rookCol, array $hasMoved): 
         return false;
     }
 
-    $row = $color === "white" ? 7 : 0;
+    $row = $color === "white" ? 0 : 7;
     $colsToCheck = $rookCol === 0 ? [
         1,
         2,

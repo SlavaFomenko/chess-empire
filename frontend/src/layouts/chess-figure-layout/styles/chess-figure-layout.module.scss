@@ -9,7 +9,7 @@
 
   background-color: #DCD7C9;
 
-  .coords{
+  .coords {
     position: absolute;
     top: 0;
     right: 0;
@@ -21,18 +21,70 @@
   height: 90%;
 }
 
+.letters {
+  position: absolute;
+  right: 0.3rem;
+  bottom: 0;
+
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #A27B5C;
+}
+
+.numbers {
+  position: absolute;
+  left: 0.2rem;
+  top: 0.1rem;
+
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #A27B5C;
+}
+
 .dark {
   background-color: #A27B5C;
+
+  .letters {
+    color: #DCD7C9;
+  }
+
+  .numbers {
+    color: #DCD7C9;
+  }
 }
 
 .isSelected {
   background-color: #83CD83;
+
+  .letters {
+    color: #508C50;
+  }
+
+  .numbers {
+    color: #508C50;
+  }
 }
 
 .isHighlighted {
   background-color: #F88379;
+
+  .letters {
+    color: #FFA9A2;
+  }
+
+  .numbers {
+    color: #FFA9A2;
+  }
 }
 
 .dark.isHighlighted {
   background-color: #FFA9A2;
+
+  .letters {
+    color: #F88379;
+  }
+
+  .numbers {
+    color: #F88379;
+  }
 }

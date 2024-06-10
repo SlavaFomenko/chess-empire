@@ -36,6 +36,7 @@ export const gameSlice = createSlice({
   initialState: { ...initialState },
   reducers: {
     selectPiece: (state, action) => {
+      console.log(action)
       if (action.payload === null || state.currentStep < state.gameHistory.length || state.myColor !== state.currentColor)
       {
         state.selectedPiece = null;
@@ -56,6 +57,7 @@ export const gameSlice = createSlice({
       state.availableMoves = availableMoves.filter(to => validateMove(state.board, { row, col }, to, state.hasMoved));
     },
     movePiece: (state, action) => {
+      console.log(action)
       if (state.currentStep < state.gameHistory.length || state.myColor !== state.currentColor)
       {
         state.selectedPiece = null;
@@ -81,7 +83,7 @@ export const gameSlice = createSlice({
 
         const apply = applyTurns([turn], state.board, state.currentColor, state.hasMoved);
 
-        const enemyRow = state.currentColor === "white" ? 0 : 7;
+        const enemyRow = state.currentColor === "white" ? 7 : 0;
         if("pP".includes(piece) && to.row === enemyRow){
           return {
             ...state,

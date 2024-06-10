@@ -3,10 +3,10 @@ import styles from "../styles/chess-figure-layout.module.scss";
 import { useSelector } from "react-redux";
 import classNames from "classnames";
 
-export const ChessFigureLayout = ({ figureProps: { coordinate, event }, children }) => {
+export const ChessFigureLayout = ({ figureProps: { coordinate, event, digit, letter }, children }) => {
   const {
     selectedPiece,
-    availableMoves,
+    availableMoves
   } = useSelector(state => state.game);
 
   const isSelected = selectedPiece && selectedPiece.row === coordinate.row && selectedPiece.col === coordinate.col;
@@ -14,14 +14,20 @@ export const ChessFigureLayout = ({ figureProps: { coordinate, event }, children
 
   return (
     <div
-      onClick={()=>event(coordinate)}
+      onClick={() => event(coordinate)}
       className={classNames(styles.wrapper, {
         [styles.isSelected]: isSelected,
         [styles.isHighlighted]: isHighlighted,
-        [styles.dark]: (coordinate.row + coordinate.col) % 2 === 1
+        [styles.dark]: (coordinate.row + coordinate.col) % 2 === 0
       })}
     >
-     <div className={styles.coords}>{coordinate.row} {coordinate.col}</div>
+      {digit && <div className={styles.numbers}>
+        {digit}
+      </div>}
+      {letter &&
+        <div className={styles.letters}>
+          {letter}
+        </div>}
       {children}
     </div>
   );

@@ -8,40 +8,51 @@ export function ChessBoard ({
   event: handleSquareClick
 }) {
   const renderBoard = [];
+  const reversed = myColor === "white";
+  const preparedBoard = reversed ? board?.map(row=>row)?.reverse() : board?.map(row=>row.map(cell=>cell).reverse());
+  const letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
-  board?.map((row, rowIndex) =>
+  preparedBoard?.map((row, rowIndex) =>
     row.map((piece, columnIndex) => {
         const color = "PNBRQK".includes(piece) ? "white" : "black";
-        const coordinate = { row: rowIndex, col: columnIndex };
+        const coordinate = { row: reversed ? 7 - rowIndex : rowIndex, col: reversed ? columnIndex : 7 - columnIndex };
         const key = `${COORDS[rowIndex]}${columnIndex}`;
+        let digit = null, letter = null;
+        if(columnIndex === 0){
+          digit = reversed ? 8 - rowIndex : rowIndex + 1;
+        }
+
+        if(rowIndex === 7){
+          letter = letters[reversed ? columnIndex : 7 - columnIndex];
+        }
         switch (piece.toUpperCase()) {
           case "R":
             renderBoard.push(
-              <Rook event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
+              <Rook letter={letter} digit={digit} event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "N":
             renderBoard.push(
-              <Knight event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
+              <Knight letter={letter} digit={digit} event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "B":
             renderBoard.push(
-              <Bishop event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
+              <Bishop letter={letter} digit={digit} event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "Q":
             renderBoard.push(
-              <Queen event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
+              <Queen letter={letter} digit={digit} event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "K":
             renderBoard.push(
-              <King event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
+              <King letter={letter} digit={digit} event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           case "P":
             renderBoard.push(
-              <Pawn event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
+              <Pawn letter={letter} digit={digit} event={handleSquareClick} color={color} key={key} coordinate={coordinate} />);
             break;
           default:
             renderBoard.push(
-              <EmptyField event={handleSquareClick} color={"empty"} key={key} coordinate={coordinate} />);
+              <EmptyField letter={letter} digit={digit} event={handleSquareClick} color={"empty"} key={key} coordinate={coordinate} />);
             break;
         }
       }
@@ -50,7 +61,7 @@ export function ChessBoard ({
 
   return (
     <div className={styles.chessBoard}>
-      {myColor === "white" ? renderBoard : renderBoard.reverse()}
+      {renderBoard}
     </div>
   );
 }
