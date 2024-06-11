@@ -1,5 +1,5 @@
-// export const HOST_URL = window.location.host;
-export const HOST_URL = 'chess-empire.ua';
+export const HOST_URL = window.location.host;
+// export const HOST_URL = 'chess-empire.ua';
 export const API_URL = 'https://' + HOST_URL + '/api';
 export const GET_LEADERBOARD = API_URL + '/leaderboard';
 export const LOGIN_URL = API_URL + '/login-check';

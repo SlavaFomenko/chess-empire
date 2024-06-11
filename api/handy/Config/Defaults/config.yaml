@@ -11,3 +11,8 @@ supported_content_types: ["application/json"]
 global_path_prefix: ""
 
 security_provider: Handy\Security\EmptySecurityProvider
+
+cors:
+  allow_origin: "*"
+  allow_methods: "POST, GET, PUT, PATCH, DELETE, OPTIONS"
+  allow_headers: "Authorization, Content-Type, Access-Control-Allow-Origin"

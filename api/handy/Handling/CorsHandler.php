@@ -12,11 +12,11 @@ class CorsHandler extends AbstractHandler
 
     public function handle(): void
     {
-        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Origin: " . Context::$config->cors["allow_origin"]);
         if(Context::$request->getMethod() == Request::METHOD_OPTIONS){
             Context::$response = new JsonResponse(null, 204);
-            header('Access-Control-Allow-Methods: POST, GET, PUT, PATCH, DELETE, OPTIONS');
-            header('Access-Control-Allow-Headers: Authorization, Content-Type, Access-Control-Allow-Origin');
+            header("Access-Control-Allow-Methods: " . Context::$config->cors["allow_methods"]);
+            header("Access-Control-Allow-Headers: " . Context::$config->cors["allow_headers"]);
             return;
         }
         parent::handle();

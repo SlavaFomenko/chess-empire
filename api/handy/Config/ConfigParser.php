@@ -64,6 +64,7 @@ class ConfigParser
             $config->supportedContentTypes = $configArray["supported_content_types"];
             $config->globalPathPrefix = $configArray["global_path_prefix"];
             $config->securityProvider=$configArray["security_provider"];
+            $config->cors = $configArray["cors"];
         } catch(Exception|Error $e){
             throw new InvalidConfigException($e->getMessage());
         }

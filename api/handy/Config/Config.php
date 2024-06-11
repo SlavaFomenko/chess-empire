@@ -24,6 +24,12 @@ class Config
     public array $supportedContentTypes;
 
     /**
+     * CORS settings: allow origin, allow methods, allow headers
+     * @var array
+     */
+    public array $cors;
+
+    /**
      * Global path prefix
      * @var string
      */
