@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { LayoutPage } from "../../../layouts/page-layout";
+import { PageLayout } from "../../../layouts/page-layout";
 import axios from "axios";
 import {
   ACCEPT_FRIEND_REQUEST,
@@ -268,7 +268,7 @@ export function ProfilePage () {
   };
 
   return (
-    <LayoutPage>
+    <PageLayout>
       <div className={styles.profilePage}>
         {user ? (
           <ProfileData
@@ -331,6 +331,6 @@ export function ProfilePage () {
           </SearchGame>
         </div>
       </BannerLayout>}
-    </LayoutPage>
+    </PageLayout>
   );
 }

@@ -1,6 +1,6 @@
 import { showNotification } from "../../notification";
-import { baseState } from "./baseState";
-import { defaultState } from "./defaultState";
+import { baseState } from "./base-state";
+import { defaultState } from "./default-state";
 
 export const unauthorizedState = ({ socket, dispatch, history, getState }) => {
   return {

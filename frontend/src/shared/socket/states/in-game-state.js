@@ -1,7 +1,7 @@
-import { baseState } from "./baseState";
+import { baseState } from "./base-state";
 import { gameOver } from "../../../widgets/chess-game/model/chess-game";
 import { showNotification } from "../../notification";
-import { defaultState } from "./defaultState";
+import { defaultState } from "./default-state";
 
 export const inGameState = ({ socket, dispatch, history, getState }) => {
   window.onbeforeunload = e => e.preventDefault();

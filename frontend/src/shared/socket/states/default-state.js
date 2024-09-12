@@ -1,6 +1,6 @@
-import { baseState } from "./baseState";
+import { baseState } from "./base-state";
 import { showNotification } from "../../notification";
-import { inGameState } from "./inGameState";
+import { inGameState } from "./in-game-state";
 import { s } from "../actions/socket";
 import React from "react";
 import { GameInviteDialog } from "../../../entities/profile/game-invite-dialog/ui/game-invite-dialog";

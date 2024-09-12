@@ -1,5 +1,5 @@
 import { showNotification } from "../../notification";
-import { disconnectedState } from "./disconnectedState";
+import { disconnectedState } from "./disconnected-state";
 import { s } from "../actions/socket";
 
 export const baseState = ({ socket, dispatch, history, getState }) => {

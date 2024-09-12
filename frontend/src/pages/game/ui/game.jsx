@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "../styles/game.module.scss";
-import { LayoutPage } from "../../../layouts/page-layout";
+import { PageLayout } from "../../../layouts/page-layout";
 import { ChessGame } from "../../../widgets/chess-game";
 import { GameOverDialog } from "../../../entities/game";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,7 +16,7 @@ export const GamePage = () => {
   const isPending = useSelector(state => state.game.promotion.isPending);
 
   return (
-    <LayoutPage>
+    <PageLayout>
       {userState.user?.token ?
         <>
           {["default", "searchingGame"].includes(socketState.state) &&
@@ -52,6 +52,6 @@ export const GamePage = () => {
           <h1>Please, sign in/up for playing</h1>
         </div>
       }
-    </LayoutPage>
+    </PageLayout>
   );
 };

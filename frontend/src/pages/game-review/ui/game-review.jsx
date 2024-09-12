@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/game-review.module.scss";
-import { LayoutPage } from "../../../layouts/page-layout";
+import { PageLayout } from "../../../layouts/page-layout";
 import axios from "axios";
 import { GET_GAME_BY_ID } from "../../../shared/config";
 import { useDispatch, useSelector } from "react-redux";
@@ -76,7 +76,7 @@ export const GameReviewPage = () => {
   };
 
   return (
-    <LayoutPage>
+    <PageLayout>
       <div className={styles.gameReviewPage}>
         {error && <h1 className={styles.errorMessage}>{error}</h1>}
         {gameState && <>
@@ -103,6 +103,6 @@ export const GameReviewPage = () => {
           </div>
         </>}
       </div>
-    </LayoutPage>
+    </PageLayout>
   );
 };

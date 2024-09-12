@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Login } from "../../../../features/login";
-import { LayoutPage } from "../../../../layouts/page-layout";
+import { PageLayout } from "../../../../layouts/page-layout";
 import { useDispatch, useSelector } from "react-redux";
 import { showNotification, hideNotification } from "../../../../shared/notification";
 import { useNavigate } from "react-router-dom";
@@ -26,12 +26,12 @@ export function LoginPage () {
   useEffect(notification, [user])
 
   return (
-    <LayoutPage>
+    <PageLayout>
       <div className={styles.loginPage}>
         <h1>Sign In</h1>
         <Login />
       </div>
-    </LayoutPage>
+    </PageLayout>
   );
 }
 
