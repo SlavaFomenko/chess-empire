@@ -33,14 +33,11 @@ services:
       dockerfile: ../docker/frontend/Dockerfile
     restart: unless-stopped
     command: npm start
-    stdin_open: true
-    tty: true
     volumes:
       - ./frontend:${FRONTEND_DIRECTORY}
+      - ${FRONTEND_DIRECTORY}/node_modules
     environment:
       NODE_ENV: dev
-      CHOKIDAR_USEPOLLING: true
-      WDS_SOCKET_PORT: 0
 
   mysql:
     image: mysql:8.3
