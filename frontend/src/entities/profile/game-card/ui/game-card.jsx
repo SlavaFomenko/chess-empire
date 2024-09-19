@@ -3,7 +3,7 @@ import styles from "../styles/game-card.module.scss";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 
-export function GameCard ({ gameData, user }) {
+export const GameCard = ({ gameData, user }) => {
   const navigate = useNavigate();
 
   const formatDate = (date) => {

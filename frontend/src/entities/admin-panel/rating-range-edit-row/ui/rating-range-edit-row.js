@@ -3,7 +3,7 @@ import styles from "../styles/rating-range-edit-row.module.css";
 import saveIcon from "../../../../shared/images/icons/save-icon.png";
 import cancelIcon from "../../../../shared/images/icons/cancel-icon.png";
 
-export function RatingRangeEditRow ({ editState, setEditState, onSubmit, onCancel }) {
+export const RatingRangeEditRow = ({ editState, setEditState, onSubmit, onCancel }) => {
   return (
     <>
       <td>

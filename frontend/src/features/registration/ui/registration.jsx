@@ -3,7 +3,7 @@ import styles from "../styles/registration.module.scss";
 import { Field, Form, Formik } from "formik";
 import { registerUser } from "../model/registration";
 
-export function Registration ({notification, navigate}) {
+export const Registration = ({notification, navigate}) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const initialValues = {

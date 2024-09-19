@@ -3,7 +3,7 @@ import styles from "../styles/edit-profile-dialog.module.scss";
 import { BannerLayout } from "../../../../layouts/banner-layout";
 import { Field, Form, Formik } from "formik";
 
-export function EditProfileDialog ({ state, setState, onSubmit }) {
+export const EditProfileDialog = ({ state, setState, onSubmit }) => {
   const [showPassword, setShowPassword] = useState({ old: false, new: false });
   const initialValues = { ...state.data, oldPassword: "", newPassword: "", password_confirm: "" };
 

@@ -4,7 +4,7 @@ import { s } from "../../../../shared/socket";
 import { hideNotification } from "../../../../shared/notification";
 import { useDispatch } from "react-redux";
 
-export function GameInviteDialog ({ data, onAccept, onReject}) {
+export const GameInviteDialog = ({ data, onAccept, onReject}) => {
   const dispatch = useDispatch();
 
   const initiator = data.white.id === null ? data.black : data.white;

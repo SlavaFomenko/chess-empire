@@ -13,7 +13,7 @@ import { RatingRangeEditRow } from "../../../../../entities/admin-panel/rating-r
 import { RatingRangeRow } from "../../../../../entities/admin-panel/rating-range-row";
 import { Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
-export function RatingsPage (props) {
+export const RatingsPage = (props) => {
   const dispatch = useDispatch();
   const userStore = useSelector(state => state.user);
   const [ratingRanges, setRatingRanges] = useState([]);

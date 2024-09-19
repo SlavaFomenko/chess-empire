@@ -4,7 +4,7 @@ import styles from "../styles/notification-layout.module.scss";
 import { useDispatch } from "react-redux";
 import { hideNotification } from "../../../shared/notification";
 
-export function NotificationLayout ({ children }) {
+export const NotificationLayout = ({ children }) => {
   const dispatch = useDispatch();
 
   return createPortal(

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import defaultProfilePic from "../../../../shared/images/icons/default-profile-pic.png";
 import { HOST_URL } from "../../../../shared/config";
 
-export function UserCard ({ user, children, onClick = () => {}, displayRoles = false }) {
+export const UserCard = ({ user, children, onClick = () => {}, displayRoles = false }) => {
   const roleTitles = {
     ROLE_USER: "User",
     ROLE_ADMIN: "Admin",

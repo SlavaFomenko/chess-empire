@@ -2,7 +2,7 @@ import React from "react";
 import styles from "../styles/play-dialog.module.scss";
 import { BannerLayout } from "../../../../layouts/banner-layout";
 
-export function PlayDialog ({ state, setState, onSubmit, onDelete }) {
+export const PlayDialog = ({ state, setState, onSubmit, onDelete }) => {
   return (
     <BannerLayout onClick={() => setState({ ...state, selectedFile: null, opened: false })}>
       <div className={styles.changePicDialog} onClick={e => e.stopPropagation()}>

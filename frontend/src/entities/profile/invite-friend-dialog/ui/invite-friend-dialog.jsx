@@ -9,7 +9,7 @@ import axios from "axios";
 import { showNotification } from "../../../../shared/notification";
 import { useDispatch, useSelector } from "react-redux";
 
-export function InviteFriendDialog ({ onClose = ()=>{} }) {
+export const InviteFriendDialog = ({ onClose = ()=>{} }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userStore = useSelector(state => state.user);

@@ -1,6 +1,6 @@
 import React from "react";
 
-export function AdminPanelPageWrapper (props) {
+export const AdminPanelPageWrapper = (props) => {
   return (
     <div>page</div>
   );

@@ -3,7 +3,7 @@ import { ChessFigureLayout } from "../../../../layouts/chess-figure-layout";
 import blackImage from "../../styles/icons/bp.png";
 import whiteImage from "../../styles/icons/wp.png";
 
-export function Pawn (props) {
+export const Pawn = (props) => {
   const image = props.color === 'black' ? blackImage : whiteImage;
 
   return (

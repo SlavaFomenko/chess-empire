@@ -5,7 +5,7 @@ import { HOST_URL } from "../../../shared/config";
 import { ChessTimer } from "../../chess-timers";
 import { useNavigate } from "react-router-dom";
 
-export function ChessPlayerBar ({ player, timer=false  }) {
+export const ChessPlayerBar = ({ player, timer=false  }) => {
   const navigate = useNavigate();
 
   return (

@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { showNotification } from "../../../../shared/notification";
 import styles from "../styles/registration.module.scss"
 
-export function RegistrationPage (props) {
+export const RegistrationPage = (props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 

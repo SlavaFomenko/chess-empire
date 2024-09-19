@@ -4,7 +4,7 @@ import { Field, Form, Formik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { s } from "../../../shared/socket";
 
-export function SearchGame ({children, onSubmit}) {
+export const SearchGame = ({children, onSubmit}) => {
   const socketState = useSelector(store => store.socket);
   const initialSettings = { time: "5", rated: false, color: "r" };
 

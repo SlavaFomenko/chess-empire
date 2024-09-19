@@ -3,7 +3,7 @@ import styles from "../styles/profile-data.module.scss";
 import defaultProfilePic from "../../../../shared/images/icons/default-profile-pic.png";
 import { HOST_URL } from "../../../../shared/config";
 
-export function ProfileData ({ user, onImageEdit = null, children, greetingMessage = (username) => `${username}` }) {
+export const ProfileData = ({ user, onImageEdit = null, children, greetingMessage = (username) => `${username}` }) => {
 
   return (
     <div className={styles.profileData}>

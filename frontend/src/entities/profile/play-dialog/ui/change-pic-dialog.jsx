@@ -2,7 +2,7 @@ import React from "react";
 import styles from "../styles/change-pic-dialog.module.scss";
 import { BannerLayout } from "../../../../layouts/banner-layout";
 
-export function ChangePicDialog ({ state, setState, onSubmit, onDelete }) {
+export const ChangePicDialog = ({ state, setState, onSubmit, onDelete }) => {
   return (
     <BannerLayout onClick={() => setState({ ...state, selectedFile: null, opened: false })}>
       <div className={styles.changePicDialog} onClick={e => e.stopPropagation()}>
