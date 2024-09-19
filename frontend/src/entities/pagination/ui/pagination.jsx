@@ -2,7 +2,7 @@ import React from "react";
 import styles from "../styles/pagination.module.scss";
 import classNames from "classnames";
 
-export function Pagination ({ pagesCount, currentPage, onClick }) {
+export const Pagination = ({ pagesCount, currentPage, onClick }) => {
   const pages = Array.from({ length: 7 }, (_, i) => currentPage + i - 3).filter(page => page >= 1 && page <= pagesCount);
 
   return (

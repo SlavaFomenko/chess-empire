@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../styles/side-bar.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { s } from "../../../shared/socket";
-import closeIcon from "../../../shared/images/icons/closeIcon.png";
+import closeIcon from "../../../shared/images/icons/close-icon.png";
 import { jwtDecode } from "jwt-decode";
 
 export function SideBar({ isMobile, closeSideBar }) {

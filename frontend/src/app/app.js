@@ -3,7 +3,7 @@ import { withProviders } from "./providers";
 import { Routing } from "../pages";
 import { useDispatch, useSelector } from "react-redux";
 import { NotificationLayout } from "../layouts/notification-layout";
-import { restoreToken } from "./model/restoreToken";
+import { restoreToken } from "./model/restore-token";
 import { useEffect } from "react";
 import { s } from "../shared/socket";
 

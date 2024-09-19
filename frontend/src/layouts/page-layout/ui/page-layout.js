@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import styles from "../styles/layout_page.module.scss";
+import styles from "../styles/page-layout.module.scss";
 import { SideBar } from "../../../widgets/side-bar";
-import menuIcon from '../../../shared/images/icons/menuIcon.png';
+import menuIcon from '../../../shared/images/icons/menu-icon.png';
 import classNames from "classnames";
 
 
-export function LayoutPage({ children }) {
+export function PageLayout({ children }) {
   const [isMobile, setIsMobile] = useState(false);
 
   const [sideBarIsOpen, setSideBarIsOpen] =  useState(!isMobile);

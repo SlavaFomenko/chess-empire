@@ -1,9 +1,9 @@
 import { socket } from "../socket";
 import { showNotification } from "../../notification";
-import { unauthorizedState } from "../states/unauthorizedState";
+import { unauthorizedState } from "../states/unauthorized-state";
 import { history } from "../../routing";
-import { searchingGameState } from "../states/searchingGameState";
-import { defaultState } from "../states/defaultState";
+import { searchingGameState } from "../states/searching-game-state";
+import { defaultState } from "../states/default-state";
 import { HOST_URL } from "../../config";
 
 const getDeviceName = () => {

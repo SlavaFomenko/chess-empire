@@ -9,7 +9,7 @@ import {
 } from "../../../shared/config";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { LayoutPage } from "../../../layouts/page-layout";
+import { PageLayout } from "../../../layouts/page-layout";
 import { ProfileData } from "../../../entities/profile/profile-data/ui/profile-data";
 import { showNotification } from "../../../shared/notification";
 import { GamesList } from "../../../entities/profile";
@@ -119,7 +119,7 @@ export function UserPage () {
   }, [user]);
 
   return (
-    <LayoutPage>
+    <PageLayout>
       <div className={styles.userPage}>
         {error && <h1 className={styles.errorMessage}>{error}</h1>}
         {!error && (user ? (
@@ -160,6 +160,6 @@ export function UserPage () {
           </SearchGame>
         </div>
       </BannerLayout>}
-    </LayoutPage>
+    </PageLayout>
   );
 }

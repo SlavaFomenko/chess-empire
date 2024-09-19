@@ -1,11 +1,11 @@
 import React from "react";
 import styles from "../styles/chess-players-bar.module.scss";
-import defaultProfilePic from "../../../shared/images/icons/defaultProfilePic.png";
+import defaultProfilePic from "../../../shared/images/icons/default-profile-pic.png";
 import { HOST_URL } from "../../../shared/config";
 import { ChessTimer } from "../../chess-timers";
 import { useNavigate } from "react-router-dom";
 
-export function ChessPlayerBar ({ player, timer=false  }) {
+export const ChessPlayerBar = ({ player, timer=false  }) => {
   const navigate = useNavigate();
 
   return (

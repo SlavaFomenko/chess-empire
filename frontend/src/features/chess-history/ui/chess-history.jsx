@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import styles from "../styles/chess-history.module.scss";
 import { cordsToTurn } from "../../../shared/game/lib";
 
-export function ChessHistory ({gameHistory, step, setStep}) {
+export const ChessHistory = ({gameHistory, step, setStep}) => {
   const containerRef = useRef(null);
 
   useEffect(() => {

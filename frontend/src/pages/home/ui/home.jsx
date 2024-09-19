@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/home.module.scss";
-import { LayoutPage } from "../../../layouts/page-layout";
+import { PageLayout } from "../../../layouts/page-layout";
 import axios from "axios";
 import { GET_LEADERBOARD } from "../../../shared/config";
 import { showNotification } from "../../../shared/notification";
@@ -24,7 +24,7 @@ export function HomePage () {
   }, []);
 
   return (
-    <LayoutPage>
+    <PageLayout>
       <div className={styles.homePage}>
         <div className={styles.greetingsDiv}>
           <h1>Welcome to Chess Empire!</h1>
@@ -53,6 +53,6 @@ export function HomePage () {
           )}
         </div>
       </div>
-    </LayoutPage>
+    </PageLayout>
   );
 }

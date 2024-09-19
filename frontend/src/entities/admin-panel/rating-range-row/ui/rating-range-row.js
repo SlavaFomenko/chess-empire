@@ -3,7 +3,7 @@ import styles from "../styles/rating-range-row.module.css";
 import editIcon from "../../../../shared/images/icons/edit-icon.png";
 import deleteIcon from "../../../../shared/images/icons/delete-icon.png";
 
-export function RatingRangeRow ({ range, onEdit, onDelete }) {
+export const RatingRangeRow = ({ range, onEdit, onDelete }) => {
 
   return (
     <>

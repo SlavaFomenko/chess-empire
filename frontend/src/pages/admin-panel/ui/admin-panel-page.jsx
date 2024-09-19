@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { LayoutPage } from "../../../layouts/page-layout";
+import { PageLayout } from "../../../layouts/page-layout";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import styles from "../styles/admin-panel-page.module.scss";
 import classNames from "classnames";
@@ -19,7 +19,7 @@ export function AdminPanelPage() {
   };
 
   return (
-    <LayoutPage>
+    <PageLayout>
       <div className={styles.wrapper}>
         <div className={styles.tabsBar}>
           <button
@@ -45,6 +45,6 @@ export function AdminPanelPage() {
           <Outlet />
         </div>
       </div>
-    </LayoutPage>
+    </PageLayout>
   );
 }

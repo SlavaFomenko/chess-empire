@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import classNames from "classnames";
 import { BannerLayout } from "../../../../layouts/banner-layout";
 
-export function GameOverDialog ({ gameState }) {
+export const GameOverDialog = ({ gameState }) => {
   const gameOverState = gameState.gameOver;
   const dispatch = useDispatch();
 

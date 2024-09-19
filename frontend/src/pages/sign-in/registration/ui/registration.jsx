@@ -1,12 +1,12 @@
 import React from "react";
-import { LayoutPage } from "../../../../layouts/page-layout";
+import { PageLayout } from "../../../../layouts/page-layout";
 import { Registration } from "../../../../features/registration";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../../../shared/notification";
 import styles from "../styles/registration.module.scss"
 
-export function RegistrationPage (props) {
+export const RegistrationPage = (props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -16,11 +16,11 @@ export function RegistrationPage (props) {
   };
 
   return (
-    <LayoutPage>
+    <PageLayout>
       <div className={styles.registrationPage}>
         <h1>Sign Up</h1>
         <Registration notification={notification} navigate={navigate} />
       </div>
-    </LayoutPage>
+    </PageLayout>
   );
 }

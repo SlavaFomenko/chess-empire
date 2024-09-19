@@ -3,7 +3,7 @@ import { ChessFigureLayout } from "../../../../layouts/chess-figure-layout";
 import blackImage from "../../styles/icons/bq.png";
 import whiteImage from "../../styles/icons/wq.png";
 
-export function Queen (props) {
+export const Queen = (props) => {
   const image = props.color === 'black' ? blackImage : whiteImage;
 
   return (

@@ -1,7 +1,7 @@
-import { baseState } from "./baseState";
-import { inGameState } from "./inGameState";
+import { baseState } from "./base-state";
+import { inGameState } from "./in-game-state";
 import { showNotification } from "../../notification";
-import { defaultState } from "./defaultState";
+import { defaultState } from "./default-state";
 
 export const searchingGameState = ({ socket, dispatch, history, getState }) => {
   return {

@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "../styles/chess-timers.module.scss";
 
-export function ChessTimer ({player}) {
+export const ChessTimer = ({player}) => {
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;

@@ -1,1 +1,1 @@
-export { LayoutPage } from "./ui/LayoutPage";
+export { PageLayout } from "./ui/page-layout";
