@@ -22,6 +22,12 @@ import { BannerLayout } from "../../../layouts/banner-layout";
 import { SearchGame } from "../../../features/search-game";
 import { s } from "../../../shared/socket";
 import { ChangePicDialog } from "../../../entities/profile/play-dialog/ui/change-pic-dialog";
+import {getAllUsersUrl} from "../../../shared/user/api/get-all-users-url";
+import {getGamesForUser} from "../../../shared/friend/api/get-games-for-user";
+import {getUserById} from "../../../shared/user/api/get-user-by-id";
+import {uploadUserPic} from "../../../shared/user/api/upload-user-pic";
+import {patchUser} from "../../../shared/user/api/patch-user";
+import {acceptFriendRequest} from "../../../shared/friend/api/accept-friend-request";
 
 export function ProfilePage () {
   const userStore = useSelector(state => state.user);
@@ -49,17 +55,7 @@ export function ProfilePage () {
     }
     try {
       setFriends({ ...friends, loading: true });
-      axios.get(GET_ALL_USERS_URL, {
-        params: {
-          page: friends.page + 1,
-          friend: true,
-          orderBy: "id",
-          desc: true
-        },
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
+      getAllUsersUrl(friends,userStore.user.token).then(response => {
         setFriends({
           loading: false,
           list: [...friends.list, ...response.data.users],
@@ -78,17 +74,7 @@ export function ProfilePage () {
     }
     try {
       setFriendRequests({ ...friendRequests, loading: true });
-      axios.get(GET_ALL_USERS_URL, {
-        params: {
-          page: friendRequests.page + 1,
-          request: true,
-          orderBy: "id",
-          desc: true
-        },
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
+        getAllUsersUrl(friendRequests,userStore.user.token).then(response => {
         setFriendRequests({
           loading: false,
           count: response.data.count,
@@ -108,15 +94,8 @@ export function ProfilePage () {
     }
     try {
       setGames({ ...games, loading: true });
-      axios.get(GET_GAMES_FOR_USER, {
-        params: {
-          page: games.page + 1,
-          userId: userStore.user.id
-        },
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
+      getGamesForUser(games,user,userStore.user.token)
+      .then(response => {
         setGames({
           loading: false,
           list: [...games.list, ...response.data.games],
@@ -131,7 +110,7 @@ export function ProfilePage () {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(GET_USER_BY_ID(userStore.user.id));
+      const response = await getUserById(userStore.user.id);
       setUser(response.data.user);
     } catch (error) {
       console.log(error);
@@ -146,14 +125,11 @@ export function ProfilePage () {
     try {
       const formData = new FormData();
       formData.append("pic", picForm.selectedFile);
-      axios.post(UPLOAD_USER_PIC(userStore.user.id), formData, {
-        headers: {
-          "content-type": "multipart/form-data",
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        window.location.reload();
-      }).catch(error => dispatch(showNotification("Error uploading new pic")));
+      uploadUserPic(userStore,formData,userStore.user.token)
+          .then(response => {
+            window.location.reload();
+          })
+          .catch(error => dispatch(showNotification("Error uploading new pic")));
     } catch (error) {
       dispatch(showNotification("Error uploading new pic"));
     }
@@ -161,11 +137,7 @@ export function ProfilePage () {
 
   const patchProfile = async (data) => {
     try {
-      axios.patch(PATCH_USER(userStore.user.id), data, {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
+          patchUser(userStore,data,userStore.user.token).then(response => {
         window.location.reload();
       }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error patching your profile!"));});
     } catch (error) {
@@ -175,21 +147,19 @@ export function ProfilePage () {
 
   const acceptRequest = async (user) => {
     try {
-      axios.post(ACCEPT_FRIEND_REQUEST(user.id), null, {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        setFriends({
-          ...friends,
-          list: [...friends.list, user]
-        });
-        setFriendRequests({
-          ...friendRequests,
-          list: friendRequests.list.filter(u=>u.id !== user.id),
-          count: friendRequests.count - 1
-        });
-      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error accepting friend request"));});
+          acceptFriendRequest(user,userStore.user.token)
+              .then(response => {
+                setFriends({
+                  ...friends,
+                  list: [...friends.list, user]
+                });
+                setFriendRequests({
+                  ...friendRequests,
+                  list: friendRequests.list.filter(u=>u.id !== user.id),
+                  count: friendRequests.count - 1
+                });
+              })
+              .catch(error => {dispatch(showNotification(error.response?.data?.message || "Error accepting friend request"));});
     } catch (error) {
       dispatch(showNotification("Error accepting friend request"));
     }
@@ -197,11 +167,7 @@ export function ProfilePage () {
 
   const removeFriend = async (user) => {
     try {
-      axios.delete(REMOVE_FRIEND(user.id), {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
+     removeFriend(user,userStore.user.token).then(response => {
         setFriends({
           ...friends,
           list: friends.list.filter(u=>u.id !== user.id)

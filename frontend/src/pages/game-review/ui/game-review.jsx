@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/game-review.module.scss";
 import { PageLayout } from "../../../layouts/page-layout";
-import axios from "axios";
 import { GET_GAME_BY_ID } from "../../../shared/config";
 import { useDispatch, useSelector } from "react-redux";
 import { ChessPlayerBar } from "../../../features/chess-players-bar";
 import { ChessBoard } from "../../../features/chess-board";
 import { ChessHistory } from "../../../features/chess-history";
 import { applyTurns, enemyColor, turnToCords } from "../../../shared/game/lib";
+import {getGameById} from "../../../shared/game/api/get-game-by-id";
 
 export const GameReviewPage = () => {
   const userStore = useSelector(state => state.user);
@@ -28,34 +28,29 @@ export const GameReviewPage = () => {
     }
     gameId = +gameId;
 
-    axios.get(GET_GAME_BY_ID(gameId), {
-      headers: {
-        Authorization: `Bearer ${userStore.user.token}`
-      }
-    }).then(response => {
-      const state = response.data;
-
-      state.history = state.history !== "" ? state.history.split(" ").map(turn => turnToCords(turn)) : [];
-
-      const { board } = applyTurns(state.history.slice(0, 1));
-
-      setGameState({
-        black: {
-          id: state.black_id,
-          profilePic: state.black_profilePic,
-          username: state.black_username
-        },
-        white: {
-          id: state.white_id,
-          profilePic: state.white_profilePic,
-          username: state.white_username
-        },
-        history: state.history,
-        board: board,
-        myColor: userStore.user.id === state.black_id ? "black" : "white",
-        currentStep: 1
-      });
-    }).catch(error => setError(error.response.data.message));
+    getGameById(gameId,userStore.user.token)
+        .then(response => {
+             const state = response.data;
+             state.history = state.history !== "" ? state.history.split(" ").map(turn => turnToCords(turn)) : [];
+             const { board } = applyTurns(state.history.slice(0, 1));
+             setGameState({
+               black: {
+                 id: state.black_id,
+                 profilePic: state.black_profilePic,
+                 username: state.black_username
+               },
+               white: {
+                 id: state.white_id,
+                 profilePic: state.white_profilePic,
+                 username: state.white_username
+               },
+               history: state.history,
+               board: board,
+               myColor: userStore.user.id === state.black_id ? "black" : "white",
+               currentStep: 1
+             });
+         })
+        .catch(error => setError(error.response.data.message));
   }, [userStore.user]);
 
   const goToStep = (step) => {

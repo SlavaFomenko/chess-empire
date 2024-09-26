@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/home.module.scss";
 import { PageLayout } from "../../../layouts/page-layout";
-import axios from "axios";
 import { GET_LEADERBOARD } from "../../../shared/config";
 import { showNotification } from "../../../shared/notification";
 import { useDispatch } from "react-redux";
 import { UserCard } from "../../../entities/profile/user-card/ui/user-card";
 import { useNavigate } from "react-router-dom";
+import {getLeaderboard} from "../../../shared/leaderboard";
 
 export function HomePage () {
   const dispatch = useDispatch();
@@ -15,7 +15,7 @@ export function HomePage () {
 
   useEffect(() => {
     try {
-      axios.get(GET_LEADERBOARD).then(response => {
+     getLeaderboard().then(response => {
         setLeaderboard(response.data);
       }).catch(error => dispatch(showNotification("Error fetching leaderboard")));
     } catch (error) {

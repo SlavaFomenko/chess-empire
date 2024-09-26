@@ -12,7 +12,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { RatingRangeEditRow } from "../../../../../entities/admin-panel/rating-range-edit-row";
 import { RatingRangeRow } from "../../../../../entities/admin-panel/rating-range-row";
 import { Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-
+import {postRatingRanges} from "../../../../../shared/rating";
+import {getRatingRanges} from "../../../../../shared/rating";
+import {patchRatingRanges} from "../../../../../shared/rating";
+import {deleteRatingRanges} from "../../../../../shared/rating";
 export const RatingsPage = (props) => {
   const dispatch = useDispatch();
   const userStore = useSelector(state => state.user);
@@ -25,13 +28,10 @@ export const RatingsPage = (props) => {
       return;
     }
     try {
-      axios.get(GET_RATING_RANGES, {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        setRatingRanges(response.data);
-      }).catch(error => dispatch(showNotification("Error fetching rating ranges")));
+          getRatingRanges(userStore.user.token)
+              .then(response => {
+                setRatingRanges(response.data);
+              }).catch(error => dispatch(showNotification("Error fetching rating ranges")));
     } catch (error) {
       dispatch(showNotification("Error fetching rating ranges"));
     }
@@ -39,14 +39,12 @@ export const RatingsPage = (props) => {
 
   const createRange = () => {
     try {
-      axios.post(POST_RATING_RANGE, newRange, {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        setNewRange(null);
-        fetchRatingRanges();
-      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error creating new rating range"));});
+      postRatingRanges(newRange,userStore.user.token)
+          .then(response => {
+            setNewRange(null);
+            fetchRatingRanges();
+          })
+          .catch(error => {dispatch(showNotification(error.response?.data?.message || "Error creating new rating range"));});
     } catch (error) {
       dispatch(showNotification("Error creating new rating range"));
     }
@@ -64,14 +62,12 @@ export const RatingsPage = (props) => {
     });
 
     try {
-      axios.patch(PATCH_RATING_RANGE(editState.id), data, {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        setEditState({ id: null, data: {} });
-        fetchRatingRanges();
-      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error patching rating range"));});
+      patchRatingRanges(editState,data,userStore.user.token)
+          .then(response => {
+            setEditState({ id: null, data: {} });
+            fetchRatingRanges();
+          })
+          .catch(error => {dispatch(showNotification(error.response?.data?.message || "Error patching rating range"));});
     } catch (error) {
       dispatch(showNotification("Error patching rating range"));
     }
@@ -79,13 +75,11 @@ export const RatingsPage = (props) => {
 
   const deleteRange = (id) => {
     try {
-      axios.delete(DELETE_RATING_RANGE(id), {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        fetchRatingRanges();
-      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error deleting rating range"));});
+        deleteRatingRanges(id,userStore.user.token)
+            .then(response => {
+              fetchRatingRanges();
+            })
+            .catch(error => {dispatch(showNotification(error.response?.data?.message || "Error deleting rating range"));});
     } catch (error) {
       dispatch(showNotification("Error deleting rating range"));
     }

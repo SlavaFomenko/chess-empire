@@ -6,8 +6,8 @@ import { UsersList } from "../../../../../entities/profile";
 import deleteIcon from "../../../../../shared/images/icons/delete-icon.png";
 import { hideNotification, showNotification } from "../../../../../shared/notification";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {deleteUser} from "../../../../../shared/user/api/delete-user";
 
 export function UsersPage () {
   const dispatch = useDispatch();
@@ -51,7 +51,7 @@ export function UsersPage () {
         <div>
           <button
             onClick={() => {
-              deleteUser(user.id);
+              deleteUserFunk(user.id);
               dispatch(hideNotification());
             }
             }
@@ -69,13 +69,9 @@ export function UsersPage () {
     ));
   };
 
-  const deleteUser = (id) => {
+  const deleteUserFunk = (id) => {
     try {
-      axios.delete(DELETE_USER(id), {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
+      deleteUser(id,userStore.user.token).then(response => {
         setDeleteTrigger(!deleteTrigger);
       }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error deleting user"));});
     } catch (error) {

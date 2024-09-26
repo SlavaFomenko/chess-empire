@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import styles from "../styles/user-page.module.scss";
-import {
-  GET_FRIEND_PAIR_BY_USER,
-  GET_GAMES_FOR_USER,
-  GET_USER_BY_ID,
-  SEND_FRIEND_REQUEST
-} from "../../../shared/config";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PageLayout } from "../../../layouts/page-layout";
@@ -16,6 +9,10 @@ import { GamesList } from "../../../entities/profile";
 import { BannerLayout } from "../../../layouts/banner-layout";
 import { SearchGame } from "../../../features/search-game";
 import { s } from "../../../shared/socket";
+import {sendFriendRequest} from "../../../shared/friend/api/send-friend-request";
+import {getGamesForUser} from "../../../shared/friend/api/get-games-for-user";
+import {getUserById} from "../../../shared/user/api/get-user-by-id";
+import {getFriendPairByUser} from "../../../shared/friend/api/get-friend-pair-by-user";
 
 export function UserPage () {
   const userStore = useSelector(state => state.user);
@@ -33,13 +30,13 @@ export function UserPage () {
       return;
     }
     try {
-      axios.post(SEND_FRIEND_REQUEST, { receiverId: user.id }, {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        window.location.reload();
-      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error sending friend request"));});
+        sendFriendRequest(user.id,userStore.user.token)
+            .then(response => {
+             window.location.reload();
+            })
+            .catch(error => {
+              dispatch(showNotification(error.response?.data?.message || "Error sending friend request"));
+            });
     } catch (error) {
       dispatch(showNotification("Error sending friend request"));
     }
@@ -51,23 +48,17 @@ export function UserPage () {
     }
     try {
       setGames({ ...games, loading: true });
-      axios.get(GET_GAMES_FOR_USER, {
-        params: {
-          page: games.page + 1,
-          userId: user.id
-        },
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        setGames({
-          loading: false,
-          list: [...games.list, ...response.data.games],
-          page: games.page + 1,
-          lastPage: games.page + 1 >= response.data.pagesCount,
-          canLoad: true
-        });
-      }).catch(error => dispatch(showNotification("Error fetching user games")));
+          getGamesForUser(games,user,userStore.user.token)
+              .then(response => {
+                setGames({
+                  loading: false,
+                  list: [...games.list, ...response.data.games],
+                  page: games.page + 1,
+                  lastPage: games.page + 1 >= response.data.pagesCount,
+                  canLoad: true
+                });
+              })
+              .catch(error => dispatch(showNotification("Error fetching user games")));
     } catch (error) {
       dispatch(showNotification("Error fetching user games"));
     }
@@ -90,27 +81,22 @@ export function UserPage () {
       navigate("/profile");
     }
 
-    axios.get(GET_USER_BY_ID(userId), {
-      headers: {
-        Authorization: `Bearer ${userStore.user.token}`
-      }
-    }).then(response => {
-      setUser(response.data?.user);
-    }).catch(error => setError(error.response.data.message));
+    getUserById(userId,userStore.user.token)
+        .then(response => {
+          setUser(response.data?.user);
+        })
+        .catch(error => setError(error.response.data.message));
   }, [userStore.user]);
 
   const checkFriendStatus = () => {
     if (!user) {
       return;
     }
-
-    axios.get(GET_FRIEND_PAIR_BY_USER(user.id), {
-      headers: {
-        Authorization: `Bearer ${userStore.user.token}`
-      }
-    }).then(response => {
-      setFriendStatus(response.data.accepted === 1 ? "friend" : "pending");
-    }).catch(error => setFriendStatus("not-friend"));
+      getFriendPairByUser(user,userStore.user.token)
+          .then(response => {
+            setFriendStatus(response.data.accepted === 1 ? "friend" : "pending");
+          })
+          .catch(error => setFriendStatus("not-friend"));
   };
 
   useEffect(() => {

@@ -4,10 +4,11 @@ import { BannerLayout } from "../../../../layouts/banner-layout";
 import { UsersList } from "../../users-list/ui/users-list";
 import { Pagination } from "../../../pagination";
 import { useNavigate } from "react-router-dom";
-import { GET_ALL_USERS_URL, POST_RATING_RANGE, SEND_FRIEND_REQUEST } from "../../../../shared/config";
+import { GET_ALL_USERS_URL } from "../../../../shared/config";
 import axios from "axios";
 import { showNotification } from "../../../../shared/notification";
 import { useDispatch, useSelector } from "react-redux";
+import {sendFriendRequest} from "../../../../shared/friend/api/send-friend-request";
 
 export const InviteFriendDialog = ({ onClose = ()=>{} }) => {
   const navigate = useNavigate();
@@ -53,13 +54,11 @@ export const InviteFriendDialog = ({ onClose = ()=>{} }) => {
 
   const sendInvite = (user) => {
     try {
-      axios.post(SEND_FRIEND_REQUEST, {receiverId: user.id}, {
-        headers: {
-          Authorization: `Bearer ${userStore.user.token}`
-        }
-      }).then(response => {
-        setInviteTrigger(!inviteTrigger);
-      }).catch(error => {dispatch(showNotification(error.response?.data?.message || "Error sending friend request"));});
+      sendFriendRequest(user.id,userStore.user.token)
+          .then(response => {
+            setInviteTrigger(!inviteTrigger);
+          })
+          .catch(error => {dispatch(showNotification(error.response?.data?.message || "Error sending friend request"));});
     } catch (error) {
       dispatch(showNotification("Error sending friend request"));
     }
