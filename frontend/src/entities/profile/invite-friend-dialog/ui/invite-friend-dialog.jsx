@@ -4,8 +4,6 @@ import { BannerLayout } from "../../../../layouts/banner-layout";
 import { UsersList } from "../../users-list/ui/users-list";
 import { Pagination } from "../../../pagination";
 import { useNavigate } from "react-router-dom";
-import { GET_ALL_USERS_URL } from "../../../../shared/config";
-import axios from "axios";
 import { showNotification } from "../../../../shared/notification";
 import { useDispatch, useSelector } from "react-redux";
 import {sendFriendRequest} from "../../../../shared/friend/api/send-friend-request";
@@ -24,12 +22,7 @@ export const InviteFriendDialog = ({ onClose = ()=>{} }) => {
     if (name && name.trim().length > 0) {
       params.name = name;
     }
-    const response = await axios.get(GET_ALL_USERS_URL, {
-      params,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
-    });
+    const response = fetchUsers(params)
     return response?.data || [];
   };
 
