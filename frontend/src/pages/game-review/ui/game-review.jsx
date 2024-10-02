@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/game-review.module.scss";
-<<<<<<< Updated upstream
 import { PageLayout } from "../../../layouts/page-layout";
-=======
-import { PageLayout } from "../../../layouts/page-layout";import axios from "axios";
->>>>>>> Stashed changes
-import { GET_GAME_BY_ID } from "../../../shared/config";
 import { useDispatch, useSelector } from "react-redux";
 import { ChessPlayerBar } from "../../../features/chess-players-bar";
 import { ChessBoard } from "../../../features/chess-board";
