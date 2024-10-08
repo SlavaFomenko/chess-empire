@@ -1,4 +1,4 @@
-import React from "react";
+import React, {memo} from "react";
 import { Route, Routes } from "react-router-dom";
 import { GamePage } from "./game";
 import { LoginPage } from "./sign-in/login";
@@ -14,12 +14,7 @@ import { GamesPage } from "./admin-panel/pages/games";
 import { RatingsPage } from "./admin-panel/pages/ratings";
 import { UserPage } from "./user";
 
-export class Routing extends React.Component {
-  shouldComponentUpdate () {
-    return false;
-  }
-
-  render () {
+function Routing() {
     return (
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -40,6 +35,7 @@ export class Routing extends React.Component {
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    );
-  }
+    )
 }
+export default memo(Routing, () => true);
+
